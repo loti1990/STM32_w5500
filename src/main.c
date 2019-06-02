@@ -55,6 +55,7 @@ int main(void){
   }
 
 
+  //ADDED COMENT FOR GIT EXAMPLE
   /* Infinite loop */
   while (1){
 
