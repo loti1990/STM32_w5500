@@ -1,0 +1,3 @@
+SPI.c:8:6:SPI1Init	4	static
+SPI.c:43:9:SPI1Send8Bit	16	static
+SPI.c:69:6:SPI3Init	4	static
