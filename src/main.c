@@ -63,8 +63,8 @@ int main(void){
 	  GPIOA ->ODR |= GPIO_ODR_ODR_8; 	//set PA8 to 1
 	  GPIOA ->ODR &= ~(GPIO_ODR_ODR_8);	//set PA8 to 0
 
-	  //DelayMs(1);
-	  SPI1SendNByte(&test_data,2);
+	  //DelayUs(1);
+	  SPI1SendNByte(test_data,2);
 
 
 
