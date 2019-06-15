@@ -39,7 +39,7 @@ SOFTWARE.
 int main(void){
 
   uint32_t ret_code_from_sysTick; 	//return code from SysTick_Config function 1 for error see core_cm4.h
-  uint8_t test_data = 0xaa;
+  uint8_t test_data[2] = {0xaa, 0xbb};
 
   //Init GPIOA
   InitGPIO();
@@ -63,9 +63,9 @@ int main(void){
 	  GPIOA ->ODR |= GPIO_ODR_ODR_8; 	//set PA8 to 1
 	  GPIOA ->ODR &= ~(GPIO_ODR_ODR_8);	//set PA8 to 0
 
+	  //DelayMs(1);
+	  SPI1SendNByte(&test_data,2);
 
-	  //SPI1 test send 8 bit data
-	  SPI1Send8Bit(&test_data);
 
 
 	  //Enable SPI3

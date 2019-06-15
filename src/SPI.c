@@ -40,29 +40,51 @@ void SPI1Init(){
 }
 
 //SPI1 send 8-bit data
-uint8_t SPI1Send8Bit(uint8_t *data){
+void SPI1Send8Bit(uint8_t *data){
 
 	 //SPI1 enable (this pull hardware CS low)
 	 //SPI1 -> CR1 	|= SPI_CR1_SPE;
 
-	 //SPI1 CS enable (output lov logical level)
+	 //SPI1 CS enable (output low logical level)
 	 GPIOA -> ODR 		&= ~(GPIO_ODR_ODR_4);
 
 	 //Write 8 bit data in to SPI1 data buffer register
 	 SPI1 -> DR 	= *data;
 
 	 //Wait until SPI1 data buffer register is empty
-	 while(!(SPI1 -> SR & SPI_SR_TXE));
+	 while((SPI1 -> SR & SPI_SR_TXE));
 	 while(!(SPI1 -> SR & SPI_SR_RXNE));
 
-	 //SPI1 disable (this pull hardware CS high of in igh inpedance)
+	 //SPI1 disable (this pull hardware CS high of in high impedance)
+	 //SPI1 -> CR1 	&= ~(SPI_CR1_SPE);
+
+	 //SPI1 CS disable (output high logical level)
+	 GPIOA -> ODR 		|= GPIO_ODR_ODR_4;
+}
+
+//SPI3 send n-byte
+void SPI1SendNByte(uint8_t *data,uint8_t data_len){
+
+	 int i = 0;
+
+	 //SPI1 CS enable (output low logical level)
+	 GPIOA -> ODR 		&= ~(GPIO_ODR_ODR_4);
+
+	 for(i = 0;i < data_len;i++){
+		 //Write 8 bit data in to SPI1 data buffer register
+		 SPI1 -> DR 	= *data+i;
+
+		 //Wait until SPI1 data buffer register is empty
+		 while(!(SPI1 -> SR & SPI_SR_TXE));
+		 //while(!(SPI1 -> SR & SPI_SR_RXNE));
+
+	 }
+	 //SPI1 disable (this pull hardware CS high of in high impedance)
 	 //SPI1 -> CR1 	&= ~(SPI_CR1_SPE);
 
 	 //SPI1 CS disable (output high logical level)
 	 GPIOA -> ODR 		|= GPIO_ODR_ODR_4;
 
-	 //return values presented in SPI1 data register
-	 return(SPI1 -> DR);
 }
 
 //SPI3 initialization
