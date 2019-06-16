@@ -55,9 +55,10 @@ void SPI1Send8Bit(uint8_t *data){
 	 GPIOA -> ODR 		|= GPIO_ODR_ODR_4;
 }
 
-//SPI3 send n-byte
+//SPI1 send n-byte
 void SPI1SendNByte(uint8_t *data,uint8_t data_len){
 
+	 //variable for count
 	 uint8_t i = 0;
 
 	 //SPI1 CS enable (output low logical level)
@@ -77,6 +78,44 @@ void SPI1SendNByte(uint8_t *data,uint8_t data_len){
 
 	 //SPI1 CS disable (output high logical level)
 	 GPIOA -> ODR 		|= GPIO_ODR_ODR_4;
+
+}
+//SPI1 send n bytes and receive 1-Byte
+uint8_t SPI1SendNByteReceive1Byte(uint8_t *data_to_send, uint8_t send_data_len){
+
+	 //variable for count
+	 uint8_t i = 0;
+
+	 //variable for storing received data
+	 uint8_t received_data = 0x00;
+
+	//SPI1 CS enable (output low logical level)
+	 GPIOA -> ODR 		&= ~(GPIO_ODR_ODR_4);
+
+	 for(i = 0;i < send_data_len;i++){
+
+		 //Write 8 bit data in to SPI1 data buffer register
+		 SPI1 -> DR 	= *(data_to_send+i);
+
+		 //Wait until SPI1 data buffer register is empty
+		 while(!(SPI1 -> SR & SPI_SR_TXE));
+
+	 }
+
+	 SPI1 -> DR = 0xaa;
+
+	 while(!(SPI1 -> SR & SPI_SR_RXNE));
+
+	 received_data = SPI1 -> DR;
+
+	 //wait till SPI1 are sending data "busy state"
+	 while(SPI1 -> SR & SPI_SR_BSY);
+
+	 //SPI1 CS disable (output high logical level)
+	 GPIOA -> ODR 		|= GPIO_ODR_ODR_4;
+
+	 //return received data
+	 return received_data;
 
 }
 

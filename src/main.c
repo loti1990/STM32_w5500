@@ -32,6 +32,7 @@ SOFTWARE.
 #include "stm32f4xx_it.h"
 #include "GPIO.h"
 #include "SPI.h"
+#include "W5500.h"
 
 //
 //MAIN
@@ -39,7 +40,8 @@ SOFTWARE.
 int main(void){
 
   uint32_t ret_code_from_sysTick; 	//return code from SysTick_Config function 1 for error see core_cm4.h
-  uint8_t test_data[2] = {0xaa, 0xbb};
+  uint8_t test_data[4] = {0x00,0x00,0x00,0xaa};
+  uint8_t test_receive = 0x00;
 
   //Init GPIOA
   InitGPIO();
@@ -47,6 +49,9 @@ int main(void){
   SPI3Init();
   //Init SPI1
   SPI1Init();
+  //W5500 initialize
+  W5500Init();
+
   //Configure system ticks to us range
   ret_code_from_sysTick = SysTick_Config(SystemCoreClock / 1000000);
 
@@ -60,11 +65,45 @@ int main(void){
   while (1){
 
 
-	  GPIOA ->ODR |= GPIO_ODR_ODR_8; 	//set PA8 to 1
-	  GPIOA ->ODR &= ~(GPIO_ODR_ODR_8);	//set PA8 to 0
+	  //GPIOA ->ODR |= GPIO_ODR_ODR_8; 	//set PA8 to 1
+	  //GPIOA ->ODR &= ~(GPIO_ODR_ODR_8);	//set PA8 to 0
 
 	  //DelayUs(1);
-	  SPI1SendNByte(test_data,2);
+	  //SPI1SendNByte(test_data,4);
+
+//	  test_data[0] = 0x00;
+//	  test_data[1] = 0x09;
+//	  test_data[2] = 0x04;
+//	  SPI1SendNByte(test_data,4);
+//	  test_data[0] = 0x00;
+//	  test_data[1] = 0x09;
+//	  test_data[2] = 0x00;
+//	  test_receive = SPI1SendNByteReceive1Byte(test_data,3);
+
+//	  test_data[0] = 0x00;
+//	  test_data[1] = 0x0f;
+//	  test_data[2] = 0x00;
+//	  test_receive = SPI1SendNByteReceive1Byte(test_data,3);
+//
+//	  test_data[0] = 0x00;
+//	  test_data[1] = 0x10;
+//	  test_data[2] = 0x00;
+//	  test_receive = SPI1SendNByteReceive1Byte(test_data,3);
+//
+//	  test_data[0] = 0x00;
+//	  test_data[1] = 0x11;
+//	  test_data[2] = 0x00;
+//	  test_receive = SPI1SendNByteReceive1Byte(test_data,3);
+//
+//	  test_data[0] = 0x00;
+//	  test_data[1] = 0x12;
+//	  test_data[2] = 0x00;
+//	  test_receive = SPI1SendNByteReceive1Byte(test_data,3);
+//
+//	  test_data[0] = 0x00;
+//	  test_data[1] = 0x13;
+//	  test_data[2] = 0x00;
+//	  test_receive = SPI1SendNByteReceive1Byte(test_data,3);
 
 
 
