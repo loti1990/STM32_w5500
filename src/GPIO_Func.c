@@ -1,4 +1,4 @@
-//In this file we will implement hendlers for GPIO
+//In this file we will implement handlers for GPIO
 
 #include "GPIO.h"
 
@@ -8,20 +8,44 @@ void InitGPIO(void){
 	RCC -> AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
 	//Enable GPIOB AHB1 clock source
 	RCC -> AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
+	//Enable GPIOD AHB1 clock source
+	RCC -> AHB1ENR |= RCC_AHB1ENR_GPIODEN;
 	//Enable SPI3 APB1 clock source 42 MHz max clock
 	RCC -> APB1ENR |= RCC_APB1ENR_SPI3EN;
 	//Enable SPI1 APB2 clock source 84 MHz max clock
 	RCC -> APB2ENR |= RCC_APB2ENR_SPI1EN;
+	//Enable SYSCONFIG for interrupt purpose
+	RCC -> APB2ENR |= RCC_APB2ENR_SYSCFGEN;
 
 	/**********************************************************************************
 	//////////////////////////PIN CONFIGURATION////////////////////////////////////////
 	***********************************************************************************/
 
 	//GPIOA PA8//
-	GPIOA -> MODER 		|= GPIO_MODER_MODER8_0; 	//PA8 pin as output
-	GPIOA -> OTYPER 	&= ~(GPIO_OTYPER_OT_8);		//PA8 output type push-pull
-	GPIOA -> OSPEEDR 	|= GPIO_OSPEEDER_OSPEEDR8; 	//PA8 output speed register (very high speed)
-	GPIOA -> PUPDR 		|= GPIO_PUPDR_PUPDR8_0; 	//PA8 pull-up
+	GPIOA -> MODER 		|= GPIO_MODER_MODER8_0; 		//PA8 pin as output
+	GPIOA -> OTYPER 	&= ~(GPIO_OTYPER_OT_8);			//PA8 output type push-pull
+	GPIOA -> OSPEEDR 	|= GPIO_OSPEEDER_OSPEEDR8; 		//PA8 output speed register (very high speed)
+	GPIOA -> PUPDR 		|= GPIO_PUPDR_PUPDR8_0; 		//PA8 pull-up
+
+	//GPIOD PD13/LED3 on discovery board//
+	GPIOD -> MODER 		|= GPIO_MODER_MODER13_0;		//PD13 pin as output
+	GPIOD -> OTYPER 	&= ~(GPIO_OTYPER_OT_13);		//PD13 output type push-pull
+	GPIOD -> OSPEEDR 	|= GPIO_OSPEEDER_OSPEEDR13_0; 	//PD13 output speed register (medium speed)
+	GPIOD -> PUPDR 		&= ~(GPIO_PUPDR_PUPDR13); 		//PD13 pull-up
+
+	//GPIOA PA3 configure for interrupt generated from W5500//
+	GPIOA -> MODER 		&= ~(GPIO_MODER_MODER3); 		//PA3 pin as input
+	GPIOA -> PUPDR 		&= ~(GPIO_PUPDR_PUPDR3); 		//PA3 pull-up
+	//Enable external interrupt on line PA3
+	NVIC_EnableIRQ(EXTI3_IRQn);
+	//Select external interrupt in SYSCFG register
+	SYSCFG -> EXTICR[0] |= SYSCFG_EXTICR1_EXTI3_PA;		//PA3 as external interrupt setting up in EXTICR1
+	//Interrupt was generated in high to low voltage transition
+	EXTI -> FTSR 		|= EXTI_FTSR_TR3;				//interrupt generated at falling edge
+	//Setup masked register
+	//0- masked (disabled), 1- not masked (enabled)
+	EXTI -> IMR			|= EXTI_IMR_MR3; 				//Enable external interrupt at pin 3
+
 
 	/**********************************************************************************
 	//////////////////////////SPI1 CONFIGURATION///////////////////////////////////////

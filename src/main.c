@@ -34,6 +34,8 @@ SOFTWARE.
 #include "SPI.h"
 #include "W5500.h"
 
+void EXTI3_IRQHandler(void); 		//Initialization of handler for external interrupt on line 3
+
 //
 //MAIN
 //
@@ -63,6 +65,12 @@ int main(void){
   //ADDED COMENT FOR GIT EXAMPLE
   /* Infinite loop */
   while (1){
+
+	  //LED3 turn on and off in 1s interval
+//	  DelayMs(1000);
+//	  GPIOD -> ODR	|= GPIO_ODR_ODR_13;
+//	  DelayMs(1000);
+//	  GPIOD -> ODR	&= ~(GPIO_ODR_ODR_13);
 
 
 	  //GPIOA ->ODR |= GPIO_ODR_ODR_8; 	//set PA8 to 1
@@ -112,4 +120,16 @@ int main(void){
 	  //Disable SPI3
 	  //SPI3 -> CR1 	&= ~(SPI_CR1_SPE);
   }
+}
+
+//External interrupt handler on line 3
+void EXTI3_IRQHandler(void){
+	if((EXTI -> PR & EXTI_PR_PR3) != 0){
+		if((GPIOD -> ODR & GPIO_ODR_ODR_13) != 0){
+			GPIOD -> ODR	&= ~(GPIO_ODR_ODR_13); 	//LED3 off
+		}else{
+			GPIOD -> ODR	|= GPIO_ODR_ODR_13; 	//LED3 on
+		}
+	EXTI -> PR |= EXTI_PR_PR3; 	//Clear flag this is necessary
+	}
 }
