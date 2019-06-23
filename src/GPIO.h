@@ -1,6 +1,7 @@
 //GPIO header file
 
 #include "stm32f4xx.h"
+#include "core_cm4.h"
 
 #ifndef GPIO_H_
 #define GPIO_H_

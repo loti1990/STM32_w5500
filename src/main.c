@@ -34,6 +34,7 @@ SOFTWARE.
 #include "SPI.h"
 #include "W5500.h"
 
+void EXTI0_IRQHandler(void); 		//Initialization of handler for external interrupt on line 0
 void EXTI3_IRQHandler(void); 		//Initialization of handler for external interrupt on line 3
 
 //
@@ -69,7 +70,7 @@ int main(void){
 	  //LED3 turn on and off in 1s interval
 //	  DelayMs(1000);
 //	  GPIOD -> ODR	|= GPIO_ODR_ODR_13;
-//	  DelayMs(1000);
+//	  DelayMs(2000);
 //	  GPIOD -> ODR	&= ~(GPIO_ODR_ODR_13);
 
 
@@ -126,10 +127,26 @@ int main(void){
 void EXTI3_IRQHandler(void){
 	if((EXTI -> PR & EXTI_PR_PR3) != 0){
 		if((GPIOD -> ODR & GPIO_ODR_ODR_13) != 0){
+
 			GPIOD -> ODR	&= ~(GPIO_ODR_ODR_13); 	//LED3 off
 		}else{
+
 			GPIOD -> ODR	|= GPIO_ODR_ODR_13; 	//LED3 on
 		}
-	EXTI -> PR |= EXTI_PR_PR3; 	//Clear flag this is necessary
+		EXTI -> PR |= EXTI_PR_PR3; 	//Clear flag this is necessary
+	}
+}
+
+//External interrupt handler on line 3
+void EXTI0_IRQHandler(void){
+	if((EXTI -> PR & EXTI_PR_PR0) != 0){
+		if((GPIOD -> ODR & GPIO_ODR_ODR_13) != 0){
+
+			GPIOD -> ODR	&= ~(GPIO_ODR_ODR_13); 	//LED3 off
+		}else{
+
+			GPIOD -> ODR	|= GPIO_ODR_ODR_13; 	//LED3 on
+		}
+		EXTI -> PR |= EXTI_PR_PR0; 	//Clear flag this is necessary
 	}
 }
