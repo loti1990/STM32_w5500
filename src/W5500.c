@@ -23,12 +23,12 @@ uint8_t CR_SHAR_W5500[9] = {0x00,0x09,0x04,0x00,0x08,0xdc,0x01,0x02,0x03};
 
 //common register - setup source IP address register
 //source IP address = 192(0xc0).168(0xa8).1(0x01).100(0x64)
-uint8_t CR_SIPR_W5500[7] = {0x00,0x0f,0x04,0xc0,0xa8,0x01,0x64};
+uint8_t CR_SIPR_W5500[7] = {0x00,0x0f,0x04,192,168,1,100};
 
 //Initialize W5500 ethernet module
 void W5500Init(void){
 
-	//enable bing
+	//enable ping
 	SPI1SendNByte(CR_MR_W5500,4);
 
 	//setup gateway IP address

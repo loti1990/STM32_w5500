@@ -5,6 +5,10 @@
 
 void InitGPIO(void){
 
+	/*************************************************
+	////////////ENABLE CLK FOR PERIPHERALS////////////
+	*************************************************/
+
 	//Enable GPIOA AHB1 clock source
 	RCC -> AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
 	//Enable GPIOB AHB1 clock source
@@ -21,6 +25,52 @@ void InitGPIO(void){
 	/**********************************************************************************
 	//////////////////////////PIN CONFIGURATION////////////////////////////////////////
 	***********************************************************************************/
+
+
+				/*************************************************
+				////////////////////INPUTS////////////////////////
+				*************************************************/
+
+	//////////////////////////////////////////////////////////
+	//GPIOA PA3 configure for interrupt generated from W5500//
+	//////////////////////////////////////////////////////////
+	GPIOA -> MODER 		&= ~(GPIO_MODER_MODER3); 		//PA3 pin as input
+	//GPIOA -> PUPDR 		&= ~(GPIO_PUPDR_PUPDR3); 	//PA3 no pull-up, pull-down
+	GPIOA -> PUPDR 		|= GPIO_PUPDR_PUPDR3_0; 		//PA3 pull-up
+	//Enable external interrupt on line 3
+	//NVIC_EnableIRQ(EXTI3_IRQn);						//Enable external interrupt
+	NVIC -> ISER[0] 	|= (1 << EXTI3_IRQn); 			//Enable external interrupt
+	//NVIC_SetPriority(EXTI3_IRQn,1); 					//set priority of EXTI3_IRQn to 1 (lower are the number the higher are priority)
+	NVIC -> IP[EXTI3_IRQn] 		= (uint8_t) 0x01;		//set priority of EXTI3_IRQn to 1 (lower are the number the higher are priority)
+	//Select external interrupt in SYSCFG register
+	SYSCFG -> EXTICR[0] |= SYSCFG_EXTICR1_EXTI3_PA;		//PA3 as external interrupt setting up in EXTICR1
+	//Interrupt was generated in high to low voltage transition
+	EXTI -> FTSR 		|= EXTI_FTSR_TR3;				//interrupt generated at falling edge
+	//Setup masked register
+	//0- masked (disabled), 1- not masked (enabled)
+	EXTI -> IMR			|= EXTI_IMR_MR3; 				//Enable external interrupt at pin 3
+
+	/////////////////////////////////////////////////////////
+	//GPIOA PA0 user button configure as external interrupt//
+	/////////////////////////////////////////////////////////
+	GPIOA -> MODER 		&= ~(GPIO_MODER_MODER0); 		//PA0 pin as input
+	GPIOA -> PUPDR 		&= ~(GPIO_PUPDR_PUPDR0); 		//PA0 no pull-up, pull-down
+	//Enable external interrupt on line 0
+	NVIC -> ISER[0] 	|= (1 << EXTI0_IRQn); 			//Enable external interrupt
+	NVIC -> IP[EXTI0_IRQn] 		= (uint8_t) 0x01;		//set priority of EXTI3_IRQn to 1 (lower are the number the higher are priority)
+	//Select external interrupt in SYSCFG register
+	SYSCFG -> EXTICR[0] |= SYSCFG_EXTICR1_EXTI0_PA;		//PA0 as external interrupt setting up in EXTICR1
+	//Interrupt was generated in low to high voltage transition
+	EXTI -> RTSR 		|= EXTI_RTSR_TR0;				//interrupt generated at rising edge
+	//Setup masked register
+	//0- masked (disabled), 1- not masked (enabled)
+	EXTI -> IMR			|= EXTI_IMR_MR0; 				//Enable external interrupt at pin 0
+
+					/*************************************************
+					////////////////////OUTPUTS///////////////////////
+					*************************************************/
+
+
 	/////////////
 	//GPIOA PA8//
 	/////////////
@@ -37,40 +87,14 @@ void InitGPIO(void){
 	GPIOD -> OSPEEDR 	|= GPIO_OSPEEDER_OSPEEDR13_0; 	//PD13 output speed register (medium speed)
 	GPIOD -> PUPDR 		&= ~(GPIO_PUPDR_PUPDR13); 		//PD13 pull-up
 
-	//////////////////////////////////////////////////////////
-	//GPIOA PA3 configure for interrupt generated from W5500//
-	//////////////////////////////////////////////////////////
-	GPIOA -> MODER 		&= ~(GPIO_MODER_MODER3); 		//PA3 pin as input
-	//GPIOA -> PUPDR 		&= ~(GPIO_PUPDR_PUPDR3); 		//PA3 no pull-up, pull-down
-	GPIOA -> PUPDR 		|= GPIO_PUPDR_PUPDR3_0; 		//PA3 pull-up
-	//Enable external interrupt on line 3
-	//NVIC_EnableIRQ(EXTI3_IRQn);			//Enable external interrupt
-	NVIC -> ISER[0] 	|= (1 << EXTI3_IRQn); 	//Enable external interrupt
-	//NVIC_SetPriority(EXTI3_IRQn,1); 	//set priority of EXTI3_IRQn to 1 (lower are the number the higher are priority)
-	NVIC -> IP[EXTI3_IRQn] 		= (uint8_t) 0x01;	//set priority of EXTI3_IRQn to 1 (lower are the number the higher are priority)
-	//Select external interrupt in SYSCFG register
-	SYSCFG -> EXTICR[0] |= SYSCFG_EXTICR1_EXTI3_PA;		//PA3 as external interrupt setting up in EXTICR1
-	//Interrupt was generated in high to low voltage transition
-	EXTI -> FTSR 		|= EXTI_FTSR_TR3;				//interrupt generated at falling edge
-	//Setup masked register
-	//0- masked (disabled), 1- not masked (enabled)
-	EXTI -> IMR			|= EXTI_IMR_MR3; 				//Enable external interrupt at pin 3
-
-	/////////////////////////////////////////////////////////
-	//GPIOA PA0 user button configure as external interrupt//
-	/////////////////////////////////////////////////////////
-	GPIOA -> MODER 		&= ~(GPIO_MODER_MODER0); 		//PA0 pin as input
-	GPIOA -> PUPDR 		&= ~(GPIO_PUPDR_PUPDR0); 		//PA0 no pull-up, pull-down
-	//Enable external interrupt on line 0
-	NVIC -> ISER[0] 	|= (1 << EXTI0_IRQn); 	//Enable external interrupt
-	NVIC -> IP[EXTI0_IRQn] 		= (uint8_t) 0x01;	//set priority of EXTI3_IRQn to 1 (lower are the number the higher are priority)
-	//Select external interrupt in SYSCFG register
-	SYSCFG -> EXTICR[0] |= SYSCFG_EXTICR1_EXTI0_PA;		//PA0 as external interrupt setting up in EXTICR1
-	//Interrupt was generated in low to high voltage transition
-	EXTI -> RTSR 		|= EXTI_RTSR_TR0;				//interrupt generated at rising edge
-	//Setup masked register
-	//0- masked (disabled), 1- not masked (enabled)
-	EXTI -> IMR			|= EXTI_IMR_MR0; 				//Enable external interrupt at pin 0
+	////////////////////////////////////////////
+	//GPIOA PA2 pin for reset control in W5500//
+	////////////////////////////////////////////
+	GPIOA -> MODER 		|=  GPIO_MODER_MODER2_0; 		//PA2 pin as output
+	GPIOA -> OTYPER 	&= ~(GPIO_OTYPER_OT_2);			//PA2 output type push-pull
+	GPIOA -> OSPEEDR 	|= GPIO_OSPEEDER_OSPEEDR2_0; 	//PA2 output speed register (medium speed)
+	GPIOA -> PUPDR 		&= ~(GPIO_PUPDR_PUPDR2); 		//PA2 pull-up
+	GPIOA -> ODR 		|= GPIO_ODR_ODR_2; 				//Enable W5500 module
 
 
 
