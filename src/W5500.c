@@ -52,7 +52,12 @@ uint8_t S0_PORT_W5500[5] = {0x00,0x04,0x0c,0x04,0x00};
 //OPEN
 uint8_t S0_CR_OPEN_W5500[4] = {0x00,0x01,0x0c,0x01};
 
+//Socket 0 listen
+//LISTEN
+uint8_t S0_CR_LISTEN_W5500[4] = {0x00,0x01,0x0c,0x02};
 
+//Socket 0 read status register
+uint8_t S0_SR_W5500[3] = {0x00,0x03,0x08};
 
 
 
@@ -89,9 +94,14 @@ void W5500Init(void){
 	//open Socket 0
 	SPI1SendNByte(S0_CR_OPEN_W5500,4);
 
-	//to do
-	//preveri INIT flag v status tegistru od socket 0 (preverjaj v while zanki)
+	//wait on Socket 0 SOCK_INIT flag
+	while(!(SPI1SendNByteReceive1Byte(S0_SR_W5500,3) & 0x13));
 
-	//pošlji ukaz za "LISTEN" DS-46
+	//listen Socket 0
+	SPI1SendNByte(S0_CR_LISTEN_W5500,4);
+
+	//wait on Socket 0 SOCK_INIT flag
+	while(!(SPI1SendNByteReceive1Byte(S0_SR_W5500,3) & 0x14));
+
 
 }
