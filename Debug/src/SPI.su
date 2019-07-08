@@ -1,5 +1,6 @@
-SPI.c:8:6:SPI1Init	4	static
-SPI.c:43:6:SPI1Send8Bit	16	static
-SPI.c:59:6:SPI1SendNByte	24	static
-SPI.c:84:9:SPI1SendNByteReceive1Byte	24	static
-SPI.c:123:6:SPI3Init	4	static
+SPI.c:8:6:SPI1Init	0	static
+SPI.c:43:6:SPI1Send8Bit	0	static
+SPI.c:59:9:SPI1Send1ByteReceive1Byte	0	static
+SPI.c:78:6:SPI1SendNByte	0	static
+SPI.c:98:9:SPI1SendNByteReceive1Byte	8	static
+SPI.c:122:6:SPI3Init	0	static

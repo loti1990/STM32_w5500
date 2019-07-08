@@ -45,7 +45,7 @@ uint8_t S0_RX_TX_BUF_SIZE_W5500[5] = {0x00,0x1e,0x0c,0x02,0x02};
 uint8_t S0_MR_W5500[4] = {0x00,0x00,0x0c,0x01};
 
 //Socket 0 source port
-//COnfigure source port as 1024
+//Configure source port as 1024
 uint8_t S0_PORT_W5500[5] = {0x00,0x04,0x0c,0x04,0x00};
 
 //Socket 0 open
@@ -95,13 +95,19 @@ void W5500Init(void){
 	SPI1SendNByte(S0_CR_OPEN_W5500,4);
 
 	//wait on Socket 0 SOCK_INIT flag
-	while(!(SPI1SendNByteReceive1Byte(S0_SR_W5500,3) & 0x13));
+	while(!(SPI1SendNByteReceive1Byte(S0_SR_W5500,3) == 0x13));
 
 	//listen Socket 0
 	SPI1SendNByte(S0_CR_LISTEN_W5500,4);
 
-	//wait on Socket 0 SOCK_INIT flag
-	while(!(SPI1SendNByteReceive1Byte(S0_SR_W5500,3) & 0x14));
+	//wait on Socket 0 SOCK_LISTEN flag
+	while(!(SPI1SendNByteReceive1Byte(S0_SR_W5500,3) == 0x14));
 
+	//wait on socket establishe flag
+	while(!(SPI1SendNByteReceive1Byte(S0_SR_W5500,3)==0x17)){
+
+		GPIOD -> ODR	|= GPIO_ODR_ODR_13; 	//LED3 on
+	}
+	GPIOD -> ODR	&= ~(GPIO_ODR_ODR_13); 	//LED3 on
 
 }

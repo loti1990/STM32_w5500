@@ -55,68 +55,67 @@ void SPI1Send8Bit(uint8_t *data){
 	 GPIOA -> ODR 		|= GPIO_ODR_ODR_4;
 }
 
+//SPI! send 1 byte receive 1 byte
+uint8_t SPI1Send1ByteReceive1Byte(uint8_t *data){
+
+	 //send 8 bit data
+	 SPI1 -> DR = *data;
+
+	 //Wait until SPI1 data buffer register is empty
+	 while(!(SPI1 -> SR & SPI_SR_TXE));
+
+	 //wait until SPI1 receive buffer is not empty
+	 while(!(SPI1 -> SR & SPI_SR_RXNE));
+
+	 //wait till SPI1 are sending data "busy state"
+	 while(SPI1 -> SR & SPI_SR_BSY);
+
+	 //return received data
+	 return SPI1 -> DR;
+}
+
 //SPI1 send n-byte
 void SPI1SendNByte(uint8_t *data,uint8_t data_len){
 
 	 //variable for count
-	 uint8_t i = 0;
+	 uint32_t i = 0;
 
 	 //SPI1 CS enable (output low logical level)
 	 GPIOA -> ODR 		&= ~(GPIO_ODR_ODR_4);
 
 	 for(i = 0;i < data_len;i++){
 
-		 //Write 8 bit data in to SPI1 data buffer register
-		 SPI1 -> DR 	= *(data+i);
-
-		 //Wait until SPI1 data buffer register is empty
-		 while(!(SPI1 -> SR & SPI_SR_TXE));
-
+		 //Write 8 bit data
+		 SPI1Send1ByteReceive1Byte(&(data[i]));
 	 }
-	 //wait till SPI1 are sending data "busy state"
-	 while(SPI1 -> SR & SPI_SR_BSY);
 
 	 //SPI1 CS disable (output high logical level)
 	 GPIOA -> ODR 		|= GPIO_ODR_ODR_4;
 
 }
+
 //SPI1 send n bytes and receive 1-Byte
 uint8_t SPI1SendNByteReceive1Byte(uint8_t *data_to_send, uint8_t send_data_len){
 
 	 //variable for count
-	 uint8_t i = 0;
+	 uint32_t i = 0;
 
-	 //variable for storing received data
+	 //Received data variable
 	 uint8_t received_data = 0x00;
 
-	//SPI1 CS enable (output low logical level)
+	 //SPI1 CS enable (output low logical level)
 	 GPIOA -> ODR 		&= ~(GPIO_ODR_ODR_4);
 
 	 for(i = 0;i < send_data_len;i++){
-
-		 //Write 8 bit data in to SPI1 data buffer register
-		 SPI1 -> DR 	= *(data_to_send+i);
-
-		 //Wait until SPI1 data buffer register is empty
-		 while(!(SPI1 -> SR & SPI_SR_TXE));
-
+		 //Send data
+		 SPI1Send1ByteReceive1Byte(&data_to_send[i]);
 	 }
-
-	 SPI1 -> DR = 0xaa;
-
-	 while(!(SPI1 -> SR & SPI_SR_RXNE));
-
-	 received_data = SPI1 -> DR;
-
-	 //wait till SPI1 are sending data "busy state"
-	 while(SPI1 -> SR & SPI_SR_BSY);
+	 received_data = SPI1Send1ByteReceive1Byte(&data_to_send[i]);
 
 	 //SPI1 CS disable (output high logical level)
 	 GPIOA -> ODR 		|= GPIO_ODR_ODR_4;
 
-	 //return received data
 	 return received_data;
-
 }
 
 //SPI3 initialization

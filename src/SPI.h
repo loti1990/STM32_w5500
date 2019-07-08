@@ -17,4 +17,6 @@ void SPI1SendNByte(uint8_t *data,uint8_t data_len); //SPI1 send n-byte
 
 uint8_t SPI1SendNByteReceive1Byte(uint8_t *data_to_send, uint8_t send_data_len); //SPI1 send n-byte receive 1-byte
 
+uint8_t SPI1Send1ByteReceive1Byte(uint8_t *data); 	//SPI1 send 1 byte receive 1 byte
+
 #endif /* SPI_H_ */
