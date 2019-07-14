@@ -59,7 +59,24 @@ uint8_t S0_CR_LISTEN_W5500[4] = {0x00,0x01,0x0c,0x02};
 //Socket 0 read status register
 uint8_t S0_SR_W5500[3] = {0x00,0x03,0x08};
 
+//write data in to socket 0 TX regster
+//write from offset address 0x0000
+uint8_t S0_TX_BUFFER[259]={0x00,0x00,0x14};
 
+//send data to client
+uint8_t S0_SEND_TX_BUFFER[4]={0x00,0x01,0x0c,0x20};
+
+//close connection
+uint8_t S0_CLOSE[4] = {0x00,0x01,0x0c,0x10};
+
+//Socket 0 TX read pointer most significant bit in register [read only]
+uint8_t S0_TX_RD_MSB[3] = {0x00,0x22,0x08};
+
+//Socket 0 TX read pointer last significant bit in register [read only]
+uint8_t S0_TX_RD_LSB[3] = {0x00,0x23,0x08};
+
+//Socket 0 TX write pointer register [read/write]
+uint8_t S0_TX_WR[5] = {0x00,0x24,0x0C};
 
 //Initialize W5500 ethernet module
 void W5500Init(void){
@@ -104,10 +121,49 @@ void W5500Init(void){
 	while(!(SPI1SendNByteReceive1Byte(S0_SR_W5500,3) == 0x14));
 
 	//wait on socket establishe flag
-	while(!(SPI1SendNByteReceive1Byte(S0_SR_W5500,3)==0x17)){
+	while(!(SPI1SendNByteReceive1Byte(S0_SR_W5500,3)==0x17));
 
-		GPIOD -> ODR	|= GPIO_ODR_ODR_13; 	//LED3 on
+	//create variables for Socket0 TX buffer start and end pointer which define data length
+	uint16_t start_pointer = 0;
+	uint16_t end_pointer = 0;
+
+	//read Socket 0 TX read pointer register
+	start_pointer = SPI1SendNByteReceive1Byte(S0_TX_RD_MSB,3);
+	start_pointer = start_pointer << 8;
+	start_pointer = start_pointer | SPI1SendNByteReceive1Byte(S0_TX_RD_LSB,3);
+
+	//calculate value of Socket0 write pointer register for length of data available for send
+	end_pointer = start_pointer + 256;
+
+	//manage LSB and MSB bits
+	S0_TX_WR[3] =(uint8_t)(end_pointer>>8);
+	S0_TX_WR[4] =(uint8_t)end_pointer;
+
+	//write value in to Socket0 TX write pointer register
+	SPI1SendNByte(S0_TX_WR,5);
+
+
+	//generate data for sending
+	int i=0;
+	for(i=3;i<259;i++){
+
+		S0_TX_BUFFER[i]=i;
 	}
-	GPIOD -> ODR	&= ~(GPIO_ODR_ODR_13); 	//LED3 on
+
+	//configure Socket0 TX buffer start address
+	S0_TX_BUFFER[0] = SPI1SendNByteReceive1Byte(S0_TX_RD_MSB,3);
+	S0_TX_BUFFER[1] = SPI1SendNByteReceive1Byte(S0_TX_RD_LSB,3);
+
+	//write data in to TX buffer
+	SPI1SendNByte(S0_TX_BUFFER,259);
+
+	//send TX data to the client
+	SPI1SendNByte(S0_SEND_TX_BUFFER,4);
+
+	//wait on last ACK flag from client
+	//while(!(SPI1SendNByteReceive1Byte(S0_SR_W5500,3)==0x1d));
+
+	//close the connection
+	SPI1SendNByteReceive1Byte(S0_CLOSE,3);
 
 }

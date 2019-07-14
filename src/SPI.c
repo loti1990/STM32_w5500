@@ -39,23 +39,7 @@ void SPI1Init(){
 	SPI1 -> CR1 	|= SPI_CR1_SPE;
 }
 
-//SPI1 send 8-bit data
-void SPI1Send8Bit(uint8_t *data){
-
-	 //SPI1 CS enable (output low logical level)
-	 GPIOA -> ODR 		&= ~(GPIO_ODR_ODR_4);
-
-	 //Write 8 bit data in to SPI1 data buffer register
-	 SPI1 -> DR 	= *data;
-
-	 //wait till SPI1 are sending data "busy state"
-	 while(SPI1 -> SR & SPI_SR_BSY);
-
-	 //SPI1 CS disable (output high logical level)
-	 GPIOA -> ODR 		|= GPIO_ODR_ODR_4;
-}
-
-//SPI! send 1 byte receive 1 byte
+//SPI1 send 1 byte receive 1 byte
 uint8_t SPI1Send1ByteReceive1Byte(uint8_t *data){
 
 	 //send 8 bit data
@@ -75,7 +59,7 @@ uint8_t SPI1Send1ByteReceive1Byte(uint8_t *data){
 }
 
 //SPI1 send n-byte
-void SPI1SendNByte(uint8_t *data,uint8_t data_len){
+void SPI1SendNByte(uint8_t *data,uint32_t data_len){
 
 	 //variable for count
 	 uint32_t i = 0;
@@ -95,7 +79,7 @@ void SPI1SendNByte(uint8_t *data,uint8_t data_len){
 }
 
 //SPI1 send n bytes and receive 1-Byte
-uint8_t SPI1SendNByteReceive1Byte(uint8_t *data_to_send, uint8_t send_data_len){
+uint8_t SPI1SendNByteReceive1Byte(uint8_t *data_to_send, uint32_t send_data_len){
 
 	 //variable for count
 	 uint32_t i = 0;
