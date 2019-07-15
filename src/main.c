@@ -137,7 +137,7 @@ void EXTI3_IRQHandler(void){
 	}
 }
 
-//External interrupt handler on line 3
+//External interrupt handler on line 0
 void EXTI0_IRQHandler(void){
 	if((EXTI -> PR & EXTI_PR_PR0) != 0){
 		if((GPIOD -> ODR & GPIO_ODR_ODR_13) != 0){

@@ -31,6 +31,10 @@ uint8_t CR_SIPR_W5500[7] = {0x00,0x0f,0x04,192,168,1,100};
 //Operation mode: 100BT Full- duplex, auto negotiation disabled
 uint8_t CR_PHYCFGR_W5500[4] = {0x00,0x2e,0x04,0xd8};
 
+//common register - socket interrupt mask register
+//enable interrupt for socket 0
+uint8_t CR_SIMR_W5500[4] = {0x00,0x18,0x04,0x01};
+
 ////////////
 //SOCKET 0//
 ////////////
@@ -98,6 +102,9 @@ void W5500Init(void){
 
 	//setup PHY configuration register
 	SPI1SendNByte(CR_PHYCFGR_W5500,4);
+
+	//enable interrupt for socket 0
+	SPI1SendNByte(CR_SIMR_W5500,4);
 
 	//setup Socket 0 RX and TX memory allocation
 	SPI1SendNByte(S0_RX_TX_BUF_SIZE_W5500,5);
