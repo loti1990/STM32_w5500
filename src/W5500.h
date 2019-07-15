@@ -10,6 +10,10 @@
 //Control phase parameter definitrion
 #define W5500_CP_BSB_CR 		0X00 		//
 
+#define TEST_ADDRES 			0x000f
+#define MSB(x)					((uint8_t)x>>8)
+#define LSB(x)					((uint8_t)x)
+
 void W5500Init(void);
 
 

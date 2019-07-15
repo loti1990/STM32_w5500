@@ -97,6 +97,8 @@ void W5500Init(void){
 	//setup hardware address register
 	SPI1SendNByte(CR_SHAR_W5500,9);
 
+	CR_SIPR_W5500[0]=MSB(TEST_ADDRES);
+	CR_SIPR_W5500[1]=LSB(TEST_ADDRES);
 	//setup source IP address register
 	SPI1SendNByte(CR_SIPR_W5500,7);
 
