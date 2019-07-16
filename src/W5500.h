@@ -150,6 +150,55 @@
 ////////////////////////////////////////////////////////////
 #define W5500_CRB_PMAGIC 		0x001d 			//PPP link control protocol magic number register
 
+//////////////////////////////////////////////////////////////
+//PHAR - destination hardware address register in PPPoE mode//
+//////////////////////////////////////////////////////////////
+#define W5500_CRB_PHAR_0 		0x001e 			//Destination hardware address register in PPPoE mode 0
+#define W5500_CRB_PHAR_1 		0x001f 			//Destination hardware address register in PPPoE mode 1
+#define W5500_CRB_PHAR_2 		0x0020 			//Destination hardware address register in PPPoE mode 2
+#define W5500_CRB_PHAR_3 		0x0021 			//Destination hardware address register in PPPoE mode 3
+#define W5500_CRB_PHAR_4 		0x0022 			//Destination hardware address register in PPPoE mode 4
+#define W5500_CRB_PHAR_5 		0x0023 			//Destination hardware address register in PPPoE mode 5
+
+////////////////////////////////////////////
+//PSID - session ID register in PPPoE mode//
+////////////////////////////////////////////
+#define W5500_CRB_PSID_0 		0x0024 			//Session ID register in PPPoE mode 0
+#define W5500_CRB_PSID_1		0x0025 			//Session ID register in PPPoE mode 1
+
+////////////////////////////////////////////
+//PMRU - maximum receive unit in PPoE mode//
+////////////////////////////////////////////
+#define W5500_CRB_PMRU_0		0x0026 			//maximum receive unit in PPoE mode 0
+#define W5500_CRB_PMRU_1		0x0027 			//maximum receive unit in PPoE mode 1
+
+/////////////////////////////////////////
+//UIPR - unreachable IP address register//
+/////////////////////////////////////////
+#define W5500_CRB_UIPR_0		0x0028			//unreachable IP address register 0
+#define W5500_CRB_UIPR_1		0x0029			//unreachable IP address register 0
+#define W5500_CRB_UIPR_2		0x002a			//unreachable IP address register 0
+#define W5500_CRB_UIPR_3		0x002b			//unreachable IP address register 0
+
+//////////////////////////////////////
+//UPORTR - unreachable port register//
+//////////////////////////////////////
+#define W5500_CRB_UPORT_0 		0x002c 			//unreachable port register 0
+#define W5500_CRB_UPORT_1 		0x002d 			//unreachable port register 1
+
+////////////////////////////////////////
+//PHYCFGR - PHY configuration register//
+////////////////////////////////////////
+#define W5500_CRB_PHYCFGR 		0x002e 			//W5500 PHY configuration register
+
+////////////////////////////////////
+//VERSIONR - chip version register//
+////////////////////////////////////
+#define W5500_CBR_VERSIONR 		0x0039 			//W5500 chip version register
+
+
+
+
 
 
 
