@@ -2239,23 +2239,23 @@ LOAD /opt/Atollic_TrueSTUDIO_for_STM32_x86_64_9.3.0/ARMTools/bin/../lib/gcc/arm-
                 0x0000000000000201       0x22 /opt/Atollic_TrueSTUDIO_for_STM32_x86_64_9.3.0/ARMTools/bin/../lib/gcc/arm-atollic-eabi/6.3.1/armv7e-m/fpu/crtn.o
 OUTPUT(Test_project.elf elf32-littlearm)
 
-.debug_info     0x0000000000000000     0x2158
+.debug_info     0x0000000000000000     0x2159
  .debug_info    0x0000000000000000      0x77e src/GPIO_Func.o
  .debug_info    0x000000000000077e      0x3dd src/SPI.o
  .debug_info    0x0000000000000b5b      0x557 src/W5500.o
- .debug_info    0x00000000000010b2      0x89e src/main.o
- .debug_info    0x0000000000001950       0x76 src/startup_stm32f40xx.o
- .debug_info    0x00000000000019c6      0x198 src/stm32f4xx_it.o
- .debug_info    0x0000000000001b5e      0x5fa src/system_stm32f4xx.o
+ .debug_info    0x00000000000010b2      0x89f src/main.o
+ .debug_info    0x0000000000001951       0x76 src/startup_stm32f40xx.o
+ .debug_info    0x00000000000019c7      0x198 src/stm32f4xx_it.o
+ .debug_info    0x0000000000001b5f      0x5fa src/system_stm32f4xx.o
 
-.debug_abbrev   0x0000000000000000      0x7fb
+.debug_abbrev   0x0000000000000000      0x80c
  .debug_abbrev  0x0000000000000000      0x119 src/GPIO_Func.o
  .debug_abbrev  0x0000000000000119      0x189 src/SPI.o
  .debug_abbrev  0x00000000000002a2       0xfc src/W5500.o
- .debug_abbrev  0x000000000000039e      0x1dd src/main.o
- .debug_abbrev  0x000000000000057b       0x12 src/startup_stm32f40xx.o
- .debug_abbrev  0x000000000000058d       0xf1 src/stm32f4xx_it.o
- .debug_abbrev  0x000000000000067e      0x17d src/system_stm32f4xx.o
+ .debug_abbrev  0x000000000000039e      0x1ee src/main.o
+ .debug_abbrev  0x000000000000058c       0x12 src/startup_stm32f40xx.o
+ .debug_abbrev  0x000000000000059e       0xf1 src/stm32f4xx_it.o
+ .debug_abbrev  0x000000000000068f      0x17d src/system_stm32f4xx.o
 
 .debug_aranges  0x0000000000000000      0x158
  .debug_aranges

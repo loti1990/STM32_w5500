@@ -290,7 +290,7 @@
 ////////////////////////////////////
 
 #define W5500_CBR_VERSIONR 		0x0039 			//W5500 chip version register offset address
-
+//Constant sign value
 #define W5500_CBR_VERSIONR_CON	0x04 			//W5500 cheap version constant read only as 0x04
 
 
@@ -304,7 +304,7 @@
 
 #define W5500_SR_MR 			0x0000 			//Socket n mode register address
 
-//Bit number		|     7    |   6  |    5    |       4    |3-0|
+//Bit number		|     7    |   6  |    5    |      4     |3-0|
 //Bit designator	|MULTI/MFEN|BCASTB|ND/MC/MMB|UCASTB MIP6B| P |
 
 #define W5500_SR_MR_MULTI_MFEN 		0x80 			//Multicasting in UDP mode / MAC filter enable in MACRAW mode
@@ -350,11 +350,77 @@
 #define W5500_SR_IR_DISCON		0x02			//Socket n discon 	interrupt
 #define W5500_SR_IR_CON			0x01			//Socket n con 		interrupt
 
+////////////////////////////////////
+//SN_SR - socket n status register//[R]
+////////////////////////////////////
 
+#define W5500_SR_SR 			0x0003 			//Socket n starus register address
 
+//Status register values which was corelated to
+//SN_CR - control register or some special control
+//packet as SYN, FIN packet in TCP
+#define W5500_SR_SR_SOCK_CLOSED 		0x00	//Socket n close 				status register value
+#define W5500_SR_SR_SOCK_INIT 			0x13	//Socket n initialization 		status register value
+#define W5500_SR_SR_SOCK_LISTEN 		0x14	//Socket n listen 				status register value
+#define W5500_SR_SR_SOCK_ESTABLISHED	0x17 	//Socket n established 			status register value
+#define W5500_SR_SR_SOCK_CLOSE_WAIT 	0x1c 	//Socket n wait on close 		status register value
+#define W5500_SR_SR_SOCK_UDP 			0x22 	//Socket n is opened as UDP 	status register value
+#define W5500_SR_SR_SOCK_MACRAW 		0x42 	//Socket n is opened as MACRAW 	status register value
 
+//Temporary status indicator during changing the status of Socket n
+#define W5500_SR_SR_SOCK_SYNSENT 		0x15 	//Socket n send connect request 	status register value
+#define W5500_SR_SR_SOCK_SYNRECV 		0x16 	//Socket n receive connect request  status register value
+#define W5500_SR_SR_SOCK_FIN_WAIT 		0x18 	//Socket n wait on FIN packet 		status register value
+#define W5500_SR_SR_SOCK_CLOSING 		0x1a 	//Socket n active-close 			status register value
+#define W5500_SR_SR_SOCK_TIME_WAIT 		0x1b 	//Socket n passive-close 			status register value
+#define W5500_SR_SR_SOCK_LAST_ACK 		0x1d 	//Socket n wait on FIN/ACK packet 	status register value
 
+///////////////////////////////////////////
+//SN_PORT - socket n source port register//[R/W]
+///////////////////////////////////////////
 
+#define W5500_SR_PORT_0 		0x0004 		//Socket n source port register 0 address
+#define W5500_SR_PORT_1 		0x0005 		//Socket n source port register 1 address
+
+////////////////////////////////////////////////////////////
+//SN_DHAR - socket n destination hardware address register//[R/W]
+////////////////////////////////////////////////////////////
+
+#define W5500_SR_DHAR_0 		0x0006 		//Socket n hardware address register 0 address
+#define W5500_SR_DHAR_1 		0x0007 		//Socket n hardware address register 1 address
+#define W5500_SR_DHAR_2 		0x0008 		//Socket n hardware address register 2 address
+#define W5500_SR_DHAR_3 		0x0009 		//Socket n hardware address register 3 address
+#define W5500_SR_DHAR_4 		0x000a 		//Socket n hardware address register 4 address
+#define W5500_SR_DHAR_5 		0x000b 		//Socket n hardware address register 5 address
+
+//////////////////////////////////////////////////////
+//SN_DIPR - socket n destination IP address register//[R/W]
+//////////////////////////////////////////////////////
+
+#define W5500_SR_DIPR_0 		0x000c 		//Socket n destination IP address register 0 address
+#define W5500_SR_DIPR_1 		0x000e 		//Socket n destination IP address register 1 address
+#define W5500_SR_DIPR_2 		0x000e 		//Socket n destination IP address register 2 address
+#define W5500_SR_DIPR_3 		0x000f 		//Socket n destination IP address register 3 address
+
+/////////////////////////////////////////////////
+//SN_DPORT - socket n destination port register//[R/W]
+/////////////////////////////////////////////////
+
+#define W5500_SR_DPORT_0 		0x0010 		//Socket n destination port register 0 address
+#define W5500_SR_DPORT_1 		0x0011 		//Socket n destination port register 1 address
+
+////////////////////////////////////////////////////
+//SN_MSSR - socket n maximum segment size register//[R/W]
+////////////////////////////////////////////////////
+
+#define W5500_SR_MSSR_0			0x0012 		//Socket n maximum segment size register 0 address
+#define W5500_SR_MSSR_1			0x0013 		//Socket n maximum segment size register 1 address
+
+/////////////////////////////////////////////////
+//SN_TOS - socket n IP type of service register//[R/W]
+/////////////////////////////////////////////////
+
+#define W5500_SR_TOS 			0x0015 		//Socket n IP type of service register address
 
 
 
