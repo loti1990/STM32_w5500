@@ -7,6 +7,21 @@
 #ifndef W5500_H_
 #define W5500_H_
 
+/*Function initialization start*/
+
+void W5500Init(void); 							//Initialize external w5500 ethernet peripheral
+
+/*Function initialization end*/
+
+/*Bit manipulation def. function start*/
+
+#define MSB(x)					((uint8_t)x>>8)
+#define LSB(x)					((uint8_t)x)
+
+/*Bit manipulation def. function end*/
+
+/*W5500 registers addresses, descriptions and constants start*/
+
 //////////////////////////////////////////////////////////
 /////-----------------CONTROL PHASE------------------/////
 //////////////////////////////////////////////////////////
@@ -422,13 +437,110 @@
 
 #define W5500_SR_TOS 			0x0015 		//Socket n IP type of service register address
 
+///////////////////////////////////////////
+//SN_TTL - socket n time to live register//[R/W]
+///////////////////////////////////////////
 
+#define W5500_SR_TLL 			0x0016 		//Socket n time to live register address
 
-#define TEST_ADDRES 			0x000f
-#define MSB(x)					((uint8_t)x>>8)
-#define LSB(x)					((uint8_t)x)
+////////////////////////////////////////////////////
+//SN_RXBUF_SIZE - socket n RX buffer size register//[R/W]
+////////////////////////////////////////////////////
 
-void W5500Init(void);
+#define W5500_SR_RXBUF_SIZE 	0x001e 		//Socket n receive buffer size register address
 
+//Receive buffer size option
+#define W5500_SR_RXBUF_SIZE_0 	0x00 		//Receive buffer size of 0 KB
+#define W5500_SR_RXBUF_SIZE_1 	0x01 		//Receive buffer size of 1 KB
+#define W5500_SR_RXBUF_SIZE_2 	0x02 		//Receive buffer size of 2 KB
+#define W5500_SR_RXBUF_SIZE_4 	0x04 		//Receive buffer size of 4 KB
+#define W5500_SR_RXBUF_SIZE_8 	0x08 		//Receive buffer size of 8 KB
+#define W5500_SR_RXBUF_SIZE_16 	0x10 		//Receive buffer size of 16 KB
+
+////////////////////////////////////////////////////
+//SN_TXBUF_SIZE - socket n TX buffer size register//[R/W]
+////////////////////////////////////////////////////
+
+#define W5500_SR_TXBUF_SIZE 	0x001f 		//Socket n transmit buffer size register address
+
+//Transmit buffer size option
+#define W5500_SR_TXBUF_SIZE_0 	0x00 		//Transmit buffer size of 0 KB
+#define W5500_SR_TXBUF_SIZE_1 	0x01 		//Transmit buffer size of 1 KB
+#define W5500_SR_TXBUF_SIZE_2 	0x02 		//Transmit buffer size of 2 KB
+#define W5500_SR_TXBUF_SIZE_4 	0x04 		//Transmit buffer size of 4 KB
+#define W5500_SR_TXBUF_SIZE_8 	0x08 		//Transmit buffer size of 8 KB
+#define W5500_SR_TXBUF_SIZE_16 	0x10 		//Transmit buffer size of 16 KB
+
+//////////////////////////////////////////////
+//SN_TX_FSR - socket n TX free size register//[R]
+//////////////////////////////////////////////
+
+#define W5500_SR_TX_FSR_0 		0x0020 		//Socket n TX free size register address 0
+#define W5500_SR_TX_FSR_1 		0x0021		//Socket n TX free size register address 1
+
+////////////////////////////////////////////////
+//SN_TX_RD - socket n TX read pointer register//[R]
+////////////////////////////////////////////////
+
+#define W5500_SR_TX_RD_0 		0x0022 		//SOcket n TX read pointer register address 0
+#define W5500_SR_TX_RD_1 		0x0023 		//SOcket n TX read pointer register address 1
+
+/////////////////////////////////////////////////
+//SN_TX_WT - socket n TX write pointer register//[R/W]
+/////////////////////////////////////////////////
+
+#define W5500_SR_TX_WR_0		0x0024 		//Socket n TX write pointer register address 0
+#define W5500_SR_TX_WR_1		0x0025 		//Socket n TX write pointer register address 1
+
+///////////////////////////////////////////////
+//SN_RX_RSR - socket n received size register//[R]
+///////////////////////////////////////////////
+
+#define W5500_SR_RX_RSR_0		0x0026 		//Socket n received size register address 0
+#define W5500_SR_RX_RSR_1		0x0027 		//Socket n received size register address 1
+
+/////////////////////////////////////////////////////
+//SN_RX_RD - socket n RX read data pointer register//[R/W]
+/////////////////////////////////////////////////////
+
+#define W5500_SR_RX_RD_0 		0x0028 		//Socket n RX read data pointer register address 0
+#define W5500_SR_RX_RD_1 		0x0029 		//Socket n RX read data pointer register address 1
+
+/////////////////////////////////////////////////
+//SN_RX_WR - socket n RX write pointer register//[R]
+/////////////////////////////////////////////////
+
+#define W5500_SR_RX_WR_0 		0x002a 		//Socket n RX writer pointer register address 0
+#define W5500_SR_RX_WR_1 		0x002b 		//Socket n RX writer pointer register address 1
+
+/////////////////////////////////////////////
+//SN_IMR - socket n interrupt mask register//[R/W]
+/////////////////////////////////////////////
+
+#define W5500_SR_RX_IMR 		0x002c 		//Socket n interrupt mask register address
+
+//Bit number		|    7   |    6   |    5   |   4   |   3   |  2 |  1   | 0 |
+//Bit designator	|Reserved|Reserved|Reserved|SEND_OK|TIMEOUT|RECV|DISCON|CON|
+
+#define W5500_SR_IMR_SEND_OK	0x10			//Socket n send ok 	interrupt mask
+#define W5500_SR_IMR_TIMEOUT	0x08			//Socket n timeout 	interrupt mask
+#define W5500_SR_IMR_RECV		0x04			//Socket n recv 	interrupt mask
+#define W5500_SR_IMR_DISCON		0x02			//Socket n discon 	interrupt mask
+#define W5500_SR_IMR_CON		0x01			//Socket n con 		interrupt mask
+
+////////////////////////////////////////
+//SN_FRAG - socket n fragment register//[R/W]
+////////////////////////////////////////
+
+#define W5500_SR_FRAG_0			0x002d 			//Socket n fragment register address 0
+#define W5500_SR_FRAG_1			0x002e 			//Socket n fragment register address 1
+
+//////////////////////////////////////////////////
+//SN_KPALVTR - socket n keep alive time register//[R/W]
+//////////////////////////////////////////////////
+
+#define W5500_SR_KALVTR 		0x002f 			//Socket n keep alive time register address
+
+/*W5500 registers addresses, descriptions and constants end*/
 
 #endif /* W5500_H_ */
