@@ -176,3 +176,82 @@ void W5500Init(void){
 	SPI1SendNByteReceive1Byte(S0_CLOSE,3);
 
 }
+
+void W5500InitV2(uint8_t *ip, uint8_t *gateway, uint8_t *submask, uint8_t *mac){
+
+	//temporary register, necessary to initialize to initial state
+	uint8_t temp_array[10] = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+
+	//w5500 enable ping response
+	temp_array[0] 		= MSB(W5500_CRB_MR);			//set address for common mode register MSB
+	temp_array[1] 		= LSB(W5500_CRB_MR);			//set address for common mode register LSB
+	temp_array[2] 		|= (W5500_CP_BSB_CR
+						| W5500_CP_WRITE
+						| W5500_CP_OM_VDLM); 			//set byte for write in to common register
+	temp_array[3] 		&= ~(W5500_CRB_MR_RST
+						| W5500_CRB_MR_WOL
+						| W5500_CRB_MR_PB
+						| W5500_CRB_MR_PPPOE
+						| W5500_CRB_MR_FARP); 		//write in to common mode register
+	//write thru spi communication
+	SPI1SendNByte(temp_array,4);
+
+
+	//setup gateway IP address
+	temp_array[0] 		= MSB(W5500_CRB_GAR_0);			//set address for common gateway register MSB
+	temp_array[1] 		= LSB(W5500_CRB_GAR_0);			//set address for common gateway register LSB
+	temp_array[2] 		|= (W5500_CP_BSB_CR
+						| W5500_CP_WRITE
+						| W5500_CP_OM_VDLM); 		//set byte for write in to common register
+	temp_array[3] 		= gateway[0]; 					//setup gateway address byte 0
+	temp_array[4] 		= gateway[1]; 					//setup gateway address byte 1
+	temp_array[5] 		= gateway[2]; 					//setup gateway address byte 2
+	temp_array[6] 		= gateway[3]; 					//setup gateway address byte 3
+	//write thru spi communication
+	SPI1SendNByte(temp_array,7);
+
+
+	//setup subnet mask register
+	temp_array[0] 		= MSB(W5500_CRB_SUBR_0);		//set address for common subnet mask register MSB
+	temp_array[1] 		= LSB(W5500_CRB_SUBR_0);		//set address for common subnet mask register LSB
+	temp_array[2] 		|= (W5500_CP_BSB_CR
+						| W5500_CP_WRITE
+						| W5500_CP_OM_VDLM); 		//set byte for write in to common register
+	temp_array[3] 		= submask[0]; 					//setup subnet mask address byte 0
+	temp_array[4] 		= submask[1]; 					//setup subnet mask address byte 1
+	temp_array[5] 		= submask[2]; 					//setup subnet mask address byte 2
+	temp_array[6] 		= submask[3]; 					//setup subnet mask address byte 3
+	//write thru spi communication
+	SPI1SendNByte(temp_array,7);
+
+
+	//setup hardware address register
+	temp_array[0] 		= MSB(W5500_CRB_SHAR_0);		//set address for common hardware address register MSB
+	temp_array[1] 		= LSB(W5500_CRB_SHAR_0);		//set address for common hardware address register LSB
+	temp_array[2] 		|= (W5500_CP_BSB_CR
+						| W5500_CP_WRITE
+						| W5500_CP_OM_VDLM); 		//set byte for write in to common register
+	temp_array[3] 		= mac[0]; 						//setup hardware address byte 0
+	temp_array[4] 		= mac[1]; 						//setup hardware address byte 1
+	temp_array[5] 		= mac[2]; 						//setup hardware address byte 2
+	temp_array[6] 		= mac[3]; 						//setup hardware address byte 3
+	temp_array[7] 		= mac[4]; 						//setup hardware address byte 4
+	temp_array[8] 		= mac[5]; 						//setup hardware address byte 5
+	//write thru spi communication
+	SPI1SendNByte(temp_array,9);
+
+	//setup source IP address register
+	temp_array[0] 		= MSB(W5500_CRB_SIPR_0);		//set address for source IP register MSB
+	temp_array[1] 		= LSB(W5500_CRB_SIPR_0);		//set address for source IP register LSB
+	temp_array[2] 		|= (W5500_CP_BSB_CR
+						| W5500_CP_WRITE
+						| W5500_CP_OM_VDLM); 		//set byte for write in to common register
+	temp_array[3] 		= ip[0]; 						//setup source IP address byte 0
+	temp_array[4] 		= ip[1]; 						//setup source IP address byte 1
+	temp_array[5] 		= ip[2]; 						//setup source IP address byte 2
+	temp_array[6] 		= ip[3]; 						//setup source IP address byte 3
+	//write thru spi communication
+	SPI1SendNByte(temp_array,7);
+
+
+}

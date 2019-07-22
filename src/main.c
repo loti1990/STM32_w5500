@@ -43,8 +43,13 @@ void EXTI3_IRQHandler(void); 		//Initialization of handler for external interrup
 int main(void){
 
   uint32_t ret_code_from_sysTick; 	//return code from SysTick_Config function 1 for error see core_cm4.h
-  uint8_t test_data[4] = {0x00,0x00,0x00,0xaa};
-  uint8_t test_receive = 0x00;
+
+  uint8_t ip[4] 	= {192,168,1,100}; 					//dedicated ip address for external W5500 device
+  uint8_t gateway[4]= {192,168,1,1}; 					//gateway
+  uint8_t submask[4]= {255,255,255,0}; 					//subnet mask
+  uint8_t mac[6]	= {0x00,0x08,0xdc,0x01,0x02,0x03}; 	//dedicated mac address
+
+
 
   //Init GPIOA
   InitGPIO();
@@ -53,7 +58,8 @@ int main(void){
   //Init SPI1
   SPI1Init();
   //W5500 initialize
-  W5500Init();
+  //W5500Init();
+  W5500InitV2(ip, gateway, submask, mac);
 
   //Configure system ticks to us range
   ret_code_from_sysTick = SysTick_Config(SystemCoreClock / 1000000);
