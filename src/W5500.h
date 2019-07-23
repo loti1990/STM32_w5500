@@ -13,6 +13,8 @@ void W5500Init(void); 																	//Initialize external w5500 ethernet peri
 
 void W5500InitV2(uint8_t *ip, uint8_t *gateway, uint8_t *submask, uint8_t *mac); 		//Initialize external W5500 ethernet peripheral V2
 
+uint8_t W5500OInitTCP(uint8_t socket_no, uint32_t port, uint8_t TX_buff_size, uint8_t RX_buff_size); 	//Open TCP protocol
+
 /*Function initialization end*/
 
 /*Bit manipulation def. function start*/
