@@ -188,10 +188,11 @@ void W5500InitV2(uint8_t *ip, uint8_t *gateway, uint8_t *submask, uint8_t *mac){
 	//temporary register, necessary to initialize to initial state
 	uint8_t temp_array[10] = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 
+
 	//w5500 enable ping response
 	temp_array[0] 		= MSB(W5500_CRB_MR);			//set address for common mode register MSB
 	temp_array[1] 		= LSB(W5500_CRB_MR);			//set address for common mode register LSB
-	temp_array[2] 		|= (W5500_CP_BSB_CR
+	temp_array[2] 		= (W5500_CP_BSB_CR
 						| W5500_CP_WRITE
 						| W5500_CP_OM_VDLM); 			//set byte for write in to common register
 	temp_array[3] 		&= ~(W5500_CRB_MR_RST
@@ -206,7 +207,7 @@ void W5500InitV2(uint8_t *ip, uint8_t *gateway, uint8_t *submask, uint8_t *mac){
 	//setup gateway IP address
 	temp_array[0] 		= MSB(W5500_CRB_GAR_0);			//set address for common gateway register MSB
 	temp_array[1] 		= LSB(W5500_CRB_GAR_0);			//set address for common gateway register LSB
-	temp_array[2] 		|= (W5500_CP_BSB_CR
+	temp_array[2] 		= (W5500_CP_BSB_CR
 						| W5500_CP_WRITE
 						| W5500_CP_OM_VDLM); 			//set byte for write in to common register
 	temp_array[3] 		= gateway[0]; 					//setup gateway address byte 0
@@ -220,7 +221,7 @@ void W5500InitV2(uint8_t *ip, uint8_t *gateway, uint8_t *submask, uint8_t *mac){
 	//setup subnet mask register
 	temp_array[0] 		= MSB(W5500_CRB_SUBR_0);		//set address for common subnet mask register MSB
 	temp_array[1] 		= LSB(W5500_CRB_SUBR_0);		//set address for common subnet mask register LSB
-	temp_array[2] 		|= (W5500_CP_BSB_CR
+	temp_array[2] 		= (W5500_CP_BSB_CR
 						| W5500_CP_WRITE
 						| W5500_CP_OM_VDLM); 			//set byte for write in to common register
 	temp_array[3] 		= submask[0]; 					//setup subnet mask address byte 0
@@ -234,7 +235,7 @@ void W5500InitV2(uint8_t *ip, uint8_t *gateway, uint8_t *submask, uint8_t *mac){
 	//setup hardware address register
 	temp_array[0] 		= MSB(W5500_CRB_SHAR_0);		//set address for common hardware address register MSB
 	temp_array[1] 		= LSB(W5500_CRB_SHAR_0);		//set address for common hardware address register LSB
-	temp_array[2] 		|= (W5500_CP_BSB_CR
+	temp_array[2] 		= (W5500_CP_BSB_CR
 						| W5500_CP_WRITE
 						| W5500_CP_OM_VDLM); 			//set byte for write in to common register
 	temp_array[3] 		= mac[0]; 						//setup hardware address byte 0
@@ -246,10 +247,11 @@ void W5500InitV2(uint8_t *ip, uint8_t *gateway, uint8_t *submask, uint8_t *mac){
 	//write thru spi communication
 	SPI1SendNByte(temp_array,9);
 
+
 	//setup source IP address register
 	temp_array[0] 		= MSB(W5500_CRB_SIPR_0);		//set address for source IP register MSB
 	temp_array[1] 		= LSB(W5500_CRB_SIPR_0);		//set address for source IP register LSB
-	temp_array[2] 		|= (W5500_CP_BSB_CR
+	temp_array[2] 		= (W5500_CP_BSB_CR
 						| W5500_CP_WRITE
 						| W5500_CP_OM_VDLM); 			//set byte for write in to common register
 	temp_array[3] 		= ip[0]; 						//setup source IP address byte 0
@@ -260,6 +262,19 @@ void W5500InitV2(uint8_t *ip, uint8_t *gateway, uint8_t *submask, uint8_t *mac){
 	SPI1SendNByte(temp_array,7);
 
 
+	//setup PHY configuration register
+	temp_array[0] 	= MSB(W5500_CRB_PHYCFGR);
+	temp_array[1] 	= LSB(W5500_CRB_PHYCFGR);
+	temp_array[2] 	= (W5500_CP_BSB_CR
+					| W5500_CP_WRITE
+					| W5500_CP_OM_VDLM); 				//write in to common register
+	temp_array[3] 	= (W5500_CRB_PHYCFGR_RST
+					| W5500_CRB_PHYCFGR_OPMD
+					| W5500_CRB_PHYCFGR_OPMDC_100FD); 	//100BT full-duplex auto negotiation disable
+	//write thru spi communication
+	SPI1SendNByte(temp_array,4);
+
+
 }
 
 //Initialize TCP protocol
@@ -268,7 +283,7 @@ void W5500InitV2(uint8_t *ip, uint8_t *gateway, uint8_t *submask, uint8_t *mac){
 //Port number 		<port>			for example 1000
 //TX buffer size 	<TX_buff_size> 	(0,1,2,4,8,16)
 //RX buffer size 	<RX_buff_size> 	(0,1,2,4,8,16)
-uint8_t W5500OInitTCP(uint8_t socket_no, uint32_t port, uint8_t TX_buff_size, uint8_t RX_buff_size){
+uint8_t W5500InitTCP(uint8_t socket_no, uint16_t port, uint8_t TX_buff_size, uint8_t RX_buff_size){
 
 	//temporary register, necessary to initialize to initial state
 	uint8_t temp_array[10] = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
@@ -277,58 +292,80 @@ uint8_t W5500OInitTCP(uint8_t socket_no, uint32_t port, uint8_t TX_buff_size, ui
 
 	switch(socket_no){
 
-	case 0:
-		socket_sel_register = W5500_CP_BSB_S0_R;
-
-	case 1:
-		socket_sel_register = W5500_CP_BSB_S1_R;
-
-	case 2:
-		socket_sel_register = W5500_CP_BSB_S2_R;
-
-	case 3:
-		socket_sel_register = W5500_CP_BSB_S3_R;
-
-	case 4:
-		socket_sel_register = W5500_CP_BSB_S4_R;
-
-	case 5:
-		socket_sel_register = W5500_CP_BSB_S5_R;
-
-	case 6:
-		socket_sel_register = W5500_CP_BSB_S6_R;
-
-	case 7:
-		socket_sel_register = W5500_CP_BSB_S7_R;
-
+	case 0x00:
+		socket_sel_register = W5500_CP_BSB_S0_R; 		//socket 0 address
+		break;
+	case 0x01:
+		socket_sel_register = W5500_CP_BSB_S1_R; 		//socket 1 address
+		break;
+	case 0x02:
+		socket_sel_register = W5500_CP_BSB_S2_R;		//socket 2 address
+		break;
+	case 0x03:
+		socket_sel_register = W5500_CP_BSB_S3_R; 		//socket 3 address
+		break;
+	case 0x04:
+		socket_sel_register = W5500_CP_BSB_S4_R; 		//socket 4 address
+		break;
+	case 0x05:
+		socket_sel_register = W5500_CP_BSB_S5_R; 		//socket 5 address
+		break;
+	case 0x06:
+		socket_sel_register = W5500_CP_BSB_S6_R; 		//socket 6 address
+		break;
+	case 0x07:
+		socket_sel_register = W5500_CP_BSB_S7_R; 		//socket 7 address
+		break;
 	default:
-		return 1; 			//error
+		return 1; 										//error
 	}
 
-	//setup PHY configuration register
-	temp_array[0] 	= MSB(W5500_CRB_PHYCFGR);
-	temp_array[1] 	= LSB(W5500_CRB_PHYCFGR);
-	temp_array[2] 	|= (W5500_CP_BSB_CR
+
+	//enable interrupt for socket n
+	temp_array[0] 	= MSB(W5500_CRB_SIMR);
+	temp_array[1] 	= LSB(W5500_CRB_SIMR);
+	temp_array[2] 	= (W5500_CP_BSB_CR
 					| W5500_CP_WRITE
 					| W5500_CP_OM_VDLM); 				//write in to common register
-	temp_array[3] 	|= (W5500_CRB_PHYCFGR_RST
-					| W5500_CRB_PHYCFGR_OPMD
-					| W5500_CRB_PHYCFGR_OPMDC_100FD); 	//100BT full-duplex auto negotiation disable
-
-
+	temp_array[3] 	= (1 << socket_no); 				//Enable socket n mask interrupt register
+	//write thru spi communication
 	SPI1SendNByte(temp_array,4);
 
-	//enable interrupt for socket 0
-	SPI1SendNByte(CR_SIMR_W5500,4);
 
-	//setup Socket 0 RX and TX memory allocation
-	SPI1SendNByte(S0_RX_TX_BUF_SIZE_W5500,5);
+	//setup Socket n RX and TX memory allocation
+	temp_array[0] 	= MSB(W5500_SR_RXBUF_SIZE);
+	temp_array[1] 	= LSB(W5500_SR_RXBUF_SIZE);
+	temp_array[2] 	= (socket_sel_register          	//Select socket n
+					| W5500_CP_WRITE
+					| W5500_CP_OM_VDLM); 				//write in to socket n configuration register
+	temp_array[3] 	= RX_buff_size; 					//Define RX buffer size
+	temp_array[4] 	= TX_buff_size; 					//Define TX buffer size at address (RX buffer size register) + 1 = 0x001f
+	//write thru spi communication
+	SPI1SendNByte(temp_array,5);
 
-	//setup Socket 0 Protocol
-	SPI1SendNByte(S0_MR_W5500,4);
 
-	//setup Socket 0 port number
-	SPI1SendNByte(S0_PORT_W5500,5);
+	//setup Socket n TCP protocol
+	temp_array[0] 	= MSB(W5500_SR_RXBUF_SIZE);
+	temp_array[1] 	= LSB(W5500_SR_RXBUF_SIZE);
+	temp_array[2] 	= (socket_sel_register          	//Select socket n
+					| W5500_CP_WRITE
+					| W5500_CP_OM_VDLM); 				//write in to socket n configuration register
+	temp_array[3] 	= W5500_SR_MR_TCP; 					//Configure socket n as TCP protocol
+	//write thru spi communication
+	SPI1SendNByte(temp_array,4);
 
+
+	//setup Socket n port number
+	temp_array[0] 	= MSB(W5500_SR_PORT_0);
+	temp_array[1] 	= LSB(W5500_SR_PORT_0);
+	temp_array[2] 	= (socket_sel_register          	//Select socket n
+					| W5500_CP_WRITE
+					| W5500_CP_OM_VDLM); 				//write in to socket n configuration register
+	temp_array[3] 	= MSB(port);						//Configure MSB byte of port register
+	temp_array[4] 	= LSB(port); 						//Configure LSB byte of port register
+	//write thru spi communication
+	SPI1SendNByte(temp_array,5);
+
+	return 0;
 
 }
