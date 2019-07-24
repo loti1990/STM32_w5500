@@ -1,3 +1,4 @@
 W5500.c:86:6:W5500Init	16	static
-W5500.c:186:6:W5500InitV2	48	static
-W5500.c:286:9:W5500InitTCP	56	static
+W5500.c:182:9:W5500SpiConnCheck	24	static
+W5500.c:210:6:W5500InitV2	48	static
+W5500.c:310:9:W5500InitTCP	56	static

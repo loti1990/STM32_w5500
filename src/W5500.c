@@ -176,6 +176,30 @@ void W5500Init(void){
 	SPI1SendNByteReceive1Byte(S0_CLOSE,3);
 
 }
+//Check SPI connection with external W5500 ethernet module
+//0 - connection established thru SPI communication
+//1 - connection error
+uint8_t W5500SpiConnCheck(void){
+
+	//temporary register, necessary to initialize to initial state
+	uint8_t temp_array[10] = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+
+	//Read version of W5500 external device
+	temp_array[0]	= MSB(W5500_CBR_VERSIONR);
+	temp_array[1]	= LSB(W5500_CBR_VERSIONR);
+	temp_array[2] 		= (W5500_CP_BSB_CR
+						| W5500_CP_READ
+						| W5500_CP_OM_VDLM); 			//set byte for reading from common register
+
+	//Read thru SPI data interface
+	temp_array[9] = SPI1SendNByteReceive1Byte(temp_array,3);
+
+	if(temp_array[9] == W5500_CBR_VERSIONR_CON){
+		return 0; 		//W5500 device is proper connected thru SPI connection
+	}else{
+		return 1; 		//W5500 device SPI error
+	}
+}
 
 //Initialize W5500
 //Input parameters:

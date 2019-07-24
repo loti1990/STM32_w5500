@@ -5,15 +5,15 @@ Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
   0 .isr_vector   00000188  08000000  08000000  00010000  2**0
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  1 .text         000008b0  08000188  08000188  00010188  2**2
+  1 .text         00000948  08000188  08000188  00010188  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .rodata       00000014  08000a38  08000a38  00010a38  2**2
+  2 .rodata       00000014  08000ad0  08000ad0  00010ad0  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  3 .init_array   00000004  08000a4c  08000a4c  00010a4c  2**2
+  3 .init_array   00000004  08000ae4  08000ae4  00010ae4  2**2
                   CONTENTS, ALLOC, LOAD, DATA
-  4 .fini_array   00000004  08000a50  08000a50  00010a50  2**2
+  4 .fini_array   00000004  08000ae8  08000ae8  00010ae8  2**2
                   CONTENTS, ALLOC, LOAD, DATA
-  5 .data         00000004  20000000  08000a54  00020000  2**2
+  5 .data         00000004  20000000  08000aec  00020000  2**2
                   CONTENTS, ALLOC, LOAD, DATA
   6 .ccmram       00000000  10000000  10000000  00020004  2**0
                   CONTENTS
@@ -23,25 +23,25 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
   9 .ARM.attributes 00000030  00000000  00000000  00020004  2**0
                   CONTENTS, READONLY
- 10 .debug_info   000023ee  00000000  00000000  00020034  2**0
+ 10 .debug_info   0000243e  00000000  00000000  00020034  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_abbrev 000008b8  00000000  00000000  00022422  2**0
+ 11 .debug_abbrev 000008c5  00000000  00000000  00022472  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_aranges 00000168  00000000  00000000  00022ce0  2**3
+ 12 .debug_aranges 00000170  00000000  00000000  00022d38  2**3
                   CONTENTS, READONLY, DEBUGGING
- 13 .debug_ranges 00000198  00000000  00000000  00022e48  2**3
+ 13 .debug_ranges 000001a0  00000000  00000000  00022ea8  2**3
                   CONTENTS, READONLY, DEBUGGING
- 14 .debug_line   00000d37  00000000  00000000  00022fe0  2**0
+ 14 .debug_line   00000d4f  00000000  00000000  00023048  2**0
                   CONTENTS, READONLY, DEBUGGING
- 15 .debug_str    00000d55  00000000  00000000  00023d17  2**0
+ 15 .debug_str    00000d67  00000000  00000000  00023d97  2**0
                   CONTENTS, READONLY, DEBUGGING
- 16 .comment      0000007c  00000000  00000000  00024a6c  2**0
+ 16 .comment      0000007c  00000000  00000000  00024afe  2**0
                   CONTENTS, READONLY
- 17 .debug_frame  000002a4  00000000  00000000  00024ae8  2**2
+ 17 .debug_frame  000002c4  00000000  00000000  00024b7c  2**2
                   CONTENTS, READONLY, DEBUGGING
- 18 .debug_loc    00000597  00000000  00000000  00024d8c  2**0
+ 18 .debug_loc    0000059c  00000000  00000000  00024e40  2**0
                   CONTENTS, READONLY, DEBUGGING
- 19 .stabstr      0000003f  00000000  00000000  00025323  2**0
+ 19 .stabstr      0000003f  00000000  00000000  000253dc  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -60,7 +60,7 @@ Disassembly of section .text:
  800019e:	bd10      	pop	{r4, pc}
  80001a0:	20000004 	.word	0x20000004
  80001a4:	00000000 	.word	0x00000000
- 80001a8:	08000a20 	.word	0x08000a20
+ 80001a8:	08000ab8 	.word	0x08000ab8
 
 080001ac <frame_dummy>:
  80001ac:	b508      	push	{r3, lr}
@@ -72,7 +72,7 @@ Disassembly of section .text:
  80001ba:	bd08      	pop	{r3, pc}
  80001bc:	00000000 	.word	0x00000000
  80001c0:	20000008 	.word	0x20000008
- 80001c4:	08000a20 	.word	0x08000a20
+ 80001c4:	08000ab8 	.word	0x08000ab8
 
 080001c8 <InitGPIO>:
 	/*************************************************
@@ -565,1063 +565,1189 @@ void SPI1Init(){
  80004ec:	40020000 	.word	0x40020000
  80004f0:	40013000 	.word	0x40013000
 
-080004f4 <SPI3Init>:
+080004f4 <SPI1SendNByteReceive1Byte>:
+
+	 //Received data variable
+	 uint8_t received_data = 0x00;
+
+	 //SPI1 CS enable (output low logical level)
+	 GPIOA -> ODR 		&= ~(GPIO_ODR_ODR_4);
+ 80004f4:	4a17      	ldr	r2, [pc, #92]	; (8000554 <SPI1SendNByteReceive1Byte+0x60>)
+ 80004f6:	6953      	ldr	r3, [r2, #20]
+ 80004f8:	f023 0310 	bic.w	r3, r3, #16
+uint8_t SPI1SendNByteReceive1Byte(uint8_t *data_to_send, uint32_t send_data_len){
+ 80004fc:	b430      	push	{r4, r5}
+	 GPIOA -> ODR 		&= ~(GPIO_ODR_ODR_4);
+ 80004fe:	6153      	str	r3, [r2, #20]
+
+	 for(i = 0;i < send_data_len;i++){
+ 8000500:	b189      	cbz	r1, 8000526 <SPI1SendNByteReceive1Byte+0x32>
+	 SPI1 -> DR = *data;
+ 8000502:	4b15      	ldr	r3, [pc, #84]	; (8000558 <SPI1SendNByteReceive1Byte+0x64>)
+ 8000504:	4604      	mov	r4, r0
+ 8000506:	1845      	adds	r5, r0, r1
+ 8000508:	f814 2b01 	ldrb.w	r2, [r4], #1
+ 800050c:	819a      	strh	r2, [r3, #12]
+	 while(!(SPI1 -> SR & SPI_SR_TXE));
+ 800050e:	891a      	ldrh	r2, [r3, #8]
+ 8000510:	0792      	lsls	r2, r2, #30
+ 8000512:	d5fc      	bpl.n	800050e <SPI1SendNByteReceive1Byte+0x1a>
+	 while(!(SPI1 -> SR & SPI_SR_RXNE));
+ 8000514:	891a      	ldrh	r2, [r3, #8]
+ 8000516:	07d2      	lsls	r2, r2, #31
+ 8000518:	d5fc      	bpl.n	8000514 <SPI1SendNByteReceive1Byte+0x20>
+	 while(SPI1 -> SR & SPI_SR_BSY);
+ 800051a:	891a      	ldrh	r2, [r3, #8]
+ 800051c:	0612      	lsls	r2, r2, #24
+ 800051e:	d4fc      	bmi.n	800051a <SPI1SendNByteReceive1Byte+0x26>
+	 for(i = 0;i < send_data_len;i++){
+ 8000520:	42ac      	cmp	r4, r5
+	 return SPI1 -> DR;
+ 8000522:	899a      	ldrh	r2, [r3, #12]
+	 for(i = 0;i < send_data_len;i++){
+ 8000524:	d1f0      	bne.n	8000508 <SPI1SendNByteReceive1Byte+0x14>
+	 SPI1 -> DR = *data;
+ 8000526:	4a0c      	ldr	r2, [pc, #48]	; (8000558 <SPI1SendNByteReceive1Byte+0x64>)
+ 8000528:	5c43      	ldrb	r3, [r0, r1]
+ 800052a:	8193      	strh	r3, [r2, #12]
+	 while(!(SPI1 -> SR & SPI_SR_TXE));
+ 800052c:	8913      	ldrh	r3, [r2, #8]
+ 800052e:	0798      	lsls	r0, r3, #30
+ 8000530:	d5fc      	bpl.n	800052c <SPI1SendNByteReceive1Byte+0x38>
+	 while(!(SPI1 -> SR & SPI_SR_RXNE));
+ 8000532:	4a09      	ldr	r2, [pc, #36]	; (8000558 <SPI1SendNByteReceive1Byte+0x64>)
+ 8000534:	8913      	ldrh	r3, [r2, #8]
+ 8000536:	07d9      	lsls	r1, r3, #31
+ 8000538:	d5fc      	bpl.n	8000534 <SPI1SendNByteReceive1Byte+0x40>
+	 while(SPI1 -> SR & SPI_SR_BSY);
+ 800053a:	4a07      	ldr	r2, [pc, #28]	; (8000558 <SPI1SendNByteReceive1Byte+0x64>)
+ 800053c:	8913      	ldrh	r3, [r2, #8]
+ 800053e:	061b      	lsls	r3, r3, #24
+ 8000540:	d4fc      	bmi.n	800053c <SPI1SendNByteReceive1Byte+0x48>
+		 SPI1Send1ByteReceive1Byte(&data_to_send[i]);
+	 }
+	 received_data = SPI1Send1ByteReceive1Byte(&data_to_send[i]);
+
+	 //SPI1 CS disable (output high logical level)
+	 GPIOA -> ODR 		|= GPIO_ODR_ODR_4;
+ 8000542:	4904      	ldr	r1, [pc, #16]	; (8000554 <SPI1SendNByteReceive1Byte+0x60>)
+	 return SPI1 -> DR;
+ 8000544:	8990      	ldrh	r0, [r2, #12]
+	 GPIOA -> ODR 		|= GPIO_ODR_ODR_4;
+ 8000546:	694b      	ldr	r3, [r1, #20]
+ 8000548:	f043 0310 	orr.w	r3, r3, #16
+
+	 return received_data;
+}
+ 800054c:	b2c0      	uxtb	r0, r0
+	 GPIOA -> ODR 		|= GPIO_ODR_ODR_4;
+ 800054e:	614b      	str	r3, [r1, #20]
+}
+ 8000550:	bc30      	pop	{r4, r5}
+ 8000552:	4770      	bx	lr
+ 8000554:	40020000 	.word	0x40020000
+ 8000558:	40013000 	.word	0x40013000
+
+0800055c <SPI3Init>:
 
 //SPI3 initialization
 void SPI3Init(){
 
 	//Configure NSS hardware pin
 	SPI3 -> CR1 	&= ~(SPI_CR1_SSM); 		//Use hardware controlled chip select line
- 80004f4:	4b1b      	ldr	r3, [pc, #108]	; (8000564 <SPI3Init+0x70>)
- 80004f6:	881a      	ldrh	r2, [r3, #0]
- 80004f8:	f422 7200 	bic.w	r2, r2, #512	; 0x200
- 80004fc:	0412      	lsls	r2, r2, #16
- 80004fe:	0c12      	lsrs	r2, r2, #16
- 8000500:	801a      	strh	r2, [r3, #0]
+ 800055c:	4b1b      	ldr	r3, [pc, #108]	; (80005cc <SPI3Init+0x70>)
+ 800055e:	881a      	ldrh	r2, [r3, #0]
+ 8000560:	f422 7200 	bic.w	r2, r2, #512	; 0x200
+ 8000564:	0412      	lsls	r2, r2, #16
+ 8000566:	0c12      	lsrs	r2, r2, #16
+ 8000568:	801a      	strh	r2, [r3, #0]
 	SPI3 -> CR2		|= SPI_CR2_SSOE; 		//Use hardware output chip select that was active in low state
- 8000502:	889a      	ldrh	r2, [r3, #4]
- 8000504:	b292      	uxth	r2, r2
- 8000506:	f042 0204 	orr.w	r2, r2, #4
- 800050a:	809a      	strh	r2, [r3, #4]
+ 800056a:	889a      	ldrh	r2, [r3, #4]
+ 800056c:	b292      	uxth	r2, r2
+ 800056e:	f042 0204 	orr.w	r2, r2, #4
+ 8000572:	809a      	strh	r2, [r3, #4]
 
 	//Configure clock polarity sample at positive edge of clock
 	SPI3 -> CR1 	&= ~(SPI_CR1_CPHA);
- 800050c:	881a      	ldrh	r2, [r3, #0]
- 800050e:	f022 0201 	bic.w	r2, r2, #1
- 8000512:	0412      	lsls	r2, r2, #16
- 8000514:	0c12      	lsrs	r2, r2, #16
- 8000516:	801a      	strh	r2, [r3, #0]
+ 8000574:	881a      	ldrh	r2, [r3, #0]
+ 8000576:	f022 0201 	bic.w	r2, r2, #1
+ 800057a:	0412      	lsls	r2, r2, #16
+ 800057c:	0c12      	lsrs	r2, r2, #16
+ 800057e:	801a      	strh	r2, [r3, #0]
 	SPI3 -> CR1 	|= SPI_CR1_CPOL;
- 8000518:	881a      	ldrh	r2, [r3, #0]
- 800051a:	b292      	uxth	r2, r2
- 800051c:	f042 0202 	orr.w	r2, r2, #2
- 8000520:	801a      	strh	r2, [r3, #0]
+ 8000580:	881a      	ldrh	r2, [r3, #0]
+ 8000582:	b292      	uxth	r2, r2
+ 8000584:	f042 0202 	orr.w	r2, r2, #2
+ 8000588:	801a      	strh	r2, [r3, #0]
 
 	//MSB bit first out
 	SPI3 -> CR1 	&= ~(SPI_CR1_LSBFIRST);
- 8000522:	881a      	ldrh	r2, [r3, #0]
- 8000524:	f022 0280 	bic.w	r2, r2, #128	; 0x80
- 8000528:	0412      	lsls	r2, r2, #16
- 800052a:	0c12      	lsrs	r2, r2, #16
- 800052c:	801a      	strh	r2, [r3, #0]
+ 800058a:	881a      	ldrh	r2, [r3, #0]
+ 800058c:	f022 0280 	bic.w	r2, r2, #128	; 0x80
+ 8000590:	0412      	lsls	r2, r2, #16
+ 8000592:	0c12      	lsrs	r2, r2, #16
+ 8000594:	801a      	strh	r2, [r3, #0]
 
 	//2-line SPI mode (MISO & MOSI)
 	SPI3 -> CR1 	&= ~(SPI_CR1_BIDIMODE);
- 800052e:	881a      	ldrh	r2, [r3, #0]
- 8000530:	f3c2 020e 	ubfx	r2, r2, #0, #15
- 8000534:	801a      	strh	r2, [r3, #0]
+ 8000596:	881a      	ldrh	r2, [r3, #0]
+ 8000598:	f3c2 020e 	ubfx	r2, r2, #0, #15
+ 800059c:	801a      	strh	r2, [r3, #0]
 
 	//SPI full duplex mode
 	SPI3 -> CR1 	&= ~(SPI_CR1_RXONLY);
- 8000536:	881a      	ldrh	r2, [r3, #0]
- 8000538:	f422 6280 	bic.w	r2, r2, #1024	; 0x400
- 800053c:	0412      	lsls	r2, r2, #16
- 800053e:	0c12      	lsrs	r2, r2, #16
- 8000540:	801a      	strh	r2, [r3, #0]
+ 800059e:	881a      	ldrh	r2, [r3, #0]
+ 80005a0:	f422 6280 	bic.w	r2, r2, #1024	; 0x400
+ 80005a4:	0412      	lsls	r2, r2, #16
+ 80005a6:	0c12      	lsrs	r2, r2, #16
+ 80005a8:	801a      	strh	r2, [r3, #0]
 
 	//SPI 8-bit data frame format
 	SPI3 -> CR1 	&= ~(SPI_CR1_DFF);
- 8000542:	881a      	ldrh	r2, [r3, #0]
- 8000544:	f422 6200 	bic.w	r2, r2, #2048	; 0x800
- 8000548:	0412      	lsls	r2, r2, #16
- 800054a:	0c12      	lsrs	r2, r2, #16
- 800054c:	801a      	strh	r2, [r3, #0]
+ 80005aa:	881a      	ldrh	r2, [r3, #0]
+ 80005ac:	f422 6200 	bic.w	r2, r2, #2048	; 0x800
+ 80005b0:	0412      	lsls	r2, r2, #16
+ 80005b2:	0c12      	lsrs	r2, r2, #16
+ 80005b4:	801a      	strh	r2, [r3, #0]
 
 	//SPI baud rate without prescaler the sclk clock would be 42 MHz
 	SPI3 -> CR1 	|= SPI_CR1_BR_0; 	// 42 MHz / 4 = 10,5 MHz
- 800054e:	881a      	ldrh	r2, [r3, #0]
- 8000550:	b292      	uxth	r2, r2
- 8000552:	f042 0208 	orr.w	r2, r2, #8
- 8000556:	801a      	strh	r2, [r3, #0]
+ 80005b6:	881a      	ldrh	r2, [r3, #0]
+ 80005b8:	b292      	uxth	r2, r2
+ 80005ba:	f042 0208 	orr.w	r2, r2, #8
+ 80005be:	801a      	strh	r2, [r3, #0]
 
 	//SPI in master mode configuration
 	SPI3 -> CR1 	|= SPI_CR1_MSTR;
- 8000558:	881a      	ldrh	r2, [r3, #0]
- 800055a:	b292      	uxth	r2, r2
- 800055c:	f042 0204 	orr.w	r2, r2, #4
- 8000560:	801a      	strh	r2, [r3, #0]
- 8000562:	4770      	bx	lr
- 8000564:	40003c00 	.word	0x40003c00
+ 80005c0:	881a      	ldrh	r2, [r3, #0]
+ 80005c2:	b292      	uxth	r2, r2
+ 80005c4:	f042 0204 	orr.w	r2, r2, #4
+ 80005c8:	801a      	strh	r2, [r3, #0]
+ 80005ca:	4770      	bx	lr
+ 80005cc:	40003c00 	.word	0x40003c00
 
-08000568 <W5500InitV2>:
+080005d0 <W5500SpiConnCheck>:
+
+}
+//Check SPI connection with external W5500 ethernet module
+//0 - connection established thru SPI communication
+//1 - connection error
+uint8_t W5500SpiConnCheck(void){
+ 80005d0:	b500      	push	{lr}
+ 80005d2:	b085      	sub	sp, #20
+
+	//temporary register, necessary to initialize to initial state
+	uint8_t temp_array[10] = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+ 80005d4:	2300      	movs	r3, #0
+
+	//Read version of W5500 external device
+	temp_array[0]	= MSB(W5500_CBR_VERSIONR);
+	temp_array[1]	= LSB(W5500_CBR_VERSIONR);
+ 80005d6:	2239      	movs	r2, #57	; 0x39
+	temp_array[2] 		= (W5500_CP_BSB_CR
+						| W5500_CP_READ
+						| W5500_CP_OM_VDLM); 			//set byte for reading from common register
+
+	//Read thru SPI data interface
+	temp_array[9] = SPI1SendNByteReceive1Byte(temp_array,3);
+ 80005d8:	a801      	add	r0, sp, #4
+ 80005da:	2103      	movs	r1, #3
+	uint8_t temp_array[10] = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+ 80005dc:	9301      	str	r3, [sp, #4]
+ 80005de:	9302      	str	r3, [sp, #8]
+ 80005e0:	f8ad 300c 	strh.w	r3, [sp, #12]
+	temp_array[1]	= LSB(W5500_CBR_VERSIONR);
+ 80005e4:	f88d 2005 	strb.w	r2, [sp, #5]
+	temp_array[9] = SPI1SendNByteReceive1Byte(temp_array,3);
+ 80005e8:	f7ff ff84 	bl	80004f4 <SPI1SendNByteReceive1Byte>
+		return 0; 		//W5500 device is proper connected thru SPI connection
+	}else{
+		return 1; 		//W5500 device SPI error
+	}
+
+}
+ 80005ec:	3804      	subs	r0, #4
+ 80005ee:	bf18      	it	ne
+ 80005f0:	2001      	movne	r0, #1
+ 80005f2:	b005      	add	sp, #20
+ 80005f4:	f85d fb04 	ldr.w	pc, [sp], #4
+
+080005f8 <W5500InitV2>:
 //Input parameters:
 //IP address 			<ip> 		for example {192,168,1,1}
 //Gateway address		<gateway> 	for example {192,168,1,1}
 //Subnet mask 			<submask> 	for example {255,255,255,0}
 //MAC address 			<mac> 		for example {0x00,0x08,0xdc,0x01,0x02,0x03}
 void W5500InitV2(uint8_t *ip, uint8_t *gateway, uint8_t *submask, uint8_t *mac){
- 8000568:	e92d 43f0 	stmdb	sp!, {r4, r5, r6, r7, r8, r9, lr}
+ 80005f8:	e92d 43f0 	stmdb	sp!, {r4, r5, r6, r7, r8, r9, lr}
 
 
 	//w5500 enable ping response
 	temp_array[0] 		= MSB(W5500_CRB_MR);			//set address for common mode register MSB
 	temp_array[1] 		= LSB(W5500_CRB_MR);			//set address for common mode register LSB
 	temp_array[2] 		= (W5500_CP_BSB_CR
- 800056c:	2404      	movs	r4, #4
+ 80005fc:	2404      	movs	r4, #4
 void W5500InitV2(uint8_t *ip, uint8_t *gateway, uint8_t *submask, uint8_t *mac){
- 800056e:	b085      	sub	sp, #20
- 8000570:	4689      	mov	r9, r1
+ 80005fe:	b085      	sub	sp, #20
+ 8000600:	4689      	mov	r9, r1
 	uint8_t temp_array[10] = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
- 8000572:	2500      	movs	r5, #0
+ 8000602:	2500      	movs	r5, #0
 void W5500InitV2(uint8_t *ip, uint8_t *gateway, uint8_t *submask, uint8_t *mac){
- 8000574:	4607      	mov	r7, r0
+ 8000604:	4607      	mov	r7, r0
 						| W5500_CRB_MR_WOL
 						| W5500_CRB_MR_PB
 						| W5500_CRB_MR_PPPOE
 						| W5500_CRB_MR_FARP); 			//write in to common mode register
 	//write thru spi communication
 	SPI1SendNByte(temp_array,4);
- 8000576:	4621      	mov	r1, r4
- 8000578:	eb0d 0004 	add.w	r0, sp, r4
+ 8000606:	4621      	mov	r1, r4
+ 8000608:	eb0d 0004 	add.w	r0, sp, r4
 void W5500InitV2(uint8_t *ip, uint8_t *gateway, uint8_t *submask, uint8_t *mac){
- 800057c:	461e      	mov	r6, r3
- 800057e:	4690      	mov	r8, r2
+ 800060c:	461e      	mov	r6, r3
+ 800060e:	4690      	mov	r8, r2
 	uint8_t temp_array[10] = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
- 8000580:	9501      	str	r5, [sp, #4]
- 8000582:	9502      	str	r5, [sp, #8]
- 8000584:	f8ad 500c 	strh.w	r5, [sp, #12]
+ 8000610:	9501      	str	r5, [sp, #4]
+ 8000612:	9502      	str	r5, [sp, #8]
+ 8000614:	f8ad 500c 	strh.w	r5, [sp, #12]
 	temp_array[2] 		= (W5500_CP_BSB_CR
- 8000588:	f88d 4006 	strb.w	r4, [sp, #6]
+ 8000618:	f88d 4006 	strb.w	r4, [sp, #6]
 	SPI1SendNByte(temp_array,4);
- 800058c:	f7ff ff90 	bl	80004b0 <SPI1SendNByte>
+ 800061c:	f7ff ff48 	bl	80004b0 <SPI1SendNByte>
 	temp_array[0] 		= MSB(W5500_CRB_GAR_0);			//set address for common gateway register MSB
 	temp_array[1] 		= LSB(W5500_CRB_GAR_0);			//set address for common gateway register LSB
 	temp_array[2] 		= (W5500_CP_BSB_CR
 						| W5500_CP_WRITE
 						| W5500_CP_OM_VDLM); 			//set byte for write in to common register
 	temp_array[3] 		= gateway[0]; 					//setup gateway address byte 0
- 8000590:	f899 0000 	ldrb.w	r0, [r9]
+ 8000620:	f899 0000 	ldrb.w	r0, [r9]
 	temp_array[4] 		= gateway[1]; 					//setup gateway address byte 1
- 8000594:	f899 3001 	ldrb.w	r3, [r9, #1]
+ 8000624:	f899 3001 	ldrb.w	r3, [r9, #1]
 	temp_array[5] 		= gateway[2]; 					//setup gateway address byte 2
- 8000598:	f899 1002 	ldrb.w	r1, [r9, #2]
+ 8000628:	f899 1002 	ldrb.w	r1, [r9, #2]
 	temp_array[6] 		= gateway[3]; 					//setup gateway address byte 3
- 800059c:	f899 2003 	ldrb.w	r2, [r9, #3]
+ 800062c:	f899 2003 	ldrb.w	r2, [r9, #3]
 	temp_array[3] 		= gateway[0]; 					//setup gateway address byte 0
- 80005a0:	f88d 0007 	strb.w	r0, [sp, #7]
+ 8000630:	f88d 0007 	strb.w	r0, [sp, #7]
 	temp_array[4] 		= gateway[1]; 					//setup gateway address byte 1
- 80005a4:	f88d 3008 	strb.w	r3, [sp, #8]
+ 8000634:	f88d 3008 	strb.w	r3, [sp, #8]
 	//write thru spi communication
 	SPI1SendNByte(temp_array,7);
- 80005a8:	eb0d 0004 	add.w	r0, sp, r4
+ 8000638:	eb0d 0004 	add.w	r0, sp, r4
 	temp_array[1] 		= LSB(W5500_CRB_GAR_0);			//set address for common gateway register LSB
- 80005ac:	2301      	movs	r3, #1
+ 800063c:	2301      	movs	r3, #1
 	temp_array[5] 		= gateway[2]; 					//setup gateway address byte 2
- 80005ae:	f88d 1009 	strb.w	r1, [sp, #9]
+ 800063e:	f88d 1009 	strb.w	r1, [sp, #9]
 	SPI1SendNByte(temp_array,7);
- 80005b2:	2107      	movs	r1, #7
+ 8000642:	2107      	movs	r1, #7
 	temp_array[6] 		= gateway[3]; 					//setup gateway address byte 3
- 80005b4:	f88d 200a 	strb.w	r2, [sp, #10]
+ 8000644:	f88d 200a 	strb.w	r2, [sp, #10]
 	temp_array[1] 		= LSB(W5500_CRB_GAR_0);			//set address for common gateway register LSB
- 80005b8:	f88d 3005 	strb.w	r3, [sp, #5]
+ 8000648:	f88d 3005 	strb.w	r3, [sp, #5]
 	temp_array[0] 		= MSB(W5500_CRB_GAR_0);			//set address for common gateway register MSB
- 80005bc:	f88d 5004 	strb.w	r5, [sp, #4]
+ 800064c:	f88d 5004 	strb.w	r5, [sp, #4]
 	temp_array[2] 		= (W5500_CP_BSB_CR
- 80005c0:	f88d 4006 	strb.w	r4, [sp, #6]
+ 8000650:	f88d 4006 	strb.w	r4, [sp, #6]
 	SPI1SendNByte(temp_array,7);
- 80005c4:	f7ff ff74 	bl	80004b0 <SPI1SendNByte>
+ 8000654:	f7ff ff2c 	bl	80004b0 <SPI1SendNByte>
 	temp_array[0] 		= MSB(W5500_CRB_SUBR_0);		//set address for common subnet mask register MSB
 	temp_array[1] 		= LSB(W5500_CRB_SUBR_0);		//set address for common subnet mask register LSB
 	temp_array[2] 		= (W5500_CP_BSB_CR
 						| W5500_CP_WRITE
 						| W5500_CP_OM_VDLM); 			//set byte for write in to common register
 	temp_array[3] 		= submask[0]; 					//setup subnet mask address byte 0
- 80005c8:	f898 3000 	ldrb.w	r3, [r8]
+ 8000658:	f898 3000 	ldrb.w	r3, [r8]
 	temp_array[4] 		= submask[1]; 					//setup subnet mask address byte 1
- 80005cc:	f898 1001 	ldrb.w	r1, [r8, #1]
+ 800065c:	f898 1001 	ldrb.w	r1, [r8, #1]
 	temp_array[5] 		= submask[2]; 					//setup subnet mask address byte 2
- 80005d0:	f898 e002 	ldrb.w	lr, [r8, #2]
+ 8000660:	f898 e002 	ldrb.w	lr, [r8, #2]
 	temp_array[6] 		= submask[3]; 					//setup subnet mask address byte 3
- 80005d4:	f898 2003 	ldrb.w	r2, [r8, #3]
+ 8000664:	f898 2003 	ldrb.w	r2, [r8, #3]
 	temp_array[3] 		= submask[0]; 					//setup subnet mask address byte 0
- 80005d8:	f88d 3007 	strb.w	r3, [sp, #7]
+ 8000668:	f88d 3007 	strb.w	r3, [sp, #7]
 	//write thru spi communication
 	SPI1SendNByte(temp_array,7);
- 80005dc:	eb0d 0004 	add.w	r0, sp, r4
+ 800066c:	eb0d 0004 	add.w	r0, sp, r4
 	temp_array[1] 		= LSB(W5500_CRB_SUBR_0);		//set address for common subnet mask register LSB
- 80005e0:	2305      	movs	r3, #5
+ 8000670:	2305      	movs	r3, #5
 	temp_array[4] 		= submask[1]; 					//setup subnet mask address byte 1
- 80005e2:	f88d 1008 	strb.w	r1, [sp, #8]
+ 8000672:	f88d 1008 	strb.w	r1, [sp, #8]
 	SPI1SendNByte(temp_array,7);
- 80005e6:	2107      	movs	r1, #7
+ 8000676:	2107      	movs	r1, #7
 	temp_array[5] 		= submask[2]; 					//setup subnet mask address byte 2
- 80005e8:	f88d e009 	strb.w	lr, [sp, #9]
+ 8000678:	f88d e009 	strb.w	lr, [sp, #9]
 	temp_array[6] 		= submask[3]; 					//setup subnet mask address byte 3
- 80005ec:	f88d 200a 	strb.w	r2, [sp, #10]
+ 800067c:	f88d 200a 	strb.w	r2, [sp, #10]
 	temp_array[1] 		= LSB(W5500_CRB_SUBR_0);		//set address for common subnet mask register LSB
- 80005f0:	f88d 3005 	strb.w	r3, [sp, #5]
+ 8000680:	f88d 3005 	strb.w	r3, [sp, #5]
 	temp_array[0] 		= MSB(W5500_CRB_SUBR_0);		//set address for common subnet mask register MSB
- 80005f4:	f88d 5004 	strb.w	r5, [sp, #4]
+ 8000684:	f88d 5004 	strb.w	r5, [sp, #4]
 	temp_array[2] 		= (W5500_CP_BSB_CR
- 80005f8:	f88d 4006 	strb.w	r4, [sp, #6]
+ 8000688:	f88d 4006 	strb.w	r4, [sp, #6]
 	SPI1SendNByte(temp_array,7);
- 80005fc:	f7ff ff58 	bl	80004b0 <SPI1SendNByte>
+ 800068c:	f7ff ff10 	bl	80004b0 <SPI1SendNByte>
 
 
 	//setup hardware address register
 	temp_array[0] 		= MSB(W5500_CRB_SHAR_0);		//set address for common hardware address register MSB
 	temp_array[1] 		= LSB(W5500_CRB_SHAR_0);		//set address for common hardware address register LSB
- 8000600:	2309      	movs	r3, #9
+ 8000690:	2309      	movs	r3, #9
 	temp_array[2] 		= (W5500_CP_BSB_CR
 						| W5500_CP_WRITE
 						| W5500_CP_OM_VDLM); 			//set byte for write in to common register
 	temp_array[3] 		= mac[0]; 						//setup hardware address byte 0
- 8000602:	7832      	ldrb	r2, [r6, #0]
+ 8000692:	7832      	ldrb	r2, [r6, #0]
 	temp_array[4] 		= mac[1]; 						//setup hardware address byte 1
- 8000604:	7870      	ldrb	r0, [r6, #1]
+ 8000694:	7870      	ldrb	r0, [r6, #1]
 	temp_array[5] 		= mac[2]; 						//setup hardware address byte 2
- 8000606:	78b1      	ldrb	r1, [r6, #2]
+ 8000696:	78b1      	ldrb	r1, [r6, #2]
 	temp_array[6] 		= mac[3]; 						//setup hardware address byte 3
- 8000608:	f896 c003 	ldrb.w	ip, [r6, #3]
+ 8000698:	f896 c003 	ldrb.w	ip, [r6, #3]
 	temp_array[7] 		= mac[4]; 						//setup hardware address byte 4
- 800060c:	f896 e004 	ldrb.w	lr, [r6, #4]
+ 800069c:	f896 e004 	ldrb.w	lr, [r6, #4]
 	temp_array[3] 		= mac[0]; 						//setup hardware address byte 0
- 8000610:	f88d 2007 	strb.w	r2, [sp, #7]
+ 80006a0:	f88d 2007 	strb.w	r2, [sp, #7]
 	temp_array[4] 		= mac[1]; 						//setup hardware address byte 1
- 8000614:	f88d 0008 	strb.w	r0, [sp, #8]
+ 80006a4:	f88d 0008 	strb.w	r0, [sp, #8]
 	temp_array[8] 		= mac[5]; 						//setup hardware address byte 5
- 8000618:	7972      	ldrb	r2, [r6, #5]
+ 80006a8:	7972      	ldrb	r2, [r6, #5]
 	temp_array[5] 		= mac[2]; 						//setup hardware address byte 2
- 800061a:	f88d 1009 	strb.w	r1, [sp, #9]
+ 80006aa:	f88d 1009 	strb.w	r1, [sp, #9]
 	//write thru spi communication
 	SPI1SendNByte(temp_array,9);
- 800061e:	eb0d 0004 	add.w	r0, sp, r4
- 8000622:	4619      	mov	r1, r3
+ 80006ae:	eb0d 0004 	add.w	r0, sp, r4
+ 80006b2:	4619      	mov	r1, r3
 	temp_array[6] 		= mac[3]; 						//setup hardware address byte 3
- 8000624:	f88d c00a 	strb.w	ip, [sp, #10]
+ 80006b4:	f88d c00a 	strb.w	ip, [sp, #10]
 	temp_array[7] 		= mac[4]; 						//setup hardware address byte 4
- 8000628:	f88d e00b 	strb.w	lr, [sp, #11]
+ 80006b8:	f88d e00b 	strb.w	lr, [sp, #11]
 	temp_array[8] 		= mac[5]; 						//setup hardware address byte 5
- 800062c:	f88d 200c 	strb.w	r2, [sp, #12]
+ 80006bc:	f88d 200c 	strb.w	r2, [sp, #12]
 	temp_array[1] 		= LSB(W5500_CRB_SHAR_0);		//set address for common hardware address register LSB
- 8000630:	f88d 3005 	strb.w	r3, [sp, #5]
+ 80006c0:	f88d 3005 	strb.w	r3, [sp, #5]
 	temp_array[0] 		= MSB(W5500_CRB_SHAR_0);		//set address for common hardware address register MSB
- 8000634:	f88d 5004 	strb.w	r5, [sp, #4]
+ 80006c4:	f88d 5004 	strb.w	r5, [sp, #4]
 	temp_array[2] 		= (W5500_CP_BSB_CR
- 8000638:	f88d 4006 	strb.w	r4, [sp, #6]
+ 80006c8:	f88d 4006 	strb.w	r4, [sp, #6]
 	SPI1SendNByte(temp_array,9);
- 800063c:	f7ff ff38 	bl	80004b0 <SPI1SendNByte>
+ 80006cc:	f7ff fef0 	bl	80004b0 <SPI1SendNByte>
 	temp_array[0] 		= MSB(W5500_CRB_SIPR_0);		//set address for source IP register MSB
 	temp_array[1] 		= LSB(W5500_CRB_SIPR_0);		//set address for source IP register LSB
 	temp_array[2] 		= (W5500_CP_BSB_CR
 						| W5500_CP_WRITE
 						| W5500_CP_OM_VDLM); 			//set byte for write in to common register
 	temp_array[3] 		= ip[0]; 						//setup source IP address byte 0
- 8000640:	f897 c000 	ldrb.w	ip, [r7]
+ 80006d0:	f897 c000 	ldrb.w	ip, [r7]
 	temp_array[4] 		= ip[1]; 						//setup source IP address byte 1
- 8000644:	f897 e001 	ldrb.w	lr, [r7, #1]
+ 80006d4:	f897 e001 	ldrb.w	lr, [r7, #1]
 	temp_array[5] 		= ip[2]; 						//setup source IP address byte 2
 	temp_array[6] 		= ip[3]; 						//setup source IP address byte 3
- 8000648:	78fa      	ldrb	r2, [r7, #3]
+ 80006d8:	78fa      	ldrb	r2, [r7, #3]
 	temp_array[5] 		= ip[2]; 						//setup source IP address byte 2
- 800064a:	78be      	ldrb	r6, [r7, #2]
+ 80006da:	78be      	ldrb	r6, [r7, #2]
 	temp_array[3] 		= ip[0]; 						//setup source IP address byte 0
- 800064c:	f88d c007 	strb.w	ip, [sp, #7]
+ 80006dc:	f88d c007 	strb.w	ip, [sp, #7]
 	//write thru spi communication
 	SPI1SendNByte(temp_array,7);
- 8000650:	eb0d 0004 	add.w	r0, sp, r4
+ 80006e0:	eb0d 0004 	add.w	r0, sp, r4
 	temp_array[1] 		= LSB(W5500_CRB_SIPR_0);		//set address for source IP register LSB
- 8000654:	230f      	movs	r3, #15
+ 80006e4:	230f      	movs	r3, #15
 	SPI1SendNByte(temp_array,7);
- 8000656:	2107      	movs	r1, #7
+ 80006e6:	2107      	movs	r1, #7
 	temp_array[4] 		= ip[1]; 						//setup source IP address byte 1
- 8000658:	f88d e008 	strb.w	lr, [sp, #8]
+ 80006e8:	f88d e008 	strb.w	lr, [sp, #8]
 	temp_array[6] 		= ip[3]; 						//setup source IP address byte 3
- 800065c:	f88d 200a 	strb.w	r2, [sp, #10]
+ 80006ec:	f88d 200a 	strb.w	r2, [sp, #10]
 	temp_array[1] 		= LSB(W5500_CRB_SIPR_0);		//set address for source IP register LSB
- 8000660:	f88d 3005 	strb.w	r3, [sp, #5]
+ 80006f0:	f88d 3005 	strb.w	r3, [sp, #5]
 	temp_array[0] 		= MSB(W5500_CRB_SIPR_0);		//set address for source IP register MSB
- 8000664:	f88d 5004 	strb.w	r5, [sp, #4]
+ 80006f4:	f88d 5004 	strb.w	r5, [sp, #4]
 	temp_array[2] 		= (W5500_CP_BSB_CR
- 8000668:	f88d 4006 	strb.w	r4, [sp, #6]
+ 80006f8:	f88d 4006 	strb.w	r4, [sp, #6]
 	temp_array[5] 		= ip[2]; 						//setup source IP address byte 2
- 800066c:	f88d 6009 	strb.w	r6, [sp, #9]
+ 80006fc:	f88d 6009 	strb.w	r6, [sp, #9]
 	SPI1SendNByte(temp_array,7);
- 8000670:	f7ff ff1e 	bl	80004b0 <SPI1SendNByte>
+ 8000700:	f7ff fed6 	bl	80004b0 <SPI1SendNByte>
 
 
 	//setup PHY configuration register
 	temp_array[0] 	= MSB(W5500_CRB_PHYCFGR);
- 8000674:	4b04      	ldr	r3, [pc, #16]	; (8000688 <W5500InitV2+0x120>)
- 8000676:	9301      	str	r3, [sp, #4]
+ 8000704:	4b04      	ldr	r3, [pc, #16]	; (8000718 <W5500InitV2+0x120>)
+ 8000706:	9301      	str	r3, [sp, #4]
 					| W5500_CP_OM_VDLM); 				//write in to common register
 	temp_array[3] 	= (W5500_CRB_PHYCFGR_RST
 					| W5500_CRB_PHYCFGR_OPMD
 					| W5500_CRB_PHYCFGR_OPMDC_100FD); 	//100BT full-duplex auto negotiation disable
 	//write thru spi communication
 	SPI1SendNByte(temp_array,4);
- 8000678:	4621      	mov	r1, r4
- 800067a:	eb0d 0004 	add.w	r0, sp, r4
- 800067e:	f7ff ff17 	bl	80004b0 <SPI1SendNByte>
+ 8000708:	4621      	mov	r1, r4
+ 800070a:	eb0d 0004 	add.w	r0, sp, r4
+ 800070e:	f7ff fecf 	bl	80004b0 <SPI1SendNByte>
 
 
 }
- 8000682:	b005      	add	sp, #20
- 8000684:	e8bd 83f0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, r9, pc}
- 8000688:	d8042e00 	.word	0xd8042e00
+ 8000712:	b005      	add	sp, #20
+ 8000714:	e8bd 83f0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, r9, pc}
+ 8000718:	d8042e00 	.word	0xd8042e00
 
-0800068c <W5500InitTCP>:
+0800071c <W5500InitTCP>:
 //Input parameters:
 //Socket number 	<socket_no> 	(0,1,2,3,4,5,6,7)
 //Port number 		<port>			for example 1000
 //TX buffer size 	<TX_buff_size> 	(0,1,2,4,8,16)
 //RX buffer size 	<RX_buff_size> 	(0,1,2,4,8,16)
 uint8_t W5500InitTCP(uint8_t socket_no, uint16_t port, uint8_t TX_buff_size, uint8_t RX_buff_size){
- 800068c:	e92d 4ff0 	stmdb	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, lr}
- 8000690:	b085      	sub	sp, #20
+ 800071c:	e92d 4ff0 	stmdb	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, lr}
+ 8000720:	b085      	sub	sp, #20
 
 	//temporary register, necessary to initialize to initial state
 	uint8_t temp_array[10] = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
- 8000692:	2400      	movs	r4, #0
- 8000694:	9402      	str	r4, [sp, #8]
- 8000696:	9401      	str	r4, [sp, #4]
- 8000698:	f8ad 400c 	strh.w	r4, [sp, #12]
+ 8000722:	2400      	movs	r4, #0
+ 8000724:	9402      	str	r4, [sp, #8]
+ 8000726:	9401      	str	r4, [sp, #4]
+ 8000728:	f8ad 400c 	strh.w	r4, [sp, #12]
 	//socket select register which select proper offset address allocation
 	uint8_t socket_sel_register;
 
 	switch(socket_no){
- 800069c:	2807      	cmp	r0, #7
- 800069e:	d863      	bhi.n	8000768 <W5500InitTCP+0xdc>
- 80006a0:	e8df f000 	tbb	[pc, r0]
- 80006a4:	504d045f 	.word	0x504d045f
- 80006a8:	5c595653 	.word	0x5c595653
- 80006ac:	f04f 082c 	mov.w	r8, #44	; 0x2c
+ 800072c:	2807      	cmp	r0, #7
+ 800072e:	d863      	bhi.n	80007f8 <W5500InitTCP+0xdc>
+ 8000730:	e8df f000 	tbb	[pc, r0]
+ 8000734:	504d045f 	.word	0x504d045f
+ 8000738:	5c595653 	.word	0x5c595653
+ 800073c:	f04f 082c 	mov.w	r8, #44	; 0x2c
 	temp_array[0] 	= MSB(W5500_CRB_SIMR);
 	temp_array[1] 	= LSB(W5500_CRB_SIMR);
 	temp_array[2] 	= (W5500_CP_BSB_CR
 					| W5500_CP_WRITE
 					| W5500_CP_OM_VDLM); 				//write in to common register
 	temp_array[3] 	= (1 << socket_no); 				//Enable socket n mask interrupt register
- 80006b0:	f04f 0b01 	mov.w	fp, #1
+ 8000740:	f04f 0b01 	mov.w	fp, #1
 	temp_array[2] 	= (W5500_CP_BSB_CR
- 80006b4:	2604      	movs	r6, #4
+ 8000744:	2604      	movs	r6, #4
 	temp_array[3] 	= (1 << socket_no); 				//Enable socket n mask interrupt register
- 80006b6:	fa0b f000 	lsl.w	r0, fp, r0
- 80006ba:	460d      	mov	r5, r1
- 80006bc:	4699      	mov	r9, r3
+ 8000746:	fa0b f000 	lsl.w	r0, fp, r0
+ 800074a:	460d      	mov	r5, r1
+ 800074c:	4699      	mov	r9, r3
 	//write thru spi communication
 	SPI1SendNByte(temp_array,4);
- 80006be:	4631      	mov	r1, r6
+ 800074e:	4631      	mov	r1, r6
 	temp_array[1] 	= LSB(W5500_CRB_SIMR);
- 80006c0:	2318      	movs	r3, #24
+ 8000750:	2318      	movs	r3, #24
 	temp_array[3] 	= (1 << socket_no); 				//Enable socket n mask interrupt register
- 80006c2:	f88d 0007 	strb.w	r0, [sp, #7]
+ 8000752:	f88d 0007 	strb.w	r0, [sp, #7]
 	SPI1SendNByte(temp_array,4);
- 80006c6:	eb0d 0006 	add.w	r0, sp, r6
- 80006ca:	4617      	mov	r7, r2
+ 8000756:	eb0d 0006 	add.w	r0, sp, r6
+ 800075a:	4617      	mov	r7, r2
 	temp_array[1] 	= LSB(W5500_CRB_SIMR);
- 80006cc:	f88d 3005 	strb.w	r3, [sp, #5]
+ 800075c:	f88d 3005 	strb.w	r3, [sp, #5]
 
 
 	//setup Socket n RX and TX memory allocation
 	temp_array[0] 	= MSB(W5500_SR_RXBUF_SIZE);
- 80006d0:	2400      	movs	r4, #0
+ 8000760:	2400      	movs	r4, #0
 	temp_array[1] 	= LSB(W5500_SR_RXBUF_SIZE);
- 80006d2:	f04f 0a1e 	mov.w	sl, #30
+ 8000762:	f04f 0a1e 	mov.w	sl, #30
 	temp_array[2] 	= (W5500_CP_BSB_CR
- 80006d6:	f88d 6006 	strb.w	r6, [sp, #6]
+ 8000766:	f88d 6006 	strb.w	r6, [sp, #6]
 	SPI1SendNByte(temp_array,4);
- 80006da:	f7ff fee9 	bl	80004b0 <SPI1SendNByte>
+ 800076a:	f7ff fea1 	bl	80004b0 <SPI1SendNByte>
 					| W5500_CP_WRITE
 					| W5500_CP_OM_VDLM); 				//write in to socket n configuration register
 	temp_array[3] 	= RX_buff_size; 					//Define RX buffer size
 	temp_array[4] 	= TX_buff_size; 					//Define TX buffer size at address (RX buffer size register) + 1 = 0x001f
 	//write thru spi communication
 	SPI1SendNByte(temp_array,5);
- 80006de:	2105      	movs	r1, #5
- 80006e0:	eb0d 0006 	add.w	r0, sp, r6
+ 800076e:	2105      	movs	r1, #5
+ 8000770:	eb0d 0006 	add.w	r0, sp, r6
 	temp_array[2] 	= (socket_sel_register          	//Select socket n
- 80006e4:	f88d 8006 	strb.w	r8, [sp, #6]
+ 8000774:	f88d 8006 	strb.w	r8, [sp, #6]
 	temp_array[3] 	= RX_buff_size; 					//Define RX buffer size
- 80006e8:	f88d 9007 	strb.w	r9, [sp, #7]
+ 8000778:	f88d 9007 	strb.w	r9, [sp, #7]
 	temp_array[4] 	= TX_buff_size; 					//Define TX buffer size at address (RX buffer size register) + 1 = 0x001f
- 80006ec:	f88d 7008 	strb.w	r7, [sp, #8]
+ 800077c:	f88d 7008 	strb.w	r7, [sp, #8]
 	temp_array[0] 	= MSB(W5500_SR_RXBUF_SIZE);
- 80006f0:	f88d 4004 	strb.w	r4, [sp, #4]
+ 8000780:	f88d 4004 	strb.w	r4, [sp, #4]
 	temp_array[1] 	= LSB(W5500_SR_RXBUF_SIZE);
- 80006f4:	f88d a005 	strb.w	sl, [sp, #5]
+ 8000784:	f88d a005 	strb.w	sl, [sp, #5]
 	SPI1SendNByte(temp_array,5);
- 80006f8:	f7ff feda 	bl	80004b0 <SPI1SendNByte>
+ 8000788:	f7ff fe92 	bl	80004b0 <SPI1SendNByte>
 	temp_array[2] 	= (socket_sel_register          	//Select socket n
 					| W5500_CP_WRITE
 					| W5500_CP_OM_VDLM); 				//write in to socket n configuration register
 	temp_array[3] 	= W5500_SR_MR_TCP; 					//Configure socket n as TCP protocol
 	//write thru spi communication
 	SPI1SendNByte(temp_array,4);
- 80006fc:	4631      	mov	r1, r6
- 80006fe:	eb0d 0006 	add.w	r0, sp, r6
+ 800078c:	4631      	mov	r1, r6
+ 800078e:	eb0d 0006 	add.w	r0, sp, r6
 	temp_array[3] 	= W5500_SR_MR_TCP; 					//Configure socket n as TCP protocol
- 8000702:	f88d b007 	strb.w	fp, [sp, #7]
+ 8000792:	f88d b007 	strb.w	fp, [sp, #7]
 	temp_array[0] 	= MSB(W5500_SR_RXBUF_SIZE);
- 8000706:	f88d 4004 	strb.w	r4, [sp, #4]
+ 8000796:	f88d 4004 	strb.w	r4, [sp, #4]
 	temp_array[1] 	= LSB(W5500_SR_RXBUF_SIZE);
- 800070a:	f88d a005 	strb.w	sl, [sp, #5]
+ 800079a:	f88d a005 	strb.w	sl, [sp, #5]
 	temp_array[2] 	= (socket_sel_register          	//Select socket n
- 800070e:	f88d 8006 	strb.w	r8, [sp, #6]
+ 800079e:	f88d 8006 	strb.w	r8, [sp, #6]
 	SPI1SendNByte(temp_array,4);
- 8000712:	f7ff fecd 	bl	80004b0 <SPI1SendNByte>
+ 80007a2:	f7ff fe85 	bl	80004b0 <SPI1SendNByte>
 					| W5500_CP_WRITE
 					| W5500_CP_OM_VDLM); 				//write in to socket n configuration register
 	temp_array[3] 	= MSB(port);						//Configure MSB byte of port register
 	temp_array[4] 	= LSB(port); 						//Configure LSB byte of port register
 	//write thru spi communication
 	SPI1SendNByte(temp_array,5);
- 8000716:	eb0d 0006 	add.w	r0, sp, r6
+ 80007a6:	eb0d 0006 	add.w	r0, sp, r6
 	temp_array[3] 	= MSB(port);						//Configure MSB byte of port register
- 800071a:	0a2b      	lsrs	r3, r5, #8
+ 80007aa:	0a2b      	lsrs	r3, r5, #8
 	SPI1SendNByte(temp_array,5);
- 800071c:	2105      	movs	r1, #5
+ 80007ac:	2105      	movs	r1, #5
 	temp_array[0] 	= MSB(W5500_SR_PORT_0);
- 800071e:	f88d 4004 	strb.w	r4, [sp, #4]
+ 80007ae:	f88d 4004 	strb.w	r4, [sp, #4]
 	temp_array[1] 	= LSB(W5500_SR_PORT_0);
- 8000722:	f88d 6005 	strb.w	r6, [sp, #5]
+ 80007b2:	f88d 6005 	strb.w	r6, [sp, #5]
 	temp_array[2] 	= (socket_sel_register          	//Select socket n
- 8000726:	f88d 8006 	strb.w	r8, [sp, #6]
+ 80007b6:	f88d 8006 	strb.w	r8, [sp, #6]
 	temp_array[4] 	= LSB(port); 						//Configure LSB byte of port register
- 800072a:	f88d 5008 	strb.w	r5, [sp, #8]
+ 80007ba:	f88d 5008 	strb.w	r5, [sp, #8]
 	temp_array[3] 	= MSB(port);						//Configure MSB byte of port register
- 800072e:	f88d 3007 	strb.w	r3, [sp, #7]
+ 80007be:	f88d 3007 	strb.w	r3, [sp, #7]
 	SPI1SendNByte(temp_array,5);
- 8000732:	f7ff febd 	bl	80004b0 <SPI1SendNByte>
+ 80007c2:	f7ff fe75 	bl	80004b0 <SPI1SendNByte>
 
 	return 0;
- 8000736:	4620      	mov	r0, r4
+ 80007c6:	4620      	mov	r0, r4
 
 }
- 8000738:	b005      	add	sp, #20
- 800073a:	e8bd 8ff0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, pc}
+ 80007c8:	b005      	add	sp, #20
+ 80007ca:	e8bd 8ff0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, pc}
 		break;
- 800073e:	f04f 084c 	mov.w	r8, #76	; 0x4c
- 8000742:	e7b5      	b.n	80006b0 <W5500InitTCP+0x24>
+ 80007ce:	f04f 084c 	mov.w	r8, #76	; 0x4c
+ 80007d2:	e7b5      	b.n	8000740 <W5500InitTCP+0x24>
 		break;
- 8000744:	f04f 086c 	mov.w	r8, #108	; 0x6c
- 8000748:	e7b2      	b.n	80006b0 <W5500InitTCP+0x24>
+ 80007d4:	f04f 086c 	mov.w	r8, #108	; 0x6c
+ 80007d8:	e7b2      	b.n	8000740 <W5500InitTCP+0x24>
 		break;
- 800074a:	f04f 088c 	mov.w	r8, #140	; 0x8c
- 800074e:	e7af      	b.n	80006b0 <W5500InitTCP+0x24>
+ 80007da:	f04f 088c 	mov.w	r8, #140	; 0x8c
+ 80007de:	e7af      	b.n	8000740 <W5500InitTCP+0x24>
 		break;
- 8000750:	f04f 08ac 	mov.w	r8, #172	; 0xac
- 8000754:	e7ac      	b.n	80006b0 <W5500InitTCP+0x24>
+ 80007e0:	f04f 08ac 	mov.w	r8, #172	; 0xac
+ 80007e4:	e7ac      	b.n	8000740 <W5500InitTCP+0x24>
 		break;
- 8000756:	f04f 08cc 	mov.w	r8, #204	; 0xcc
- 800075a:	e7a9      	b.n	80006b0 <W5500InitTCP+0x24>
+ 80007e6:	f04f 08cc 	mov.w	r8, #204	; 0xcc
+ 80007ea:	e7a9      	b.n	8000740 <W5500InitTCP+0x24>
 		break;
- 800075c:	f04f 08ec 	mov.w	r8, #236	; 0xec
- 8000760:	e7a6      	b.n	80006b0 <W5500InitTCP+0x24>
+ 80007ec:	f04f 08ec 	mov.w	r8, #236	; 0xec
+ 80007f0:	e7a6      	b.n	8000740 <W5500InitTCP+0x24>
 	switch(socket_no){
- 8000762:	f04f 080c 	mov.w	r8, #12
- 8000766:	e7a3      	b.n	80006b0 <W5500InitTCP+0x24>
+ 80007f2:	f04f 080c 	mov.w	r8, #12
+ 80007f6:	e7a3      	b.n	8000740 <W5500InitTCP+0x24>
 		return 1; 										//error
- 8000768:	2001      	movs	r0, #1
- 800076a:	e7e5      	b.n	8000738 <W5500InitTCP+0xac>
+ 80007f8:	2001      	movs	r0, #1
+ 80007fa:	e7e5      	b.n	80007c8 <W5500InitTCP+0xac>
 
-0800076c <main>:
+080007fc <main>:
 void EXTI3_IRQHandler(void); 		//Initialization of handler for external interrupt on line 3
 
 //
 //MAIN
 //
 int main(void){
- 800076c:	b530      	push	{r4, r5, lr}
+ 80007fc:	b530      	push	{r4, r5, lr}
 
   uint32_t ret_code_from_sysTick; 	//return code from SysTick_Config function 1 for error see core_cm4.h
   uint8_t error_hand;
 
   uint8_t ip[4] 	= {192,168,1,100}; 					//dedicated ip address for external W5500 device
- 800076e:	4b1b      	ldr	r3, [pc, #108]	; (80007dc <main+0x70>)
+ 80007fe:	4b1d      	ldr	r3, [pc, #116]	; (8000874 <main+0x78>)
   uint8_t gateway[4]= {192,168,1,1}; 					//gateway
   uint8_t submask[4]= {255,255,255,0}; 					//subnet mask
   uint8_t mac[6]	= {0x00,0x08,0xdc,0x01,0x02,0x03}; 	//dedicated mac address
- 8000770:	f103 020c 	add.w	r2, r3, #12
- 8000774:	e892 0003 	ldmia.w	r2, {r0, r1}
+ 8000800:	f103 020c 	add.w	r2, r3, #12
+ 8000804:	e892 0003 	ldmia.w	r2, {r0, r1}
 int main(void){
- 8000778:	b087      	sub	sp, #28
+ 8000808:	b087      	sub	sp, #28
   uint8_t gateway[4]= {192,168,1,1}; 					//gateway
- 800077a:	685a      	ldr	r2, [r3, #4]
+ 800080a:	685a      	ldr	r2, [r3, #4]
   uint8_t ip[4] 	= {192,168,1,100}; 					//dedicated ip address for external W5500 device
- 800077c:	681c      	ldr	r4, [r3, #0]
+ 800080c:	681c      	ldr	r4, [r3, #0]
   uint8_t submask[4]= {255,255,255,0}; 					//subnet mask
- 800077e:	689b      	ldr	r3, [r3, #8]
+ 800080e:	689b      	ldr	r3, [r3, #8]
   uint8_t mac[6]	= {0x00,0x08,0xdc,0x01,0x02,0x03}; 	//dedicated mac address
- 8000780:	9004      	str	r0, [sp, #16]
- 8000782:	f8ad 1014 	strh.w	r1, [sp, #20]
+ 8000810:	9004      	str	r0, [sp, #16]
+ 8000812:	f8ad 1014 	strh.w	r1, [sp, #20]
   uint8_t gateway[4]= {192,168,1,1}; 					//gateway
- 8000786:	9202      	str	r2, [sp, #8]
+ 8000816:	9202      	str	r2, [sp, #8]
   uint8_t submask[4]= {255,255,255,0}; 					//subnet mask
- 8000788:	9303      	str	r3, [sp, #12]
+ 8000818:	9303      	str	r3, [sp, #12]
   uint8_t ip[4] 	= {192,168,1,100}; 					//dedicated ip address for external W5500 device
- 800078a:	9401      	str	r4, [sp, #4]
-
+ 800081a:	9401      	str	r4, [sp, #4]
 
 
   //Init GPIOA
   InitGPIO();
- 800078c:	f7ff fd1c 	bl	80001c8 <InitGPIO>
+ 800081c:	f7ff fcd4 	bl	80001c8 <InitGPIO>
   //Init SPI3
   SPI3Init();
- 8000790:	f7ff feb0 	bl	80004f4 <SPI3Init>
+ 8000820:	f7ff fe9c 	bl	800055c <SPI3Init>
   //Init SPI1
   SPI1Init();
- 8000794:	f7ff fe4c 	bl	8000430 <SPI1Init>
+ 8000824:	f7ff fe04 	bl	8000430 <SPI1Init>
   //W5500 initialize
   //W5500Init();
-  W5500InitV2(ip, gateway, submask, mac);
- 8000798:	ab04      	add	r3, sp, #16
- 800079a:	aa03      	add	r2, sp, #12
- 800079c:	a902      	add	r1, sp, #8
- 800079e:	a801      	add	r0, sp, #4
- 80007a0:	f7ff fee2 	bl	8000568 <W5500InitV2>
-  //Initialize socket n for TCP protocol
-  error_hand = W5500InitTCP(0,1024,2,2);
- 80007a4:	2302      	movs	r3, #2
- 80007a6:	461a      	mov	r2, r3
- 80007a8:	f44f 6180 	mov.w	r1, #1024	; 0x400
- 80007ac:	2000      	movs	r0, #0
- 80007ae:	f7ff ff6d 	bl	800068c <W5500InitTCP>
-
-  //error was occurred
-  if(error_hand !=0)return 0;
- 80007b2:	b980      	cbnz	r0, 80007d6 <main+0x6a>
-
-  //Configure system ticks to us range
-  ret_code_from_sysTick = SysTick_Config(SystemCoreClock / 1000000);
- 80007b4:	4b0a      	ldr	r3, [pc, #40]	; (80007e0 <main+0x74>)
- 80007b6:	490b      	ldr	r1, [pc, #44]	; (80007e4 <main+0x78>)
- 80007b8:	681b      	ldr	r3, [r3, #0]
- */
-__STATIC_INLINE uint32_t SysTick_Config(uint32_t ticks)
-{
-  if (ticks > SysTick_LOAD_RELOAD_Msk)  return (1);            /* Reload value impossible */
-
-  SysTick->LOAD  = (ticks & SysTick_LOAD_RELOAD_Msk) - 1;      /* set reload register */
- 80007ba:	4a0b      	ldr	r2, [pc, #44]	; (80007e8 <main+0x7c>)
-    SCB->SHP[((uint32_t)(IRQn) & 0xF)-4] = ((priority << (8 - __NVIC_PRIO_BITS)) & 0xff); } /* set Priority for Cortex-M  System Interrupts */
- 80007bc:	4c0b      	ldr	r4, [pc, #44]	; (80007ec <main+0x80>)
- 80007be:	fba1 1303 	umull	r1, r3, r1, r3
- 80007c2:	0c9b      	lsrs	r3, r3, #18
-  SysTick->LOAD  = (ticks & SysTick_LOAD_RELOAD_Msk) - 1;      /* set reload register */
- 80007c4:	3b01      	subs	r3, #1
-    SCB->SHP[((uint32_t)(IRQn) & 0xF)-4] = ((priority << (8 - __NVIC_PRIO_BITS)) & 0xff); } /* set Priority for Cortex-M  System Interrupts */
- 80007c6:	25f0      	movs	r5, #240	; 0xf0
-  NVIC_SetPriority (SysTick_IRQn, (1<<__NVIC_PRIO_BITS) - 1);  /* set Priority for Systick Interrupt */
-  SysTick->VAL   = 0;                                          /* Load the SysTick Counter Value */
-  SysTick->CTRL  = SysTick_CTRL_CLKSOURCE_Msk |
- 80007c8:	2107      	movs	r1, #7
-  SysTick->LOAD  = (ticks & SysTick_LOAD_RELOAD_Msk) - 1;      /* set reload register */
- 80007ca:	6053      	str	r3, [r2, #4]
-    SCB->SHP[((uint32_t)(IRQn) & 0xF)-4] = ((priority << (8 - __NVIC_PRIO_BITS)) & 0xff); } /* set Priority for Cortex-M  System Interrupts */
- 80007cc:	f884 5023 	strb.w	r5, [r4, #35]	; 0x23
-  SysTick->VAL   = 0;                                          /* Load the SysTick Counter Value */
- 80007d0:	6090      	str	r0, [r2, #8]
-  SysTick->CTRL  = SysTick_CTRL_CLKSOURCE_Msk |
- 80007d2:	6011      	str	r1, [r2, #0]
- 80007d4:	e7fe      	b.n	80007d4 <main+0x68>
+  if(W5500SpiConnCheck() == 0){
+ 8000828:	f7ff fed2 	bl	80005d0 <W5500SpiConnCheck>
+ 800082c:	b110      	cbz	r0, 8000834 <main+0x38>
 	  //Enable SPI3
 	  //SPI3 -> CR1 	|= SPI_CR1_SPE;
 	  //Disable SPI3
 	  //SPI3 -> CR1 	&= ~(SPI_CR1_SPE);
   }
 }
- 80007d6:	2000      	movs	r0, #0
- 80007d8:	b007      	add	sp, #28
- 80007da:	bd30      	pop	{r4, r5, pc}
- 80007dc:	08000a38 	.word	0x08000a38
- 80007e0:	20000000 	.word	0x20000000
- 80007e4:	431bde83 	.word	0x431bde83
- 80007e8:	e000e010 	.word	0xe000e010
- 80007ec:	e000ed00 	.word	0xe000ed00
+ 800082e:	2000      	movs	r0, #0
+ 8000830:	b007      	add	sp, #28
+ 8000832:	bd30      	pop	{r4, r5, pc}
+ 8000834:	4604      	mov	r4, r0
+  W5500InitV2(ip, gateway, submask, mac);
+ 8000836:	ab04      	add	r3, sp, #16
+ 8000838:	aa03      	add	r2, sp, #12
+ 800083a:	a902      	add	r1, sp, #8
+ 800083c:	a801      	add	r0, sp, #4
+ 800083e:	f7ff fedb 	bl	80005f8 <W5500InitV2>
+  error_hand = W5500InitTCP(0,1024,2,2);
+ 8000842:	2302      	movs	r3, #2
+ 8000844:	4620      	mov	r0, r4
+ 8000846:	461a      	mov	r2, r3
+ 8000848:	f44f 6180 	mov.w	r1, #1024	; 0x400
+ 800084c:	f7ff ff66 	bl	800071c <W5500InitTCP>
+  if(error_hand !=0)return 0;
+ 8000850:	2800      	cmp	r0, #0
+ 8000852:	d1ec      	bne.n	800082e <main+0x32>
+  ret_code_from_sysTick = SysTick_Config(SystemCoreClock / 1000000);
+ 8000854:	4b08      	ldr	r3, [pc, #32]	; (8000878 <main+0x7c>)
+ */
+__STATIC_INLINE uint32_t SysTick_Config(uint32_t ticks)
+{
+  if (ticks > SysTick_LOAD_RELOAD_Msk)  return (1);            /* Reload value impossible */
 
-080007f0 <EXTI3_IRQHandler>:
+  SysTick->LOAD  = (ticks & SysTick_LOAD_RELOAD_Msk) - 1;      /* set reload register */
+ 8000856:	4a09      	ldr	r2, [pc, #36]	; (800087c <main+0x80>)
+    SCB->SHP[((uint32_t)(IRQn) & 0xF)-4] = ((priority << (8 - __NVIC_PRIO_BITS)) & 0xff); } /* set Priority for Cortex-M  System Interrupts */
+ 8000858:	4c09      	ldr	r4, [pc, #36]	; (8000880 <main+0x84>)
+ 800085a:	681b      	ldr	r3, [r3, #0]
+ 800085c:	4909      	ldr	r1, [pc, #36]	; (8000884 <main+0x88>)
+ 800085e:	fbb3 f3f1 	udiv	r3, r3, r1
+ 8000862:	25f0      	movs	r5, #240	; 0xf0
+  SysTick->LOAD  = (ticks & SysTick_LOAD_RELOAD_Msk) - 1;      /* set reload register */
+ 8000864:	3b01      	subs	r3, #1
+  NVIC_SetPriority (SysTick_IRQn, (1<<__NVIC_PRIO_BITS) - 1);  /* set Priority for Systick Interrupt */
+  SysTick->VAL   = 0;                                          /* Load the SysTick Counter Value */
+  SysTick->CTRL  = SysTick_CTRL_CLKSOURCE_Msk |
+ 8000866:	2107      	movs	r1, #7
+  SysTick->LOAD  = (ticks & SysTick_LOAD_RELOAD_Msk) - 1;      /* set reload register */
+ 8000868:	6053      	str	r3, [r2, #4]
+    SCB->SHP[((uint32_t)(IRQn) & 0xF)-4] = ((priority << (8 - __NVIC_PRIO_BITS)) & 0xff); } /* set Priority for Cortex-M  System Interrupts */
+ 800086a:	f884 5023 	strb.w	r5, [r4, #35]	; 0x23
+  SysTick->VAL   = 0;                                          /* Load the SysTick Counter Value */
+ 800086e:	6090      	str	r0, [r2, #8]
+  SysTick->CTRL  = SysTick_CTRL_CLKSOURCE_Msk |
+ 8000870:	6011      	str	r1, [r2, #0]
+ 8000872:	e7fe      	b.n	8000872 <main+0x76>
+ 8000874:	08000ad0 	.word	0x08000ad0
+ 8000878:	20000000 	.word	0x20000000
+ 800087c:	e000e010 	.word	0xe000e010
+ 8000880:	e000ed00 	.word	0xe000ed00
+ 8000884:	000f4240 	.word	0x000f4240
+
+08000888 <EXTI3_IRQHandler>:
 
 //External interrupt handler on line 3
 void EXTI3_IRQHandler(void){
 	if((EXTI -> PR & EXTI_PR_PR3) != 0){
- 80007f0:	4b0a      	ldr	r3, [pc, #40]	; (800081c <EXTI3_IRQHandler+0x2c>)
- 80007f2:	695b      	ldr	r3, [r3, #20]
- 80007f4:	071b      	lsls	r3, r3, #28
- 80007f6:	d50f      	bpl.n	8000818 <EXTI3_IRQHandler+0x28>
+ 8000888:	4b0a      	ldr	r3, [pc, #40]	; (80008b4 <EXTI3_IRQHandler+0x2c>)
+ 800088a:	695b      	ldr	r3, [r3, #20]
+ 800088c:	071b      	lsls	r3, r3, #28
+ 800088e:	d50f      	bpl.n	80008b0 <EXTI3_IRQHandler+0x28>
 		if((GPIOD -> ODR & GPIO_ODR_ODR_13) != 0){
- 80007f8:	4b09      	ldr	r3, [pc, #36]	; (8000820 <EXTI3_IRQHandler+0x30>)
- 80007fa:	695a      	ldr	r2, [r3, #20]
- 80007fc:	f412 5f00 	tst.w	r2, #8192	; 0x2000
+ 8000890:	4b09      	ldr	r3, [pc, #36]	; (80008b8 <EXTI3_IRQHandler+0x30>)
+ 8000892:	695a      	ldr	r2, [r3, #20]
+ 8000894:	f412 5f00 	tst.w	r2, #8192	; 0x2000
 
 			GPIOD -> ODR	&= ~(GPIO_ODR_ODR_13); 	//LED3 off
- 8000800:	695a      	ldr	r2, [r3, #20]
- 8000802:	bf14      	ite	ne
- 8000804:	f422 5200 	bicne.w	r2, r2, #8192	; 0x2000
+ 8000898:	695a      	ldr	r2, [r3, #20]
+ 800089a:	bf14      	ite	ne
+ 800089c:	f422 5200 	bicne.w	r2, r2, #8192	; 0x2000
 		}else{
 
 			GPIOD -> ODR	|= GPIO_ODR_ODR_13; 	//LED3 on
- 8000808:	f442 5200 	orreq.w	r2, r2, #8192	; 0x2000
- 800080c:	615a      	str	r2, [r3, #20]
+ 80008a0:	f442 5200 	orreq.w	r2, r2, #8192	; 0x2000
+ 80008a4:	615a      	str	r2, [r3, #20]
 		}
 		EXTI -> PR |= EXTI_PR_PR3; 	//Clear flag this is necessary
- 800080e:	4a03      	ldr	r2, [pc, #12]	; (800081c <EXTI3_IRQHandler+0x2c>)
- 8000810:	6953      	ldr	r3, [r2, #20]
- 8000812:	f043 0308 	orr.w	r3, r3, #8
- 8000816:	6153      	str	r3, [r2, #20]
- 8000818:	4770      	bx	lr
- 800081a:	bf00      	nop
- 800081c:	40013c00 	.word	0x40013c00
- 8000820:	40020c00 	.word	0x40020c00
+ 80008a6:	4a03      	ldr	r2, [pc, #12]	; (80008b4 <EXTI3_IRQHandler+0x2c>)
+ 80008a8:	6953      	ldr	r3, [r2, #20]
+ 80008aa:	f043 0308 	orr.w	r3, r3, #8
+ 80008ae:	6153      	str	r3, [r2, #20]
+ 80008b0:	4770      	bx	lr
+ 80008b2:	bf00      	nop
+ 80008b4:	40013c00 	.word	0x40013c00
+ 80008b8:	40020c00 	.word	0x40020c00
 
-08000824 <EXTI0_IRQHandler>:
+080008bc <EXTI0_IRQHandler>:
 	}
 }
 
 //External interrupt handler on line 0
 void EXTI0_IRQHandler(void){
 	if((EXTI -> PR & EXTI_PR_PR0) != 0){
- 8000824:	4b0a      	ldr	r3, [pc, #40]	; (8000850 <EXTI0_IRQHandler+0x2c>)
- 8000826:	695b      	ldr	r3, [r3, #20]
- 8000828:	07db      	lsls	r3, r3, #31
- 800082a:	d50f      	bpl.n	800084c <EXTI0_IRQHandler+0x28>
+ 80008bc:	4b0a      	ldr	r3, [pc, #40]	; (80008e8 <EXTI0_IRQHandler+0x2c>)
+ 80008be:	695b      	ldr	r3, [r3, #20]
+ 80008c0:	07db      	lsls	r3, r3, #31
+ 80008c2:	d50f      	bpl.n	80008e4 <EXTI0_IRQHandler+0x28>
 		if((GPIOD -> ODR & GPIO_ODR_ODR_13) != 0){
- 800082c:	4b09      	ldr	r3, [pc, #36]	; (8000854 <EXTI0_IRQHandler+0x30>)
- 800082e:	695a      	ldr	r2, [r3, #20]
- 8000830:	f412 5f00 	tst.w	r2, #8192	; 0x2000
+ 80008c4:	4b09      	ldr	r3, [pc, #36]	; (80008ec <EXTI0_IRQHandler+0x30>)
+ 80008c6:	695a      	ldr	r2, [r3, #20]
+ 80008c8:	f412 5f00 	tst.w	r2, #8192	; 0x2000
 
 			GPIOD -> ODR	&= ~(GPIO_ODR_ODR_13); 	//LED3 off
- 8000834:	695a      	ldr	r2, [r3, #20]
- 8000836:	bf14      	ite	ne
- 8000838:	f422 5200 	bicne.w	r2, r2, #8192	; 0x2000
+ 80008cc:	695a      	ldr	r2, [r3, #20]
+ 80008ce:	bf14      	ite	ne
+ 80008d0:	f422 5200 	bicne.w	r2, r2, #8192	; 0x2000
 		}else{
 
 			GPIOD -> ODR	|= GPIO_ODR_ODR_13; 	//LED3 on
- 800083c:	f442 5200 	orreq.w	r2, r2, #8192	; 0x2000
- 8000840:	615a      	str	r2, [r3, #20]
+ 80008d4:	f442 5200 	orreq.w	r2, r2, #8192	; 0x2000
+ 80008d8:	615a      	str	r2, [r3, #20]
 		}
 		EXTI -> PR |= EXTI_PR_PR0; 	//Clear flag this is necessary
- 8000842:	4a03      	ldr	r2, [pc, #12]	; (8000850 <EXTI0_IRQHandler+0x2c>)
- 8000844:	6953      	ldr	r3, [r2, #20]
- 8000846:	f043 0301 	orr.w	r3, r3, #1
- 800084a:	6153      	str	r3, [r2, #20]
- 800084c:	4770      	bx	lr
- 800084e:	bf00      	nop
- 8000850:	40013c00 	.word	0x40013c00
- 8000854:	40020c00 	.word	0x40020c00
+ 80008da:	4a03      	ldr	r2, [pc, #12]	; (80008e8 <EXTI0_IRQHandler+0x2c>)
+ 80008dc:	6953      	ldr	r3, [r2, #20]
+ 80008de:	f043 0301 	orr.w	r3, r3, #1
+ 80008e2:	6153      	str	r3, [r2, #20]
+ 80008e4:	4770      	bx	lr
+ 80008e6:	bf00      	nop
+ 80008e8:	40013c00 	.word	0x40013c00
+ 80008ec:	40020c00 	.word	0x40020c00
 
-08000858 <Reset_Handler>:
+080008f0 <Reset_Handler>:
 
     .section  .text.Reset_Handler
   .weak  Reset_Handler
   .type  Reset_Handler, %function
 Reset_Handler:  
   ldr   sp, =_estack    /* Atollic update: set stack pointer */
- 8000858:	f8df d034 	ldr.w	sp, [pc, #52]	; 8000890 <LoopFillZerobss+0x14>
+ 80008f0:	f8df d034 	ldr.w	sp, [pc, #52]	; 8000928 <LoopFillZerobss+0x14>
 
 /* Copy the data segment initializers from flash to SRAM */  
   movs  r1, #0
- 800085c:	2100      	movs	r1, #0
+ 80008f4:	2100      	movs	r1, #0
   b  LoopCopyDataInit
- 800085e:	e003      	b.n	8000868 <LoopCopyDataInit>
+ 80008f6:	e003      	b.n	8000900 <LoopCopyDataInit>
 
-08000860 <CopyDataInit>:
+080008f8 <CopyDataInit>:
 
 CopyDataInit:
   ldr  r3, =_sidata
- 8000860:	4b0c      	ldr	r3, [pc, #48]	; (8000894 <LoopFillZerobss+0x18>)
+ 80008f8:	4b0c      	ldr	r3, [pc, #48]	; (800092c <LoopFillZerobss+0x18>)
   ldr  r3, [r3, r1]
- 8000862:	585b      	ldr	r3, [r3, r1]
+ 80008fa:	585b      	ldr	r3, [r3, r1]
   str  r3, [r0, r1]
- 8000864:	5043      	str	r3, [r0, r1]
+ 80008fc:	5043      	str	r3, [r0, r1]
   adds  r1, r1, #4
- 8000866:	3104      	adds	r1, #4
+ 80008fe:	3104      	adds	r1, #4
 
-08000868 <LoopCopyDataInit>:
+08000900 <LoopCopyDataInit>:
     
 LoopCopyDataInit:
   ldr  r0, =_sdata
- 8000868:	480b      	ldr	r0, [pc, #44]	; (8000898 <LoopFillZerobss+0x1c>)
+ 8000900:	480b      	ldr	r0, [pc, #44]	; (8000930 <LoopFillZerobss+0x1c>)
   ldr  r3, =_edata
- 800086a:	4b0c      	ldr	r3, [pc, #48]	; (800089c <LoopFillZerobss+0x20>)
+ 8000902:	4b0c      	ldr	r3, [pc, #48]	; (8000934 <LoopFillZerobss+0x20>)
   adds  r2, r0, r1
- 800086c:	1842      	adds	r2, r0, r1
+ 8000904:	1842      	adds	r2, r0, r1
   cmp  r2, r3
- 800086e:	429a      	cmp	r2, r3
+ 8000906:	429a      	cmp	r2, r3
   bcc  CopyDataInit
- 8000870:	d3f6      	bcc.n	8000860 <CopyDataInit>
+ 8000908:	d3f6      	bcc.n	80008f8 <CopyDataInit>
   ldr  r2, =_sbss
- 8000872:	4a0b      	ldr	r2, [pc, #44]	; (80008a0 <LoopFillZerobss+0x24>)
+ 800090a:	4a0b      	ldr	r2, [pc, #44]	; (8000938 <LoopFillZerobss+0x24>)
   b  LoopFillZerobss
- 8000874:	e002      	b.n	800087c <LoopFillZerobss>
+ 800090c:	e002      	b.n	8000914 <LoopFillZerobss>
 
-08000876 <FillZerobss>:
+0800090e <FillZerobss>:
 /* Zero fill the bss segment. */  
 FillZerobss:
   movs  r3, #0
- 8000876:	2300      	movs	r3, #0
+ 800090e:	2300      	movs	r3, #0
   str  r3, [r2], #4
- 8000878:	f842 3b04 	str.w	r3, [r2], #4
+ 8000910:	f842 3b04 	str.w	r3, [r2], #4
 
-0800087c <LoopFillZerobss>:
+08000914 <LoopFillZerobss>:
     
 LoopFillZerobss:
   ldr  r3, = _ebss
- 800087c:	4b09      	ldr	r3, [pc, #36]	; (80008a4 <LoopFillZerobss+0x28>)
+ 8000914:	4b09      	ldr	r3, [pc, #36]	; (800093c <LoopFillZerobss+0x28>)
   cmp  r2, r3
- 800087e:	429a      	cmp	r2, r3
+ 8000916:	429a      	cmp	r2, r3
   bcc  FillZerobss
- 8000880:	d3f9      	bcc.n	8000876 <FillZerobss>
+ 8000918:	d3f9      	bcc.n	800090e <FillZerobss>
 
 /* Call the clock system intitialization function.*/
   bl  SystemInit   
- 8000882:	f000 f82b 	bl	80008dc <SystemInit>
+ 800091a:	f000 f82b 	bl	8000974 <SystemInit>
 /* Call static constructors */
     bl __libc_init_array
- 8000886:	f000 f8a7 	bl	80009d8 <__libc_init_array>
+ 800091e:	f000 f8a7 	bl	8000a70 <__libc_init_array>
 /* Call the application's entry point.*/
   bl  main
- 800088a:	f7ff ff6f 	bl	800076c <main>
+ 8000922:	f7ff ff6b 	bl	80007fc <main>
   bx  lr    
- 800088e:	4770      	bx	lr
+ 8000926:	4770      	bx	lr
   ldr   sp, =_estack    /* Atollic update: set stack pointer */
- 8000890:	20020000 	.word	0x20020000
+ 8000928:	20020000 	.word	0x20020000
   ldr  r3, =_sidata
- 8000894:	08000a54 	.word	0x08000a54
+ 800092c:	08000aec 	.word	0x08000aec
   ldr  r0, =_sdata
- 8000898:	20000000 	.word	0x20000000
+ 8000930:	20000000 	.word	0x20000000
   ldr  r3, =_edata
- 800089c:	20000004 	.word	0x20000004
+ 8000934:	20000004 	.word	0x20000004
   ldr  r2, =_sbss
- 80008a0:	20000004 	.word	0x20000004
+ 8000938:	20000004 	.word	0x20000004
   ldr  r3, = _ebss
- 80008a4:	20000024 	.word	0x20000024
+ 800093c:	20000024 	.word	0x20000024
 
-080008a8 <ADC_IRQHandler>:
+08000940 <ADC_IRQHandler>:
  * @retval None       
 */
     .section  .text.Default_Handler,"ax",%progbits
 Default_Handler:
 Infinite_Loop:
   b  Infinite_Loop
- 80008a8:	e7fe      	b.n	80008a8 <ADC_IRQHandler>
+ 8000940:	e7fe      	b.n	8000940 <ADC_IRQHandler>
 	...
 
-080008ac <NMI_Handler>:
- 80008ac:	4770      	bx	lr
- 80008ae:	bf00      	nop
+08000944 <NMI_Handler>:
+ 8000944:	4770      	bx	lr
+ 8000946:	bf00      	nop
 
-080008b0 <HardFault_Handler>:
+08000948 <HardFault_Handler>:
   * @brief  This function handles Hard Fault exception.
   * @param  None
   * @retval None
   */
 void HardFault_Handler(void)
 {
- 80008b0:	e7fe      	b.n	80008b0 <HardFault_Handler>
- 80008b2:	bf00      	nop
+ 8000948:	e7fe      	b.n	8000948 <HardFault_Handler>
+ 800094a:	bf00      	nop
 
-080008b4 <MemManage_Handler>:
+0800094c <MemManage_Handler>:
   * @brief  This function handles Memory Manage exception.
   * @param  None
   * @retval None
   */
 void MemManage_Handler(void)
 {
- 80008b4:	e7fe      	b.n	80008b4 <MemManage_Handler>
- 80008b6:	bf00      	nop
+ 800094c:	e7fe      	b.n	800094c <MemManage_Handler>
+ 800094e:	bf00      	nop
 
-080008b8 <BusFault_Handler>:
+08000950 <BusFault_Handler>:
   * @brief  This function handles Bus Fault exception.
   * @param  None
   * @retval None
   */
 void BusFault_Handler(void)
 {
- 80008b8:	e7fe      	b.n	80008b8 <BusFault_Handler>
- 80008ba:	bf00      	nop
+ 8000950:	e7fe      	b.n	8000950 <BusFault_Handler>
+ 8000952:	bf00      	nop
 
-080008bc <UsageFault_Handler>:
+08000954 <UsageFault_Handler>:
   * @brief  This function handles Usage Fault exception.
   * @param  None
   * @retval None
   */
 void UsageFault_Handler(void)
 {
- 80008bc:	e7fe      	b.n	80008bc <UsageFault_Handler>
- 80008be:	bf00      	nop
+ 8000954:	e7fe      	b.n	8000954 <UsageFault_Handler>
+ 8000956:	bf00      	nop
 
-080008c0 <SVC_Handler>:
- 80008c0:	4770      	bx	lr
- 80008c2:	bf00      	nop
+08000958 <SVC_Handler>:
+ 8000958:	4770      	bx	lr
+ 800095a:	bf00      	nop
 
-080008c4 <DebugMon_Handler>:
- 80008c4:	4770      	bx	lr
- 80008c6:	bf00      	nop
+0800095c <DebugMon_Handler>:
+ 800095c:	4770      	bx	lr
+ 800095e:	bf00      	nop
 
-080008c8 <PendSV_Handler>:
+08000960 <PendSV_Handler>:
   * @brief  This function handles PendSVC exception.
   * @param  None
   * @retval None
   */
 void PendSV_Handler(void)
 {
- 80008c8:	4770      	bx	lr
- 80008ca:	bf00      	nop
+ 8000960:	4770      	bx	lr
+ 8000962:	bf00      	nop
 
-080008cc <SysTick_Handler>:
+08000964 <SysTick_Handler>:
   * @retval None
   */
 void SysTick_Handler(void)
 {
 //*  TimingDelay_Decrement(); */
 	delay_cnt--;
- 80008cc:	4a02      	ldr	r2, [pc, #8]	; (80008d8 <SysTick_Handler+0xc>)
- 80008ce:	6813      	ldr	r3, [r2, #0]
- 80008d0:	3b01      	subs	r3, #1
- 80008d2:	6013      	str	r3, [r2, #0]
- 80008d4:	4770      	bx	lr
- 80008d6:	bf00      	nop
- 80008d8:	20000020 	.word	0x20000020
+ 8000964:	4a02      	ldr	r2, [pc, #8]	; (8000970 <SysTick_Handler+0xc>)
+ 8000966:	6813      	ldr	r3, [r2, #0]
+ 8000968:	3b01      	subs	r3, #1
+ 800096a:	6013      	str	r3, [r2, #0]
+ 800096c:	4770      	bx	lr
+ 800096e:	bf00      	nop
+ 8000970:	20000020 	.word	0x20000020
 
-080008dc <SystemInit>:
+08000974 <SystemInit>:
   */
 void SystemInit(void)
 {
   /* FPU settings ------------------------------------------------------------*/
   #if (__FPU_PRESENT == 1) && (__FPU_USED == 1)
     SCB->CPACR |= ((3UL << 10*2)|(3UL << 11*2));  /* set CP10 and CP11 Full Access */
- 80008dc:	4938      	ldr	r1, [pc, #224]	; (80009c0 <SystemInit+0xe4>)
+ 8000974:	4938      	ldr	r1, [pc, #224]	; (8000a58 <SystemInit+0xe4>)
   #endif
   /* Reset the RCC clock configuration to the default reset state ------------*/
   /* Set HSION bit */
   RCC->CR |= (uint32_t)0x00000001;
- 80008de:	4b39      	ldr	r3, [pc, #228]	; (80009c4 <SystemInit+0xe8>)
+ 8000976:	4b39      	ldr	r3, [pc, #228]	; (8000a5c <SystemInit+0xe8>)
     SCB->CPACR |= ((3UL << 10*2)|(3UL << 11*2));  /* set CP10 and CP11 Full Access */
- 80008e0:	f8d1 2088 	ldr.w	r2, [r1, #136]	; 0x88
+ 8000978:	f8d1 2088 	ldr.w	r2, [r1, #136]	; 0x88
 
   /* Reset HSEON, CSSON and PLLON bits */
   RCC->CR &= (uint32_t)0xFEF6FFFF;
 
   /* Reset PLLCFGR register */
   RCC->PLLCFGR = 0x24003010;
- 80008e4:	4838      	ldr	r0, [pc, #224]	; (80009c8 <SystemInit+0xec>)
+ 800097c:	4838      	ldr	r0, [pc, #224]	; (8000a60 <SystemInit+0xec>)
     SCB->CPACR |= ((3UL << 10*2)|(3UL << 11*2));  /* set CP10 and CP11 Full Access */
- 80008e6:	f442 0270 	orr.w	r2, r2, #15728640	; 0xf00000
- 80008ea:	f8c1 2088 	str.w	r2, [r1, #136]	; 0x88
+ 800097e:	f442 0270 	orr.w	r2, r2, #15728640	; 0xf00000
+ 8000982:	f8c1 2088 	str.w	r2, [r1, #136]	; 0x88
   RCC->CR |= (uint32_t)0x00000001;
- 80008ee:	681a      	ldr	r2, [r3, #0]
+ 8000986:	681a      	ldr	r2, [r3, #0]
   RCC->CFGR = 0x00000000;
- 80008f0:	2100      	movs	r1, #0
+ 8000988:	2100      	movs	r1, #0
   RCC->CR |= (uint32_t)0x00000001;
- 80008f2:	f042 0201 	orr.w	r2, r2, #1
- 80008f6:	601a      	str	r2, [r3, #0]
+ 800098a:	f042 0201 	orr.w	r2, r2, #1
+ 800098e:	601a      	str	r2, [r3, #0]
   RCC->CFGR = 0x00000000;
- 80008f8:	6099      	str	r1, [r3, #8]
+ 8000990:	6099      	str	r1, [r3, #8]
   RCC->CR &= (uint32_t)0xFEF6FFFF;
- 80008fa:	681a      	ldr	r2, [r3, #0]
- 80008fc:	f022 7284 	bic.w	r2, r2, #17301504	; 0x1080000
- 8000900:	f422 3280 	bic.w	r2, r2, #65536	; 0x10000
- 8000904:	601a      	str	r2, [r3, #0]
+ 8000992:	681a      	ldr	r2, [r3, #0]
+ 8000994:	f022 7284 	bic.w	r2, r2, #17301504	; 0x1080000
+ 8000998:	f422 3280 	bic.w	r2, r2, #65536	; 0x10000
+ 800099c:	601a      	str	r2, [r3, #0]
   RCC->PLLCFGR = 0x24003010;
- 8000906:	6058      	str	r0, [r3, #4]
+ 800099e:	6058      	str	r0, [r3, #4]
 
   /* Reset HSEBYP bit */
   RCC->CR &= (uint32_t)0xFFFBFFFF;
- 8000908:	681a      	ldr	r2, [r3, #0]
+ 80009a0:	681a      	ldr	r2, [r3, #0]
 {
- 800090a:	b082      	sub	sp, #8
+ 80009a2:	b082      	sub	sp, #8
   RCC->CR &= (uint32_t)0xFFFBFFFF;
- 800090c:	f422 2280 	bic.w	r2, r2, #262144	; 0x40000
- 8000910:	601a      	str	r2, [r3, #0]
+ 80009a4:	f422 2280 	bic.w	r2, r2, #262144	; 0x40000
+ 80009a8:	601a      	str	r2, [r3, #0]
 
   /* Disable all interrupts */
   RCC->CIR = 0x00000000;
- 8000912:	60d9      	str	r1, [r3, #12]
+ 80009aa:	60d9      	str	r1, [r3, #12]
 static void SetSysClock(void)
 {
 /******************************************************************************/
 /*            PLL (clocked by HSE) used as System clock source                */
 /******************************************************************************/
   __IO uint32_t StartUpCounter = 0, HSEStatus = 0;
- 8000914:	9100      	str	r1, [sp, #0]
- 8000916:	9101      	str	r1, [sp, #4]
+ 80009ac:	9100      	str	r1, [sp, #0]
+ 80009ae:	9101      	str	r1, [sp, #4]
   
   /* Enable HSE */
   RCC->CR |= ((uint32_t)RCC_CR_HSEON);
- 8000918:	681a      	ldr	r2, [r3, #0]
- 800091a:	f442 3280 	orr.w	r2, r2, #65536	; 0x10000
- 800091e:	601a      	str	r2, [r3, #0]
+ 80009b0:	681a      	ldr	r2, [r3, #0]
+ 80009b2:	f442 3280 	orr.w	r2, r2, #65536	; 0x10000
+ 80009b6:	601a      	str	r2, [r3, #0]
  
   /* Wait till HSE is ready and if Time out is reached exit */
   do
   {
     HSEStatus = RCC->CR & RCC_CR_HSERDY;
- 8000920:	461a      	mov	r2, r3
- 8000922:	e003      	b.n	800092c <SystemInit+0x50>
+ 80009b8:	461a      	mov	r2, r3
+ 80009ba:	e003      	b.n	80009c4 <SystemInit+0x50>
     StartUpCounter++;
   } while((HSEStatus == 0) && (StartUpCounter != HSE_STARTUP_TIMEOUT));
- 8000924:	9b00      	ldr	r3, [sp, #0]
- 8000926:	f5b3 6fa0 	cmp.w	r3, #1280	; 0x500
- 800092a:	d009      	beq.n	8000940 <SystemInit+0x64>
+ 80009bc:	9b00      	ldr	r3, [sp, #0]
+ 80009be:	f5b3 6fa0 	cmp.w	r3, #1280	; 0x500
+ 80009c2:	d009      	beq.n	80009d8 <SystemInit+0x64>
     HSEStatus = RCC->CR & RCC_CR_HSERDY;
- 800092c:	6813      	ldr	r3, [r2, #0]
- 800092e:	f403 3300 	and.w	r3, r3, #131072	; 0x20000
- 8000932:	9301      	str	r3, [sp, #4]
+ 80009c4:	6813      	ldr	r3, [r2, #0]
+ 80009c6:	f403 3300 	and.w	r3, r3, #131072	; 0x20000
+ 80009ca:	9301      	str	r3, [sp, #4]
     StartUpCounter++;
- 8000934:	9b00      	ldr	r3, [sp, #0]
- 8000936:	3301      	adds	r3, #1
- 8000938:	9300      	str	r3, [sp, #0]
+ 80009cc:	9b00      	ldr	r3, [sp, #0]
+ 80009ce:	3301      	adds	r3, #1
+ 80009d0:	9300      	str	r3, [sp, #0]
   } while((HSEStatus == 0) && (StartUpCounter != HSE_STARTUP_TIMEOUT));
- 800093a:	9b01      	ldr	r3, [sp, #4]
- 800093c:	2b00      	cmp	r3, #0
- 800093e:	d0f1      	beq.n	8000924 <SystemInit+0x48>
+ 80009d2:	9b01      	ldr	r3, [sp, #4]
+ 80009d4:	2b00      	cmp	r3, #0
+ 80009d6:	d0f1      	beq.n	80009bc <SystemInit+0x48>
 
   if ((RCC->CR & RCC_CR_HSERDY) != RESET)
- 8000940:	4b20      	ldr	r3, [pc, #128]	; (80009c4 <SystemInit+0xe8>)
- 8000942:	681b      	ldr	r3, [r3, #0]
- 8000944:	f413 3300 	ands.w	r3, r3, #131072	; 0x20000
+ 80009d8:	4b20      	ldr	r3, [pc, #128]	; (8000a5c <SystemInit+0xe8>)
+ 80009da:	681b      	ldr	r3, [r3, #0]
+ 80009dc:	f413 3300 	ands.w	r3, r3, #131072	; 0x20000
   {
     HSEStatus = (uint32_t)0x01;
- 8000948:	bf18      	it	ne
- 800094a:	2301      	movne	r3, #1
+ 80009e0:	bf18      	it	ne
+ 80009e2:	2301      	movne	r3, #1
   }
   else
   {
     HSEStatus = (uint32_t)0x00;
- 800094c:	9301      	str	r3, [sp, #4]
+ 80009e4:	9301      	str	r3, [sp, #4]
   }
 
   if (HSEStatus == (uint32_t)0x01)
- 800094e:	9b01      	ldr	r3, [sp, #4]
- 8000950:	2b01      	cmp	r3, #1
- 8000952:	d005      	beq.n	8000960 <SystemInit+0x84>
+ 80009e6:	9b01      	ldr	r3, [sp, #4]
+ 80009e8:	2b01      	cmp	r3, #1
+ 80009ea:	d005      	beq.n	80009f8 <SystemInit+0x84>
   SCB->VTOR = FLASH_BASE | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal FLASH */
- 8000954:	4b1a      	ldr	r3, [pc, #104]	; (80009c0 <SystemInit+0xe4>)
- 8000956:	f04f 6200 	mov.w	r2, #134217728	; 0x8000000
- 800095a:	609a      	str	r2, [r3, #8]
+ 80009ec:	4b1a      	ldr	r3, [pc, #104]	; (8000a58 <SystemInit+0xe4>)
+ 80009ee:	f04f 6200 	mov.w	r2, #134217728	; 0x8000000
+ 80009f2:	609a      	str	r2, [r3, #8]
 }
- 800095c:	b002      	add	sp, #8
- 800095e:	4770      	bx	lr
+ 80009f4:	b002      	add	sp, #8
+ 80009f6:	4770      	bx	lr
   {
     /* Select regulator voltage output Scale 1 mode, System frequency up to 168 MHz */
     RCC->APB1ENR |= RCC_APB1ENR_PWREN;
- 8000960:	4b18      	ldr	r3, [pc, #96]	; (80009c4 <SystemInit+0xe8>)
+ 80009f8:	4b18      	ldr	r3, [pc, #96]	; (8000a5c <SystemInit+0xe8>)
     PWR->CR |= PWR_CR_VOS;
- 8000962:	491a      	ldr	r1, [pc, #104]	; (80009cc <SystemInit+0xf0>)
+ 80009fa:	491a      	ldr	r1, [pc, #104]	; (8000a64 <SystemInit+0xf0>)
     RCC->APB1ENR |= RCC_APB1ENR_PWREN;
- 8000964:	6c1a      	ldr	r2, [r3, #64]	; 0x40
+ 80009fc:	6c1a      	ldr	r2, [r3, #64]	; 0x40
     
     /* PCLK1 = HCLK / 4*/
     RCC->CFGR |= RCC_CFGR_PPRE1_DIV4;
 
     /* Configure the main PLL */
     RCC->PLLCFGR = PLL_M | (PLL_N << 6) | (((PLL_P >> 1) -1) << 16) |
- 8000966:	481a      	ldr	r0, [pc, #104]	; (80009d0 <SystemInit+0xf4>)
+ 80009fe:	481a      	ldr	r0, [pc, #104]	; (8000a68 <SystemInit+0xf4>)
     RCC->APB1ENR |= RCC_APB1ENR_PWREN;
- 8000968:	f042 5280 	orr.w	r2, r2, #268435456	; 0x10000000
- 800096c:	641a      	str	r2, [r3, #64]	; 0x40
+ 8000a00:	f042 5280 	orr.w	r2, r2, #268435456	; 0x10000000
+ 8000a04:	641a      	str	r2, [r3, #64]	; 0x40
     PWR->CR |= PWR_CR_VOS;
- 800096e:	680a      	ldr	r2, [r1, #0]
- 8000970:	f442 4240 	orr.w	r2, r2, #49152	; 0xc000
- 8000974:	600a      	str	r2, [r1, #0]
+ 8000a06:	680a      	ldr	r2, [r1, #0]
+ 8000a08:	f442 4240 	orr.w	r2, r2, #49152	; 0xc000
+ 8000a0c:	600a      	str	r2, [r1, #0]
     RCC->CFGR |= RCC_CFGR_HPRE_DIV1;
- 8000976:	689a      	ldr	r2, [r3, #8]
- 8000978:	609a      	str	r2, [r3, #8]
+ 8000a0e:	689a      	ldr	r2, [r3, #8]
+ 8000a10:	609a      	str	r2, [r3, #8]
     RCC->CFGR |= RCC_CFGR_PPRE2_DIV2;
- 800097a:	689a      	ldr	r2, [r3, #8]
- 800097c:	f442 4200 	orr.w	r2, r2, #32768	; 0x8000
- 8000980:	609a      	str	r2, [r3, #8]
+ 8000a12:	689a      	ldr	r2, [r3, #8]
+ 8000a14:	f442 4200 	orr.w	r2, r2, #32768	; 0x8000
+ 8000a18:	609a      	str	r2, [r3, #8]
     RCC->CFGR |= RCC_CFGR_PPRE1_DIV4;
- 8000982:	689a      	ldr	r2, [r3, #8]
- 8000984:	f442 52a0 	orr.w	r2, r2, #5120	; 0x1400
- 8000988:	609a      	str	r2, [r3, #8]
+ 8000a1a:	689a      	ldr	r2, [r3, #8]
+ 8000a1c:	f442 52a0 	orr.w	r2, r2, #5120	; 0x1400
+ 8000a20:	609a      	str	r2, [r3, #8]
     RCC->PLLCFGR = PLL_M | (PLL_N << 6) | (((PLL_P >> 1) -1) << 16) |
- 800098a:	6058      	str	r0, [r3, #4]
+ 8000a22:	6058      	str	r0, [r3, #4]
                    (RCC_PLLCFGR_PLLSRC_HSE) | (PLL_Q << 24);
 
     /* Enable the main PLL */
     RCC->CR |= RCC_CR_PLLON;
- 800098c:	681a      	ldr	r2, [r3, #0]
- 800098e:	f042 7280 	orr.w	r2, r2, #16777216	; 0x1000000
- 8000992:	601a      	str	r2, [r3, #0]
+ 8000a24:	681a      	ldr	r2, [r3, #0]
+ 8000a26:	f042 7280 	orr.w	r2, r2, #16777216	; 0x1000000
+ 8000a2a:	601a      	str	r2, [r3, #0]
 
     /* Wait till the main PLL is ready */
     while((RCC->CR & RCC_CR_PLLRDY) == 0)
- 8000994:	681a      	ldr	r2, [r3, #0]
- 8000996:	0192      	lsls	r2, r2, #6
- 8000998:	d5fc      	bpl.n	8000994 <SystemInit+0xb8>
+ 8000a2c:	681a      	ldr	r2, [r3, #0]
+ 8000a2e:	0192      	lsls	r2, r2, #6
+ 8000a30:	d5fc      	bpl.n	8000a2c <SystemInit+0xb8>
     {
     }
    
     /* Configure Flash prefetch, Instruction cache, Data cache and wait state */
     FLASH->ACR = FLASH_ACR_PRFTEN |FLASH_ACR_ICEN |FLASH_ACR_DCEN |FLASH_ACR_LATENCY_5WS;
- 800099a:	490e      	ldr	r1, [pc, #56]	; (80009d4 <SystemInit+0xf8>)
+ 8000a32:	490e      	ldr	r1, [pc, #56]	; (8000a6c <SystemInit+0xf8>)
     /* Select the main PLL as system clock source */
     RCC->CFGR &= (uint32_t)((uint32_t)~(RCC_CFGR_SW));
     RCC->CFGR |= RCC_CFGR_SW_PLL;
 
     /* Wait till the main PLL is used as system clock source */
     while ((RCC->CFGR & (uint32_t)RCC_CFGR_SWS ) != RCC_CFGR_SWS_PLL);
- 800099c:	4a09      	ldr	r2, [pc, #36]	; (80009c4 <SystemInit+0xe8>)
+ 8000a34:	4a09      	ldr	r2, [pc, #36]	; (8000a5c <SystemInit+0xe8>)
     FLASH->ACR = FLASH_ACR_PRFTEN |FLASH_ACR_ICEN |FLASH_ACR_DCEN |FLASH_ACR_LATENCY_5WS;
- 800099e:	f240 7005 	movw	r0, #1797	; 0x705
- 80009a2:	6008      	str	r0, [r1, #0]
+ 8000a36:	f240 7005 	movw	r0, #1797	; 0x705
+ 8000a3a:	6008      	str	r0, [r1, #0]
     RCC->CFGR &= (uint32_t)((uint32_t)~(RCC_CFGR_SW));
- 80009a4:	6899      	ldr	r1, [r3, #8]
- 80009a6:	f021 0103 	bic.w	r1, r1, #3
- 80009aa:	6099      	str	r1, [r3, #8]
+ 8000a3c:	6899      	ldr	r1, [r3, #8]
+ 8000a3e:	f021 0103 	bic.w	r1, r1, #3
+ 8000a42:	6099      	str	r1, [r3, #8]
     RCC->CFGR |= RCC_CFGR_SW_PLL;
- 80009ac:	6899      	ldr	r1, [r3, #8]
- 80009ae:	f041 0102 	orr.w	r1, r1, #2
- 80009b2:	6099      	str	r1, [r3, #8]
+ 8000a44:	6899      	ldr	r1, [r3, #8]
+ 8000a46:	f041 0102 	orr.w	r1, r1, #2
+ 8000a4a:	6099      	str	r1, [r3, #8]
     while ((RCC->CFGR & (uint32_t)RCC_CFGR_SWS ) != RCC_CFGR_SWS_PLL);
- 80009b4:	6893      	ldr	r3, [r2, #8]
- 80009b6:	f003 030c 	and.w	r3, r3, #12
- 80009ba:	2b08      	cmp	r3, #8
- 80009bc:	d1fa      	bne.n	80009b4 <SystemInit+0xd8>
- 80009be:	e7c9      	b.n	8000954 <SystemInit+0x78>
- 80009c0:	e000ed00 	.word	0xe000ed00
- 80009c4:	40023800 	.word	0x40023800
- 80009c8:	24003010 	.word	0x24003010
- 80009cc:	40007000 	.word	0x40007000
- 80009d0:	07405408 	.word	0x07405408
- 80009d4:	40023c00 	.word	0x40023c00
+ 8000a4c:	6893      	ldr	r3, [r2, #8]
+ 8000a4e:	f003 030c 	and.w	r3, r3, #12
+ 8000a52:	2b08      	cmp	r3, #8
+ 8000a54:	d1fa      	bne.n	8000a4c <SystemInit+0xd8>
+ 8000a56:	e7c9      	b.n	80009ec <SystemInit+0x78>
+ 8000a58:	e000ed00 	.word	0xe000ed00
+ 8000a5c:	40023800 	.word	0x40023800
+ 8000a60:	24003010 	.word	0x24003010
+ 8000a64:	40007000 	.word	0x40007000
+ 8000a68:	07405408 	.word	0x07405408
+ 8000a6c:	40023c00 	.word	0x40023c00
 
-080009d8 <__libc_init_array>:
- 80009d8:	b570      	push	{r4, r5, r6, lr}
- 80009da:	4e0d      	ldr	r6, [pc, #52]	; (8000a10 <__libc_init_array+0x38>)
- 80009dc:	4c0d      	ldr	r4, [pc, #52]	; (8000a14 <__libc_init_array+0x3c>)
- 80009de:	1ba4      	subs	r4, r4, r6
- 80009e0:	10a4      	asrs	r4, r4, #2
- 80009e2:	2500      	movs	r5, #0
- 80009e4:	42a5      	cmp	r5, r4
- 80009e6:	d109      	bne.n	80009fc <__libc_init_array+0x24>
- 80009e8:	4e0b      	ldr	r6, [pc, #44]	; (8000a18 <__libc_init_array+0x40>)
- 80009ea:	4c0c      	ldr	r4, [pc, #48]	; (8000a1c <__libc_init_array+0x44>)
- 80009ec:	f000 f818 	bl	8000a20 <_init>
- 80009f0:	1ba4      	subs	r4, r4, r6
- 80009f2:	10a4      	asrs	r4, r4, #2
- 80009f4:	2500      	movs	r5, #0
- 80009f6:	42a5      	cmp	r5, r4
- 80009f8:	d105      	bne.n	8000a06 <__libc_init_array+0x2e>
- 80009fa:	bd70      	pop	{r4, r5, r6, pc}
- 80009fc:	f856 3025 	ldr.w	r3, [r6, r5, lsl #2]
- 8000a00:	4798      	blx	r3
- 8000a02:	3501      	adds	r5, #1
- 8000a04:	e7ee      	b.n	80009e4 <__libc_init_array+0xc>
- 8000a06:	f856 3025 	ldr.w	r3, [r6, r5, lsl #2]
- 8000a0a:	4798      	blx	r3
- 8000a0c:	3501      	adds	r5, #1
- 8000a0e:	e7f2      	b.n	80009f6 <__libc_init_array+0x1e>
- 8000a10:	08000a4c 	.word	0x08000a4c
- 8000a14:	08000a4c 	.word	0x08000a4c
- 8000a18:	08000a4c 	.word	0x08000a4c
- 8000a1c:	08000a50 	.word	0x08000a50
+08000a70 <__libc_init_array>:
+ 8000a70:	b570      	push	{r4, r5, r6, lr}
+ 8000a72:	4e0d      	ldr	r6, [pc, #52]	; (8000aa8 <__libc_init_array+0x38>)
+ 8000a74:	4c0d      	ldr	r4, [pc, #52]	; (8000aac <__libc_init_array+0x3c>)
+ 8000a76:	1ba4      	subs	r4, r4, r6
+ 8000a78:	10a4      	asrs	r4, r4, #2
+ 8000a7a:	2500      	movs	r5, #0
+ 8000a7c:	42a5      	cmp	r5, r4
+ 8000a7e:	d109      	bne.n	8000a94 <__libc_init_array+0x24>
+ 8000a80:	4e0b      	ldr	r6, [pc, #44]	; (8000ab0 <__libc_init_array+0x40>)
+ 8000a82:	4c0c      	ldr	r4, [pc, #48]	; (8000ab4 <__libc_init_array+0x44>)
+ 8000a84:	f000 f818 	bl	8000ab8 <_init>
+ 8000a88:	1ba4      	subs	r4, r4, r6
+ 8000a8a:	10a4      	asrs	r4, r4, #2
+ 8000a8c:	2500      	movs	r5, #0
+ 8000a8e:	42a5      	cmp	r5, r4
+ 8000a90:	d105      	bne.n	8000a9e <__libc_init_array+0x2e>
+ 8000a92:	bd70      	pop	{r4, r5, r6, pc}
+ 8000a94:	f856 3025 	ldr.w	r3, [r6, r5, lsl #2]
+ 8000a98:	4798      	blx	r3
+ 8000a9a:	3501      	adds	r5, #1
+ 8000a9c:	e7ee      	b.n	8000a7c <__libc_init_array+0xc>
+ 8000a9e:	f856 3025 	ldr.w	r3, [r6, r5, lsl #2]
+ 8000aa2:	4798      	blx	r3
+ 8000aa4:	3501      	adds	r5, #1
+ 8000aa6:	e7f2      	b.n	8000a8e <__libc_init_array+0x1e>
+ 8000aa8:	08000ae4 	.word	0x08000ae4
+ 8000aac:	08000ae4 	.word	0x08000ae4
+ 8000ab0:	08000ae4 	.word	0x08000ae4
+ 8000ab4:	08000ae8 	.word	0x08000ae8
 
-08000a20 <_init>:
- 8000a20:	b5f8      	push	{r3, r4, r5, r6, r7, lr}
- 8000a22:	bf00      	nop
- 8000a24:	bcf8      	pop	{r3, r4, r5, r6, r7}
- 8000a26:	bc08      	pop	{r3}
- 8000a28:	469e      	mov	lr, r3
- 8000a2a:	4770      	bx	lr
+08000ab8 <_init>:
+ 8000ab8:	b5f8      	push	{r3, r4, r5, r6, r7, lr}
+ 8000aba:	bf00      	nop
+ 8000abc:	bcf8      	pop	{r3, r4, r5, r6, r7}
+ 8000abe:	bc08      	pop	{r3}
+ 8000ac0:	469e      	mov	lr, r3
+ 8000ac2:	4770      	bx	lr
 
-08000a2c <_fini>:
- 8000a2c:	b5f8      	push	{r3, r4, r5, r6, r7, lr}
- 8000a2e:	bf00      	nop
- 8000a30:	bcf8      	pop	{r3, r4, r5, r6, r7}
- 8000a32:	bc08      	pop	{r3}
- 8000a34:	469e      	mov	lr, r3
- 8000a36:	4770      	bx	lr
+08000ac4 <_fini>:
+ 8000ac4:	b5f8      	push	{r3, r4, r5, r6, r7, lr}
+ 8000ac6:	bf00      	nop
+ 8000ac8:	bcf8      	pop	{r3, r4, r5, r6, r7}
+ 8000aca:	bc08      	pop	{r3}
+ 8000acc:	469e      	mov	lr, r3
+ 8000ace:	4770      	bx	lr

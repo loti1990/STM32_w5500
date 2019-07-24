@@ -59,18 +59,24 @@ int main(void){
   SPI1Init();
   //W5500 initialize
   //W5500Init();
-  W5500InitV2(ip, gateway, submask, mac);
-  //Initialize socket n for TCP protocol
-  error_hand = W5500InitTCP(0,1024,2,2);
+  if(W5500SpiConnCheck() == 0){
 
-  //error was occurred
-  if(error_hand !=0)return 0;
+	  W5500InitV2(ip, gateway, submask, mac);
+	  //Initialize socket n for TCP protocol
+	  error_hand = W5500InitTCP(0,1024,2,2);
+	  //error was occurred
+	  if(error_hand !=0)return 0;
+
+  }else{
+
+	  return 0;
+  }
 
   //Configure system ticks to us range
   ret_code_from_sysTick = SysTick_Config(SystemCoreClock / 1000000);
 
   if(ret_code_from_sysTick != 0){
-	  //Error heandler
+	  //Error handler
   }
 
 

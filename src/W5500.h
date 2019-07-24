@@ -9,6 +9,8 @@
 
 /*Function initialization start*/
 
+uint8_t W5500SpiConnCheck(void);														//Check connection with external W5500 ethernet module
+
 void W5500Init(void); 																	//Initialize external w5500 ethernet peripheral
 
 void W5500InitV2(uint8_t *ip, uint8_t *gateway, uint8_t *submask, uint8_t *mac); 		//Initialize external W5500 ethernet peripheral V2
