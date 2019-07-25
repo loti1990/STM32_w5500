@@ -187,9 +187,9 @@ uint8_t W5500SpiConnCheck(void){
 	//Read version of W5500 external device
 	temp_array[0]	= MSB(W5500_CBR_VERSIONR);
 	temp_array[1]	= LSB(W5500_CBR_VERSIONR);
-	temp_array[2] 		= (W5500_CP_BSB_CR
-						| W5500_CP_READ
-						| W5500_CP_OM_VDLM); 			//set byte for reading from common register
+	temp_array[2] 	= (W5500_CP_BSB_CR
+					| W5500_CP_READ
+					| W5500_CP_OM_VDLM); 			//set byte for reading from common register
 
 	//Read thru SPI data interface
 	temp_array[9] = SPI1SendNByteReceive1Byte(temp_array,3);
@@ -369,8 +369,8 @@ uint8_t W5500InitTCP(uint8_t socket_no, uint16_t port, uint8_t TX_buff_size, uin
 
 
 	//setup Socket n TCP protocol
-	temp_array[0] 	= MSB(W5500_SR_RXBUF_SIZE);
-	temp_array[1] 	= LSB(W5500_SR_RXBUF_SIZE);
+	temp_array[0] 	= MSB(W5500_SR_MR);
+	temp_array[1] 	= LSB(W5500_SR_MR);
 	temp_array[2] 	= (socket_sel_register          	//Select socket n
 					| W5500_CP_WRITE
 					| W5500_CP_OM_VDLM); 				//write in to socket n configuration register
@@ -391,5 +391,90 @@ uint8_t W5500InitTCP(uint8_t socket_no, uint16_t port, uint8_t TX_buff_size, uin
 	SPI1SendNByte(temp_array,5);
 
 	return 0;
+}
 
+//Open TCP protocol
+//Socket number 	<socket_no> 	(0,1,2,3,4,5,6,7)
+
+uint8_t W5500OpenTCPServer(uint8_t socket_no){
+
+	//temporary register, necessary to initialize to initial state
+	uint8_t temp_array[10] = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+	//socket select register which select proper offset address allocation
+	uint8_t socket_sel_register;
+
+	switch(socket_no){
+
+		case 0x00:
+			socket_sel_register = W5500_CP_BSB_S0_R; 		//socket 0 address
+			break;
+		case 0x01:
+			socket_sel_register = W5500_CP_BSB_S1_R; 		//socket 1 address
+			break;
+		case 0x02:
+			socket_sel_register = W5500_CP_BSB_S2_R;		//socket 2 address
+			break;
+		case 0x03:
+			socket_sel_register = W5500_CP_BSB_S3_R; 		//socket 3 address
+			break;
+		case 0x04:
+			socket_sel_register = W5500_CP_BSB_S4_R; 		//socket 4 address
+			break;
+		case 0x05:
+			socket_sel_register = W5500_CP_BSB_S5_R; 		//socket 5 address
+			break;
+		case 0x06:
+			socket_sel_register = W5500_CP_BSB_S6_R; 		//socket 6 address
+			break;
+		case 0x07:
+			socket_sel_register = W5500_CP_BSB_S7_R; 		//socket 7 address
+			break;
+		default:
+			return 1; 										//error
+		}
+
+
+	//open Socket n
+	temp_array[0] 	= MSB(W5500_SR_CR);
+	temp_array[1] 	= LSB(W5500_SR_CR);
+	temp_array[2] 	= (socket_sel_register
+					| W5500_CP_WRITE
+					| W5500_CP_OM_VDLM); 				//write in to socket n configuration register
+	temp_array[3] 	= W5500_SR_CR_OPEN; 				//open command
+	//write thru spi communication
+	SPI1SendNByte(temp_array,4);
+
+	//Read status register
+	temp_array[0]	= MSB(W5500_SR_SR);
+	temp_array[1]	= LSB(W5500_SR_SR);
+	temp_array[2] 	= (socket_sel_register
+					| W5500_CP_READ
+					| W5500_CP_OM_VDLM); 				//set byte for reading from common register
+
+	//wait on Socket n SOCK_INIT flag
+	while(!(SPI1SendNByteReceive1Byte(temp_array,3) == W5500_SR_SR_SOCK_INIT));
+
+
+	//listen Socket n
+	temp_array[0] 	= MSB(W5500_SR_CR);
+	temp_array[1] 	= LSB(W5500_SR_CR);
+	temp_array[2] 	= (socket_sel_register
+					| W5500_CP_WRITE
+					| W5500_CP_OM_VDLM); 				//write in to socket n configuration register
+	temp_array[3] 	= W5500_SR_CR_LISTEN; 				//listen command
+	//write thru spi communication
+	SPI1SendNByte(temp_array,4);
+
+
+	//Read status register
+	temp_array[0]	= MSB(W5500_SR_SR);
+	temp_array[1]	= LSB(W5500_SR_SR);
+	temp_array[2] 	= (socket_sel_register
+					| W5500_CP_READ
+					| W5500_CP_OM_VDLM); 				//set byte for reading from common register
+	//wait on Socket n SOCK_LISTEN flag
+	while(!(SPI1SendNByteReceive1Byte(temp_array,3) == W5500_SR_SR_SOCK_LISTEN));
+
+
+	return 0;
 }

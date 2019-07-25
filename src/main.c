@@ -66,6 +66,10 @@ int main(void){
 	  error_hand = W5500InitTCP(0,1024,2,2);
 	  //error was occurred
 	  if(error_hand !=0)return 0;
+	  //Open TCP server socket
+	  error_hand = W5500OpenTCPServer(0);
+	  //error was occurred
+	  if(error_hand !=0)return 0;
 
   }else{
 
