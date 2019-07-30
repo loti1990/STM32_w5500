@@ -356,6 +356,17 @@ uint8_t W5500InitTCP(uint8_t socket_no, uint16_t port, uint8_t TX_buff_size, uin
 	SPI1SendNByte(temp_array,4);
 
 
+	//clear Socket interrupt register SIR
+	temp_array[0] 	= MSB(W5500_CRB_SIR);
+	temp_array[1] 	= LSB(W5500_CRB_SIR);
+	temp_array[2] 	= (W5500_CP_BSB_CR
+					| W5500_CP_WRITE
+					| W5500_CP_OM_VDLM); 				//write in to common register
+	temp_array[3] 	= 0x00; 							//Clear all status flags in socket interrupt register
+	//write thru spi communication
+	SPI1SendNByte(temp_array,4);
+
+
 	//setup Socket n RX and TX memory allocation
 	temp_array[0] 	= MSB(W5500_SR_RXBUF_SIZE);
 	temp_array[1] 	= LSB(W5500_SR_RXBUF_SIZE);
