@@ -498,6 +498,10 @@ uint8_t CheckInterruptStatus(){
 
 	//temporary register, necessary to initialize to initial state
 	uint8_t temp_array[5] = {0x00,0x00,0x00,0x00,0x00};
+	//socket number register
+	uint8_t socket_num;
+	//socket address selected register
+	uint8_t socket_sel_register;
 
 	//Read from socket interrupt register
 	temp_array[0]	= MSB(W5500_CRB_SIR);
@@ -507,55 +511,87 @@ uint8_t CheckInterruptStatus(){
 					| W5500_CP_OM_VDLM); 				//set byte for reading from common register
 
 	//read from SIR register
-	temp_array[3] 	= SPI1SendNByteReceive1Byte(temp_array,3);
+	temp_array[4] 	= SPI1SendNByteReceive1Byte(temp_array,3);
 
-	switch(temp_array[3]){
+	switch(temp_array[4]){
 
 	//interrupt occurred on socket 0
 	case 1:
-		return 0;
+		socket_num 			= 0;
+		socket_sel_register = W5500_CP_BSB_S0_R; 		//socket 0 address
 		break;
 
 	//interrupt occurred on socket 1
 	case 2:
-		return 1;
+		socket_num 			= 1;
+		socket_sel_register = W5500_CP_BSB_S1_R; 		//socket 1 address
 		break;
 
 	//interrupt occurred on socket 2
 	case 4:
-		return 2;
+		socket_num 			= 2;
+		socket_sel_register = W5500_CP_BSB_S2_R; 		//socket 2 address
 		break;
 
 	//interrupt occurred on socket 3
 	case 8:
-		return 3;
+		socket_num 			= 3;
+		socket_sel_register = W5500_CP_BSB_S3_R; 		//socket 3 address
 		break;
 
 	//interrupt occurred on socket 4
 	case 16:
-		return 4;
+		socket_num 			= 4;
+		socket_sel_register = W5500_CP_BSB_S4_R; 		//socket 4 address
 		break;
 
 	//interrupt occurred on socket 5
 	case 32:
-		return 5;
+		socket_num 			= 5;
+		socket_sel_register = W5500_CP_BSB_S5_R; 		//socket 5 address
 		break;
 
 	//interrupt occurred on socket 6
 	case 64:
-		return 6;
+		socket_num 			= 6;
+		socket_sel_register = W5500_CP_BSB_S6_R; 		//socket 6 address
 		break;
 
 	//interrupt occurred on socket 7
 	case 128:
-		return 7;
+		socket_num 			= 7;
+		socket_sel_register = W5500_CP_BSB_S7_R; 		//socket 7 address
 		break;
 
 	//interrupt occurred on multiple sockets
 	default:
-		return 8;
+		return 1;
 	}
+
+	//read interrupt flag from Sn_IR register
+	temp_array[0]	= MSB(W5500_SR_IR);
+	temp_array[1]	= LSB(W5500_SR_IR);
+	temp_array[2] 	= (socket_sel_register
+					| W5500_CP_READ
+					| W5500_CP_OM_VDLM); 				//set byte for reading from common register
+
+	//read from SIR register
+	SPI1SendNByteReceive1Byte(temp_array,3);
+
+
+	//clear interrupt flag in SIR register
+	temp_array[0]	= MSB(W5500_CRB_SIR);
+	temp_array[1]	= LSB(W5500_CRB_SIR);
+	temp_array[2] 	= (W5500_CP_BSB_CR
+					| W5500_CP_WRITE
+					| W5500_CP_OM_VDLM); 					//set byte for reading from common register
+	temp_array[3] 	= temp_array[4] & ~(1 << socket_num);
+
+	//write thru spi communication
+	SPI1SendNByte(temp_array,4);
+	return socket_num;
 }
+
 /*
  * Plan strezenja prekinitvi:
  * -preveri na katerem socketu se je zgodila prekinitev,

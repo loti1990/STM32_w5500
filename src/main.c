@@ -37,6 +37,14 @@ SOFTWARE.
 void EXTI0_IRQHandler(void); 		//Initialization of handler for external interrupt on line 0
 void EXTI3_IRQHandler(void); 		//Initialization of handler for external interrupt on line 3
 
+//GLOBAL VARIABLES
+
+uint8_t ip[4] 					= {192,168,1,100}; 					//dedicated ip address for external W5500 device
+uint8_t gateway[4]				= {192,168,1,1}; 					//gateway
+uint8_t submask[4]				= {255,255,255,0}; 					//subnet mask
+uint8_t mac[6]					= {0x00,0x08,0xdc,0x01,0x02,0x03}; 	//dedicated mac address
+uint8_t TCP_sorket_num 			= 0;								//TCP socket number form 0 to 7
+
 //
 //MAIN
 //
@@ -44,12 +52,6 @@ int main(void){
 
   uint32_t ret_code_from_sysTick; 	//return code from SysTick_Config function 1 for error see core_cm4.h
   uint8_t error_hand;
-
-  uint8_t ip[4] 	= {192,168,1,100}; 					//dedicated ip address for external W5500 device
-  uint8_t gateway[4]= {192,168,1,1}; 					//gateway
-  uint8_t submask[4]= {255,255,255,0}; 					//subnet mask
-  uint8_t mac[6]	= {0x00,0x08,0xdc,0x01,0x02,0x03}; 	//dedicated mac address
-
 
   //Init GPIOA
   InitGPIO();
@@ -63,11 +65,11 @@ int main(void){
 
 	  W5500InitV2(ip, gateway, submask, mac);
 	  //Initialize socket n for TCP protocol
-	  error_hand = W5500InitTCP(0,1024,2,2);
+	  error_hand = W5500InitTCP(TCP_sorket_num,1024,2,2);
 	  //error was occurred
 	  if(error_hand !=0)return 0;
 	  //Open TCP server socket
-	  error_hand = W5500OpenTCPServer(0);
+	  error_hand = W5500OpenTCPServer(TCP_sorket_num);
 	  //error was occurred
 	  if(error_hand !=0)return 0;
 
@@ -146,14 +148,20 @@ int main(void){
 
 //External interrupt handler on line 3
 void EXTI3_IRQHandler(void){
+	//Check if interrupt occurred in W5500 side
 	if((EXTI -> PR & EXTI_PR_PR3) != 0){
-		if((GPIOD -> ODR & GPIO_ODR_ODR_13) != 0){
 
-			GPIOD -> ODR	&= ~(GPIO_ODR_ODR_13); 	//LED3 off
-		}else{
+		if(CheckInterruptStatus() == 0){ //check on which socket occurred interrupt
 
-			GPIOD -> ODR	|= GPIO_ODR_ODR_13; 	//LED3 on
+			if((GPIOD -> ODR & GPIO_ODR_ODR_13) != 0){
+
+				GPIOD -> ODR	&= ~(GPIO_ODR_ODR_13); 	//LED3 off
+			}else{
+
+				GPIOD -> ODR	|= GPIO_ODR_ODR_13; 	//LED3 on
+			}
 		}
+
 		EXTI -> PR |= EXTI_PR_PR3; 	//Clear flag this is necessary
 	}
 }
