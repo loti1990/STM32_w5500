@@ -17,14 +17,22 @@ void W5500InitV2(uint8_t *ip, uint8_t *gateway, uint8_t *submask, uint8_t *mac);
 
 uint8_t W5500InitTCP(uint8_t socket_no, uint16_t port, uint8_t TX_buff_size, uint8_t RX_buff_size); 	//Initialize TCP protocol
 
-uint8_t W5500OpenTCPServer(uint8_t socket_no);		//Open TCP protocol
+uint8_t W5500OpenTCPServer(uint8_t socket_no);			//Open TCP protocol
+
+uint8_t CheckInterruptStatus(void); 					//Check on which socket was occurred interrupt
 
 /*Function initialization end*/
 
 /*Bit manipulation def. function start*/
 
+//most significant bit in 16 bits long variable
 #define MSB(x)					(uint8_t)(x>>8)
+
+//last significant bit in 16 bits long variable
 #define LSB(x)					((uint8_t)x)
+
+//check on which position in variable was set bit to value 1
+#define CHECK_BIT(var,pos)		((var) & (1 << pos)))
 
 /*Bit manipulation def. function end*/
 

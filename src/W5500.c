@@ -207,6 +207,7 @@ uint8_t W5500SpiConnCheck(void){
 //Gateway address		<gateway> 	for example {192,168,1,1}
 //Subnet mask 			<submask> 	for example {255,255,255,0}
 //MAC address 			<mac> 		for example {0x00,0x08,0xdc,0x01,0x02,0x03}
+//Returned value 		0-OK status 1- error
 void W5500InitV2(uint8_t *ip, uint8_t *gateway, uint8_t *submask, uint8_t *mac){
 
 	//temporary register, necessary to initialize to initial state
@@ -307,6 +308,7 @@ void W5500InitV2(uint8_t *ip, uint8_t *gateway, uint8_t *submask, uint8_t *mac){
 //Port number 		<port>			for example 1000
 //TX buffer size 	<TX_buff_size> 	(0,1,2,4,8,16)
 //RX buffer size 	<RX_buff_size> 	(0,1,2,4,8,16)
+//Returned value 	0-OK status 1- error
 uint8_t W5500InitTCP(uint8_t socket_no, uint16_t port, uint8_t TX_buff_size, uint8_t RX_buff_size){
 
 	//temporary register, necessary to initialize to initial state
@@ -406,7 +408,7 @@ uint8_t W5500InitTCP(uint8_t socket_no, uint16_t port, uint8_t TX_buff_size, uin
 
 //Open TCP protocol
 //Socket number 	<socket_no> 	(0,1,2,3,4,5,6,7)
-
+//Returned value 0-OK status 1- error
 uint8_t W5500OpenTCPServer(uint8_t socket_no){
 
 	//temporary register, necessary to initialize to initial state
@@ -489,3 +491,77 @@ uint8_t W5500OpenTCPServer(uint8_t socket_no){
 
 	return 0;
 }
+//Check on which socket was occurred interrupt
+//Returned value was equal to number on which socket occurred interrupt (0,1,2,3,4,5,6,7) or
+//8 if multiple interrupt occurred at the same time
+uint8_t CheckInterruptStatus(){
+
+	//temporary register, necessary to initialize to initial state
+	uint8_t temp_array[5] = {0x00,0x00,0x00,0x00,0x00};
+
+	//Read from socket interrupt register
+	temp_array[0]	= MSB(W5500_CRB_SIR);
+	temp_array[1]	= LSB(W5500_CRB_SIR);
+	temp_array[2] 	= (W5500_CP_BSB_CR
+					| W5500_CP_READ
+					| W5500_CP_OM_VDLM); 				//set byte for reading from common register
+
+	//read from SIR register
+	temp_array[3] 	= SPI1SendNByteReceive1Byte(temp_array,3);
+
+	switch(temp_array[3]){
+
+	//interrupt occurred on socket 0
+	case 1:
+		return 0;
+		break;
+
+	//interrupt occurred on socket 1
+	case 2:
+		return 1;
+		break;
+
+	//interrupt occurred on socket 2
+	case 4:
+		return 2;
+		break;
+
+	//interrupt occurred on socket 3
+	case 8:
+		return 3;
+		break;
+
+	//interrupt occurred on socket 4
+	case 16:
+		return 4;
+		break;
+
+	//interrupt occurred on socket 5
+	case 32:
+		return 5;
+		break;
+
+	//interrupt occurred on socket 6
+	case 64:
+		return 6;
+		break;
+
+	//interrupt occurred on socket 7
+	case 128:
+		return 7;
+		break;
+
+	//interrupt occurred on multiple sockets
+	default:
+		return 8;
+	}
+}
+/*
+ * Plan strezenja prekinitvi:
+ * -preveri na katerem socketu se je zgodila prekinitev,
+ * -preveri ali se je hkrati zgodilo več prekinitev npr. prekinitev na socketu 0 in socketu 1,
+ * -preveri kaj je zahtevalo prekinitev v registru Sn_IR (pred tem je potrebno v socket n
+ * omogočiti bte kaj vse bo prozilo prekinitev v registru Sn_IMR),
+ * -po uspešnem preverjanju ustrezno ukrepaj po definiranem protokolu
+ *
+ * */
