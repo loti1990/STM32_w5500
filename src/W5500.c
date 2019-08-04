@@ -565,17 +565,39 @@ uint8_t CheckInterruptStatus(){
 
 	//interrupt occurred on multiple sockets
 	default:
-		return 1;
+		return 8;
 	}
+	////////////////TESTNO ZA RAZJASNITEV DELOVANJA PREKINITEV
 
 	//read interrupt flag from Sn_IR register
 	temp_array[0]	= MSB(W5500_SR_IR);
 	temp_array[1]	= LSB(W5500_SR_IR);
 	temp_array[2] 	= (socket_sel_register
 					| W5500_CP_READ
-					| W5500_CP_OM_VDLM); 				//set byte for reading from common register
+					| W5500_CP_OM_VDLM); 				//set byte for reading from socket n register
 
-	//read from SIR register
+	//read from Sn_IR register
+	SPI1SendNByteReceive1Byte(temp_array,3);
+
+	//write in to interrupt Sn_IR register
+	temp_array[0]	= MSB(W5500_SR_IR);
+	temp_array[1]	= LSB(W5500_SR_IR);
+	temp_array[2] 	= (socket_sel_register
+					| W5500_CP_WRITE
+					| W5500_CP_OM_VDLM); 				//set byte for  writing in to socket n register
+	temp_array[3] 	= 0x03;
+
+	//write in to Sn_IR register
+	SPI1SendNByte(temp_array,4);
+
+	//read interrupt flag from Sn_IR register
+	temp_array[0]	= MSB(W5500_SR_IR);
+	temp_array[1]	= LSB(W5500_SR_IR);
+	temp_array[2] 	= (socket_sel_register
+					| W5500_CP_READ
+					| W5500_CP_OM_VDLM); 				//set byte for reading from socket n register
+
+	//read from Sn_IR register
 	SPI1SendNByteReceive1Byte(temp_array,3);
 
 
@@ -589,6 +611,19 @@ uint8_t CheckInterruptStatus(){
 
 	//write thru spi communication
 	SPI1SendNByte(temp_array,4);
+
+	//Read from socket interrupt register
+	temp_array[0]	= MSB(W5500_CRB_SIR);
+	temp_array[1]	= LSB(W5500_CRB_SIR);
+	temp_array[2] 	= (W5500_CP_BSB_CR
+					| W5500_CP_READ
+					| W5500_CP_OM_VDLM); 				//set byte for reading from common register
+
+	//read from SIR register
+	SPI1SendNByteReceive1Byte(temp_array,3);
+
+	////////////////TESTNO ZA RAZJASNITEV DELOVANJA PREKINITEV
+
 	return socket_num;
 }
 
