@@ -11,4 +11,6 @@
 
 void ADC1TempInit(void); 	//Initialize ADC1 for temperature measurement
 
+uint16_t TempSensRead(void); //Read data data register from integrated temperature sensor
+
 #endif /* ADC_H_ */

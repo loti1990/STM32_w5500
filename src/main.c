@@ -33,6 +33,7 @@ SOFTWARE.
 #include "GPIO.h"
 #include "SPI.h"
 #include "W5500.h"
+#include "ADC.h"
 
 void EXTI0_IRQHandler(void); 		//Initialization of handler for external interrupt on line 0
 void EXTI3_IRQHandler(void); 		//Initialization of handler for external interrupt on line 3
@@ -53,12 +54,16 @@ int main(void){
   uint32_t ret_code_from_sysTick; 	//return code from SysTick_Config function 1 for error see core_cm4.h
   uint8_t error_hand;
 
+  uint16_t temperature_raw_data = 0;
+
   //Init GPIOA
   InitGPIO();
   //Init SPI3
   SPI3Init();
   //Init SPI1
   SPI1Init();
+  //Init ADC1 for temp sensor
+  ADC1TempInit();
   //W5500 initialize
   //W5500Init();
   if(W5500SpiConnCheck() == 0){
@@ -90,6 +95,7 @@ int main(void){
   /* Infinite loop */
   while (1){
 
+	  temperature_raw_data = TempSensRead();
 	  //LED3 turn on and off in 1s interval
 //	  DelayMs(1000);
 //	  GPIOD -> ODR	|= GPIO_ODR_ODR_13;
