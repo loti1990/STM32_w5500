@@ -23,7 +23,9 @@ void ADC1TempInit(){
 
 	ADC1 	-> CR1 		&= ~(ADC_CR1_RES_0 | ADC_CR1_RES_1);	//Setup 12 bit resolution (take 15 ADC clock cycle
 
-	ADC1 	-> CR2 		|= ADC_CR2_ADON;		//Turn on ADC1
+	ADC1 	-> CR2 		|=(ADC_CR2_CONT); 		//Continious convertion mode
+
+	//ADC1 	-> CR2 		|= ADC_CR2_ADON;		//Turn on ADC1
 
 }
 
@@ -36,3 +38,5 @@ uint16_t TempSensRead(){
 
 	return (uint16_t) ADC1 -> DR;
 }
+
+

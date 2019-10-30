@@ -1,0 +1,2 @@
+DMA.c:10:6:DMA2ADC1Init	8	static
+DMA.c:64:6:DMA2Stream0InterruptEnable	0	static

@@ -34,9 +34,11 @@ SOFTWARE.
 #include "SPI.h"
 #include "W5500.h"
 #include "ADC.h"
+#include "DMA.h"
 
 void EXTI0_IRQHandler(void); 		//Initialization of handler for external interrupt on line 0
 void EXTI3_IRQHandler(void); 		//Initialization of handler for external interrupt on line 3
+void DMA2_Stream0_IRQHandler(void); //Initialization of handler for DMA2 interrupt on stream 0
 
 //GLOBAL VARIABLES
 
@@ -54,7 +56,12 @@ int main(void){
   uint32_t ret_code_from_sysTick; 	//return code from SysTick_Config function 1 for error see core_cm4.h
   uint8_t error_hand;
 
-  uint16_t temperature_raw_data = 0;
+  volatile uint16_t adc_data[16];
+
+  volatile uint16_t i = 0;
+
+  //volatile float temperature = 0.0;
+  //volatile uint16_t temp = 0;
 
   //Init GPIOA
   InitGPIO();
@@ -64,6 +71,11 @@ int main(void){
   SPI1Init();
   //Init ADC1 for temp sensor
   ADC1TempInit();
+  //Initialize DAM for ADC1 temperature sensor
+  DMA2ADC1Init(16, (uint32_t *) &ADC1 -> DR, (uint32_t *) &adc_data);
+  //Enable interrupt for DMA2 stream 0
+  DMA2Stream0InterruptEnable();
+
   //W5500 initialize
   //W5500Init();
   if(W5500SpiConnCheck() == 0){
@@ -91,11 +103,20 @@ int main(void){
   }
 
 
-  //ADDED COMENT FOR GIT EXAMPLE
+
+
+  DMA2_Stream0 	-> CR		|= (DMA_SxCR_EN);
+  ADC1 			-> CR2 		|= (ADC_CR2_DMA);
+  //ADC1 			-> CR2 		|= (ADC_CR2_DDS);
+  ADC1 	-> CR2 		|= ADC_CR2_ADON;
+  ADC1 			-> CR2 		|= ADC_CR2_SWSTART;
+
+
   /* Infinite loop */
   while (1){
-
-	  temperature_raw_data = TempSensRead();
+	  i++;
+	  //temp = TempSensRead();
+	  //temperature = (((3.0*(float)temp/4095.0)-0.76)/0.0025)+25.0;
 	  //LED3 turn on and off in 1s interval
 //	  DelayMs(1000);
 //	  GPIOD -> ODR	|= GPIO_ODR_ODR_13;
@@ -184,4 +205,24 @@ void EXTI0_IRQHandler(void){
 		}
 		EXTI -> PR |= EXTI_PR_PR0; 	//Clear flag this is necessary
 	}
+}
+
+//DMA2 interrupt handler on stream 0
+void DMA2_Stream0_IRQHandler(void){
+
+	//Check if interrupt was ocured on stream 0 transfer complete
+	if(DMA2 -> LISR & DMA_LISR_TCIF0){
+
+		if((GPIOD -> ODR & GPIO_ODR_ODR_13) != 0){
+
+			GPIOD -> ODR	&= ~(GPIO_ODR_ODR_13); 	//LED3 off
+		}else{
+
+			GPIOD -> ODR	|= GPIO_ODR_ODR_13; 	//LED3 on
+		}
+	}
+	DMA2 -> LIFCR	|= DMA_LIFCR_CTCIF0; 		//Clear interrupt flag
+	DMA2 -> LIFCR	|= DMA_LIFCR_CHTIF0; 		//Clear interrupt flag
+	DMA2_Stream0 	-> CR		&= ~(DMA_SxCR_EN);
+	ADC1 			-> CR2 		&= ~(ADC_CR2_DMA);
 }

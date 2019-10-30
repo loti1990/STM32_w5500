@@ -41,7 +41,7 @@ void InitGPIO(void){
 	//NVIC_EnableIRQ(EXTI3_IRQn);						//Enable external interrupt
 	NVIC -> ISER[0] 	|= (1 << EXTI3_IRQn); 			//Enable external interrupt
 	//NVIC_SetPriority(EXTI3_IRQn,1); 					//set priority of EXTI3_IRQn to 1 (lower are the number the higher are priority)
-	NVIC -> IP[EXTI3_IRQn] 		= (uint8_t) 0x01;		//set priority of EXTI3_IRQn to 1 (lower are the number the higher are priority)
+	NVIC -> IP[EXTI3_IRQn] 		= (uint8_t) 0x02;		//set priority of EXTI3_IRQn to 2 (lower are the number the higher are priority)
 	//Select external interrupt in SYSCFG register
 	SYSCFG -> EXTICR[0] |= SYSCFG_EXTICR1_EXTI3_PA;		//PA3 as external interrupt setting up in EXTICR1
 	//Interrupt was generated in high to low voltage transition
