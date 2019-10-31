@@ -56,12 +56,12 @@ int main(void){
   uint32_t ret_code_from_sysTick; 	//return code from SysTick_Config function 1 for error see core_cm4.h
   uint8_t error_hand;
 
-  volatile uint16_t adc_data[16];
+  volatile uint16_t adc_data[256];
 
   volatile uint16_t i = 0;
 
-  //volatile float temperature = 0.0;
-  //volatile uint16_t temp = 0;
+  volatile float temperature = 0.0;
+  volatile uint16_t temp = 0;
 
   //Init GPIOA
   InitGPIO();
@@ -72,7 +72,7 @@ int main(void){
   //Init ADC1 for temp sensor
   ADC1TempInit();
   //Initialize DAM for ADC1 temperature sensor
-  DMA2ADC1Init(16, (uint32_t *) &ADC1 -> DR, (uint32_t *) &adc_data);
+  DMA2ADC1Init((uint16_t)256, (uint32_t *) &ADC1 -> DR, (uint32_t *) &adc_data);
   //Enable interrupt for DMA2 stream 0
   DMA2Stream0InterruptEnable();
 
@@ -105,16 +105,25 @@ int main(void){
 
 
 
-  DMA2_Stream0 	-> CR		|= (DMA_SxCR_EN);
-  ADC1 			-> CR2 		|= (ADC_CR2_DMA);
-  //ADC1 			-> CR2 		|= (ADC_CR2_DDS);
-  ADC1 	-> CR2 		|= ADC_CR2_ADON;
-  ADC1 			-> CR2 		|= ADC_CR2_SWSTART;
 
 
+  DMA2ADC1CollectNewData();
   /* Infinite loop */
   while (1){
-	  i++;
+
+	  if(!(ADC1->CR2&ADC_CR2_ADON)){
+
+		  for(i = 0; i < 256; i++){
+			  if(i == 1){
+				  temp = adc_data[i];
+			  }else{
+				  temp +=adc_data[i];
+				  temp = temp >> 1;
+			  }
+		  }
+		  temperature = (((3.0*(float)temp/4095.0)-0.76)/0.0025)+25.0;
+		  DMA2ADC1CollectNewData();
+	  }
 	  //temp = TempSensRead();
 	  //temperature = (((3.0*(float)temp/4095.0)-0.76)/0.0025)+25.0;
 	  //LED3 turn on and off in 1s interval
@@ -221,8 +230,11 @@ void DMA2_Stream0_IRQHandler(void){
 			GPIOD -> ODR	|= GPIO_ODR_ODR_13; 	//LED3 on
 		}
 	}
-	DMA2 -> LIFCR	|= DMA_LIFCR_CTCIF0; 		//Clear interrupt flag
-	DMA2 -> LIFCR	|= DMA_LIFCR_CHTIF0; 		//Clear interrupt flag
-	DMA2_Stream0 	-> CR		&= ~(DMA_SxCR_EN);
-	ADC1 			-> CR2 		&= ~(ADC_CR2_DMA);
+
+	DMA2_Stream0 	-> CR		&= ~(DMA_SxCR_EN); 		//Disable DMA2 Stream 0 Chanel0
+	ADC1 			-> CR2 		&= ~(ADC_CR2_DMA); 		//Disable DMA in adc1 CR
+	ADC1 			-> CR2 		&= ~(ADC_CR2_ADON); 	//Turn ADC1 to OFF state
+
+	DMA2 -> LIFCR	|= DMA_LIFCR_CTCIF0; 				//Clear interrupt flag for transfer complete
+	DMA2 -> LIFCR	|= DMA_LIFCR_CHTIF0; 				//Clear interrupt flag for transfer half transfer
 }

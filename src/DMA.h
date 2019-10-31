@@ -11,5 +11,6 @@ void DMA2ADC1Init(uint16_t data_num, uint32_t *peripheral_address, uint32_t *mem
 
 void DMA2Stream0InterruptEnable(void); 																//Direct memory access enable interrupt on stream 0
 
+void DMA2ADC1CollectNewData(void); 																	//Collect new data from ADC1
 
 #endif /* DMA_H_ */

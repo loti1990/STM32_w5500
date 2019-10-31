@@ -49,7 +49,7 @@ void DMA2ADC1Init(uint16_t data_num, uint32_t *peripheral_address, uint32_t *mem
 	DMA2_Stream0 -> CR		&= ~(DMA_SxCR_HTIE | DMA_SxCR_TEIE | DMA_SxCR_DMEIE); 			//Half transfer interrupt -> disable; Transfer error interrupt -> disable; Direct mode error interrupt -> disable
 
 	//Data length to be transfered
-	DMA2_Stream0 -> NDTR 	= data_num;							//Number of data items to transfer
+	DMA2_Stream0 -> NDTR 	= data_num;								//Number of data items to transfer
 
 	//Peripheral address register
 	DMA2_Stream0 -> PAR 	= (uint32_t) peripheral_address;		//Peripheral address
@@ -60,7 +60,6 @@ void DMA2ADC1Init(uint16_t data_num, uint32_t *peripheral_address, uint32_t *mem
 }
 
 //DMA2 enable interrupt on stream line 0
-
 void DMA2Stream0InterruptEnable(void){
 
 	//Enable DMA interrupt on stream 0
@@ -69,4 +68,12 @@ void DMA2Stream0InterruptEnable(void){
 	//Setup DMA priority on stream 0
 	NVIC_SetPriority(DMA2_Stream0_IRQn,1);
 
+}
+
+void DMA2ADC1CollectNewData(void){
+
+	  DMA2_Stream0 	-> CR		|= (DMA_SxCR_EN); 		//Enable DAM2
+	  ADC1 			-> CR2 		|= (ADC_CR2_DMA); 		//Enable DMA on ADC1
+	  ADC1 			-> CR2 		|= ADC_CR2_ADON; 		//Turn ADC1 to ON state
+	  ADC1 			-> CR2 		|= ADC_CR2_SWSTART; 	//Software start ADC1
 }
