@@ -56,12 +56,12 @@ int main(void){
   uint32_t ret_code_from_sysTick; 	//return code from SysTick_Config function 1 for error see core_cm4.h
   uint8_t error_hand;
 
-  volatile uint16_t adc_data[256];
-
-  volatile uint16_t i = 0;
-
-  volatile float temperature = 0.0;
-  volatile uint16_t temp = 0;
+//  volatile uint16_t adc_data[256];
+//
+//  volatile uint16_t i = 0;
+//
+//  volatile float temperature = 0.0;
+//  volatile uint16_t temp = 0;
 
   //Init GPIOA
   InitGPIO();
@@ -70,11 +70,11 @@ int main(void){
   //Init SPI1
   SPI1Init();
   //Init ADC1 for temp sensor
-  ADC1TempInit();
+  //ADC1TempInit();
   //Initialize DAM for ADC1 temperature sensor
-  DMA2ADC1Init((uint16_t)256, (uint32_t *) &ADC1 -> DR, (uint32_t *) &adc_data);
+  //DMA2ADC1Init((uint16_t)256, (uint32_t *) &ADC1 -> DR, (uint32_t *) &adc_data);
   //Enable interrupt for DMA2 stream 0
-  DMA2Stream0InterruptEnable();
+  //DMA2Stream0InterruptEnable();
 
   //W5500 initialize
   //W5500Init();
@@ -103,27 +103,26 @@ int main(void){
   }
 
 
+  //DMA2ADC1CollectNewData();
 
-
-
-
-  DMA2ADC1CollectNewData();
   /* Infinite loop */
   while (1){
 
-	  if(!(ADC1->CR2&ADC_CR2_ADON)){
+// 		ADC1 temperature read
+//	  if(!(ADC1->CR2&ADC_CR2_ADON)){
+//
+//		  for(i = 0; i < 256; i++){
+//			  if(i == 1){
+//				  temp = adc_data[i];
+//			  }else{
+//				  temp +=adc_data[i];
+//				  temp = temp >> 1;
+//			  }
+//		  }
+//		  temperature = (((3.0*(float)temp/4095.0)-0.76)/0.0025)+25.0;
+//		  DMA2ADC1CollectNewData();
+//	  }
 
-		  for(i = 0; i < 256; i++){
-			  if(i == 1){
-				  temp = adc_data[i];
-			  }else{
-				  temp +=adc_data[i];
-				  temp = temp >> 1;
-			  }
-		  }
-		  temperature = (((3.0*(float)temp/4095.0)-0.76)/0.0025)+25.0;
-		  DMA2ADC1CollectNewData();
-	  }
 	  //temp = TempSensRead();
 	  //temperature = (((3.0*(float)temp/4095.0)-0.76)/0.0025)+25.0;
 	  //LED3 turn on and off in 1s interval
@@ -139,46 +138,7 @@ int main(void){
 	  //DelayUs(1);
 	  //SPI1SendNByte(test_data,4);
 
-//	  test_data[0] = 0x00;
-//	  test_data[1] = 0x09;
-//	  test_data[2] = 0x04;
-//	  SPI1SendNByte(test_data,4);
-//	  test_data[0] = 0x00;
-//	  test_data[1] = 0x09;
-//	  test_data[2] = 0x00;
-//	  test_receive = SPI1SendNByteReceive1Byte(test_data,3);
 
-//	  test_data[0] = 0x00;
-//	  test_data[1] = 0x0f;
-//	  test_data[2] = 0x00;
-//	  test_receive = SPI1SendNByteReceive1Byte(test_data,3);
-//
-//	  test_data[0] = 0x00;
-//	  test_data[1] = 0x10;
-//	  test_data[2] = 0x00;
-//	  test_receive = SPI1SendNByteReceive1Byte(test_data,3);
-//
-//	  test_data[0] = 0x00;
-//	  test_data[1] = 0x11;
-//	  test_data[2] = 0x00;
-//	  test_receive = SPI1SendNByteReceive1Byte(test_data,3);
-//
-//	  test_data[0] = 0x00;
-//	  test_data[1] = 0x12;
-//	  test_data[2] = 0x00;
-//	  test_receive = SPI1SendNByteReceive1Byte(test_data,3);
-//
-//	  test_data[0] = 0x00;
-//	  test_data[1] = 0x13;
-//	  test_data[2] = 0x00;
-//	  test_receive = SPI1SendNByteReceive1Byte(test_data,3);
-
-
-
-	  //Enable SPI3
-	  //SPI3 -> CR1 	|= SPI_CR1_SPE;
-	  //Disable SPI3
-	  //SPI3 -> CR1 	&= ~(SPI_CR1_SPE);
   }
 }
 
@@ -187,7 +147,7 @@ void EXTI3_IRQHandler(void){
 	//Check if interrupt occurred in W5500 side
 	if((EXTI -> PR & EXTI_PR_PR3) != 0){
 
-		if(CheckInterruptStatus() == 0){ //check on which socket occurred interrupt
+		if(CheckInterruptStatus() == 0){ 		//check on which socket occurred interrupt
 
 			if((GPIOD -> ODR & GPIO_ODR_ODR_13) != 0){
 

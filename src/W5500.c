@@ -213,6 +213,25 @@ void W5500InitV2(uint8_t *ip, uint8_t *gateway, uint8_t *submask, uint8_t *mac){
 	//temporary register, necessary to initialize to initial state
 	uint8_t temp_array[10] = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 
+	//S/W reset W5500
+	temp_array[0] 	= MSB(W5500_CRB_MR);			//set address for common mode register MSB
+	temp_array[1] 	= LSB(W5500_CRB_MR);			//set address for common mode register LSB
+	temp_array[2] 	= (W5500_CP_BSB_CR
+					| W5500_CP_WRITE
+					| W5500_CP_OM_VDLM); 			//set byte for write in to common register
+	temp_array[3] 	= (W5500_CRB_MR_RST); 			//write in to common mode register
+	//write thru spi communication
+	SPI1SendNByte(temp_array,4);
+
+	//Read PHY register if PHY was reset
+	temp_array[0]	= MSB(W5500_CRB_MR);
+	temp_array[1]	= LSB(W5500_CRB_MR);
+	temp_array[2] 	= (W5500_CP_BSB_CR
+					| W5500_CP_READ
+					| W5500_CP_OM_VDLM); 				//set byte for reading from PHY
+	//wait on PHY comes back from reset state
+	while((SPI1SendNByteReceive1Byte(temp_array,3) & W5500_CRB_MR_RST));
+
 
 	//w5500 enable ping response
 	temp_array[0] 		= MSB(W5500_CRB_MR);			//set address for common mode register MSB
@@ -306,8 +325,8 @@ void W5500InitV2(uint8_t *ip, uint8_t *gateway, uint8_t *submask, uint8_t *mac){
 //Input parameters:
 //Socket number 	<socket_no> 	(0,1,2,3,4,5,6,7)
 //Port number 		<port>			for example 1000
-//TX buffer size 	<TX_buff_size> 	(0,1,2,4,8,16)
-//RX buffer size 	<RX_buff_size> 	(0,1,2,4,8,16)
+//TX buffer size 	<TX_buff_size> 	(0,1,2,4,8,16) KB
+//RX buffer size 	<RX_buff_size> 	(0,1,2,4,8,16) KB
 //Returned value 	0-OK status 1- error
 uint8_t W5500InitTCP(uint8_t socket_no, uint16_t port, uint8_t TX_buff_size, uint8_t RX_buff_size){
 
@@ -345,6 +364,7 @@ uint8_t W5500InitTCP(uint8_t socket_no, uint16_t port, uint8_t TX_buff_size, uin
 	default:
 		return 1; 										//error
 	}
+
 
 
 	//enable interrupt for socket n
@@ -567,62 +587,62 @@ uint8_t CheckInterruptStatus(){
 	default:
 		return 8;
 	}
-	////////////////TESTNO ZA RAZJASNITEV DELOVANJA PREKINITEV
-
-	//read interrupt flag from Sn_IR register
-	temp_array[0]	= MSB(W5500_SR_IR);
-	temp_array[1]	= LSB(W5500_SR_IR);
-	temp_array[2] 	= (socket_sel_register
-					| W5500_CP_READ
-					| W5500_CP_OM_VDLM); 				//set byte for reading from socket n register
-
-	//read from Sn_IR register
-	SPI1SendNByteReceive1Byte(temp_array,3);
-
-	//write in to interrupt Sn_IR register
-	temp_array[0]	= MSB(W5500_SR_IR);
-	temp_array[1]	= LSB(W5500_SR_IR);
-	temp_array[2] 	= (socket_sel_register
-					| W5500_CP_WRITE
-					| W5500_CP_OM_VDLM); 				//set byte for  writing in to socket n register
-	temp_array[3] 	= 0x03;
-
-	//write in to Sn_IR register
-	SPI1SendNByte(temp_array,4);
-
-	//read interrupt flag from Sn_IR register
-	temp_array[0]	= MSB(W5500_SR_IR);
-	temp_array[1]	= LSB(W5500_SR_IR);
-	temp_array[2] 	= (socket_sel_register
-					| W5500_CP_READ
-					| W5500_CP_OM_VDLM); 				//set byte for reading from socket n register
-
-	//read from Sn_IR register
-	SPI1SendNByteReceive1Byte(temp_array,3);
-
-
-	//clear interrupt flag in SIR register
-	temp_array[0]	= MSB(W5500_CRB_SIR);
-	temp_array[1]	= LSB(W5500_CRB_SIR);
-	temp_array[2] 	= (W5500_CP_BSB_CR
-					| W5500_CP_WRITE
-					| W5500_CP_OM_VDLM); 					//set byte for reading from common register
-	temp_array[3] 	= temp_array[4] & ~(1 << socket_num);
-
-	//write thru spi communication
-	SPI1SendNByte(temp_array,4);
-
-	//Read from socket interrupt register
-	temp_array[0]	= MSB(W5500_CRB_SIR);
-	temp_array[1]	= LSB(W5500_CRB_SIR);
-	temp_array[2] 	= (W5500_CP_BSB_CR
-					| W5500_CP_READ
-					| W5500_CP_OM_VDLM); 				//set byte for reading from common register
-
-	//read from SIR register
-	SPI1SendNByteReceive1Byte(temp_array,3);
-
-	////////////////TESTNO ZA RAZJASNITEV DELOVANJA PREKINITEV
+//	////////////////TESTNO ZA RAZJASNITEV DELOVANJA PREKINITEV
+//
+//	//read interrupt flag from Sn_IR register
+//	temp_array[0]	= MSB(W5500_SR_IR);
+//	temp_array[1]	= LSB(W5500_SR_IR);
+//	temp_array[2] 	= (socket_sel_register
+//					| W5500_CP_READ
+//					| W5500_CP_OM_VDLM); 				//set byte for reading from socket n register
+//
+//	//read from Sn_IR register
+//	SPI1SendNByteReceive1Byte(temp_array,3);
+//
+//	//write in to interrupt Sn_IR register
+//	temp_array[0]	= MSB(W5500_SR_IR);
+//	temp_array[1]	= LSB(W5500_SR_IR);
+//	temp_array[2] 	= (socket_sel_register
+//					| W5500_CP_WRITE
+//					| W5500_CP_OM_VDLM); 				//set byte for  writing in to socket n register
+//	temp_array[3] 	= 0x03;
+//
+//	//write in to Sn_IR register
+//	SPI1SendNByte(temp_array,4);
+//
+//	//read interrupt flag from Sn_IR register
+//	temp_array[0]	= MSB(W5500_SR_IR);
+//	temp_array[1]	= LSB(W5500_SR_IR);
+//	temp_array[2] 	= (socket_sel_register
+//					| W5500_CP_READ
+//					| W5500_CP_OM_VDLM); 				//set byte for reading from socket n register
+//
+//	//read from Sn_IR register
+//	SPI1SendNByteReceive1Byte(temp_array,3);
+//
+//
+//	//clear interrupt flag in SIR register
+//	temp_array[0]	= MSB(W5500_CRB_SIR);
+//	temp_array[1]	= LSB(W5500_CRB_SIR);
+//	temp_array[2] 	= (W5500_CP_BSB_CR
+//					| W5500_CP_WRITE
+//					| W5500_CP_OM_VDLM); 					//set byte for reading from common register
+//	temp_array[3] 	= temp_array[4] & ~(1 << socket_num);
+//
+//	//write thru spi communication
+//	SPI1SendNByte(temp_array,4);
+//
+//	//Read from socket interrupt register
+//	temp_array[0]	= MSB(W5500_CRB_SIR);
+//	temp_array[1]	= LSB(W5500_CRB_SIR);
+//	temp_array[2] 	= (W5500_CP_BSB_CR
+//					| W5500_CP_READ
+//					| W5500_CP_OM_VDLM); 				//set byte for reading from common register
+//
+//	//read from SIR register
+//	SPI1SendNByteReceive1Byte(temp_array,3);
+//
+//	////////////////TESTNO ZA RAZJASNITEV DELOVANJA PREKINITEV
 
 	return socket_num;
 }
