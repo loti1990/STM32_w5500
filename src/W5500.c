@@ -518,8 +518,11 @@ uint8_t CheckInterruptStatus(){
 
 	//temporary register, necessary to initialize to initial state
 	uint8_t temp_array[5] = {0x00,0x00,0x00,0x00,0x00};
-	//socket number register
-	uint8_t socket_num;
+
+	//socket number register with status
+	//[0:4] bits represent what cause interrupt
+	//[5:7] bits represent on which socket was occured interrupt
+	uint8_t socket_num_and_status;
 	//socket address selected register
 	uint8_t socket_sel_register;
 
@@ -528,7 +531,7 @@ uint8_t CheckInterruptStatus(){
 	temp_array[1]	= LSB(W5500_CRB_SIR);
 	temp_array[2] 	= (W5500_CP_BSB_CR
 					| W5500_CP_READ
-					| W5500_CP_OM_VDLM); 				//set byte for reading from common register
+					| W5500_CP_OM_VDLM); 				//set byte for reading from common interrupt register
 
 	//read from SIR register
 	temp_array[4] 	= SPI1SendNByteReceive1Byte(temp_array,3);
@@ -536,57 +539,89 @@ uint8_t CheckInterruptStatus(){
 	switch(temp_array[4]){
 
 	//interrupt occurred on socket 0
-	case 1:
-		socket_num 			= 0;
+	case W5500_CRB_SIR_S0:
+		socket_num_and_status	= 0 << 5; 				//8b000_00000
 		socket_sel_register = W5500_CP_BSB_S0_R; 		//socket 0 address
 		break;
 
 	//interrupt occurred on socket 1
-	case 2:
-		socket_num 			= 1;
+	case W5500_CRB_SIR_S1:
+		socket_num_and_status	= 1 << 5; 				//8b001_00000
 		socket_sel_register = W5500_CP_BSB_S1_R; 		//socket 1 address
 		break;
 
 	//interrupt occurred on socket 2
-	case 4:
-		socket_num 			= 2;
+	case W5500_CRB_SIR_S2:
+		socket_num_and_status	= 2 << 5; 				//8b010_00000
 		socket_sel_register = W5500_CP_BSB_S2_R; 		//socket 2 address
 		break;
 
 	//interrupt occurred on socket 3
-	case 8:
-		socket_num 			= 3;
+	case W5500_CRB_SIR_S3:
+		socket_num_and_status	= 3 << 5; 				//8b011_00000
 		socket_sel_register = W5500_CP_BSB_S3_R; 		//socket 3 address
 		break;
 
 	//interrupt occurred on socket 4
-	case 16:
-		socket_num 			= 4;
+	case W5500_CRB_SIR_S4:
+		socket_num_and_status	= 4 << 5; 				//8b100_00000
 		socket_sel_register = W5500_CP_BSB_S4_R; 		//socket 4 address
 		break;
 
 	//interrupt occurred on socket 5
-	case 32:
-		socket_num 			= 5;
+	case W5500_CRB_SIR_S5:
+		socket_num_and_status	= 5 << 5; 				//8b101_00000
 		socket_sel_register = W5500_CP_BSB_S5_R; 		//socket 5 address
 		break;
 
 	//interrupt occurred on socket 6
-	case 64:
-		socket_num 			= 6;
+	case W5500_CRB_SIR_S6:
+		socket_num_and_status	= 6 << 5; 				//8b110_00000
 		socket_sel_register = W5500_CP_BSB_S6_R; 		//socket 6 address
 		break;
 
 	//interrupt occurred on socket 7
-	case 128:
-		socket_num 			= 7;
+	case W5500_CRB_SIR_S7:
+		socket_num_and_status	= 7 << 5; 				//8b111_00000
 		socket_sel_register = W5500_CP_BSB_S7_R; 		//socket 7 address
 		break;
 
 	//interrupt occurred on multiple sockets
 	default:
-		return 8;
+		return 0;
 	}
+
+	//read interrupt flag from Sn_IR register
+	temp_array[0]	= MSB(W5500_SR_IR);
+	temp_array[1]	= LSB(W5500_SR_IR);
+	temp_array[2] 	= (socket_sel_register
+					| W5500_CP_READ
+					| W5500_CP_OM_VDLM); 				//set byte for reading from socket n register interrupt register
+
+	//read from Sn_IR register
+	socket_num_and_status |= SPI1SendNByteReceive1Byte(temp_array,3);
+
+	//write in to interrupt Sn_IR register
+	temp_array[0]	= MSB(W5500_SR_IR);
+	temp_array[1]	= LSB(W5500_SR_IR);
+	temp_array[2] 	= (socket_sel_register
+					| W5500_CP_WRITE
+					| W5500_CP_OM_VDLM); 				//set byte for  writing in to socket n interrupt register
+	temp_array[3] 	= (socket_num_and_status & 0x1F); 	//clear interrupt flag (use lower 5 bits in variable "socket_num_and_status")
+
+	//write in to Sn_IR register
+	SPI1SendNByte(temp_array,4);
+
+	//clear interrupt flag in SIR register
+	temp_array[0]	= MSB(W5500_CRB_SIR);
+	temp_array[1]	= LSB(W5500_CRB_SIR);
+	temp_array[2] 	= (W5500_CP_BSB_CR
+					| W5500_CP_WRITE
+					| W5500_CP_OM_VDLM); 					//set byte for reading from common register
+	temp_array[3] 	= 0x00; 								//clear status interrupt register
+
+
+
 //	////////////////TESTNO ZA RAZJASNITEV DELOVANJA PREKINITEV
 //
 //	//read interrupt flag from Sn_IR register
@@ -644,7 +679,7 @@ uint8_t CheckInterruptStatus(){
 //
 //	////////////////TESTNO ZA RAZJASNITEV DELOVANJA PREKINITEV
 
-	return socket_num;
+	return socket_num_and_status;
 }
 
 /*
