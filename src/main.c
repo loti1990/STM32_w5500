@@ -82,7 +82,7 @@ int main(void){
 
 	  W5500InitV2(ip, gateway, submask, mac);
 	  //Initialize socket n for TCP protocol
-	  error_hand = W5500InitTCP(TCP_sorket_num,1024,2,2);
+	  error_hand = W5500InitTCP(TCP_sorket_num,1024,1,1);
 	  //error was occurred
 	  if(error_hand !=0)return 0;
 	  //Open TCP server socket
@@ -146,7 +146,7 @@ int main(void){
 void EXTI3_IRQHandler(void){
 
 	//w5500 socket number and status
-	uint8_t w5500_socket_interrupt_status;
+	volatile uint8_t w5500_socket_interrupt_status;
 
 	//Check if interrupt occurred in W5500 side
 	if((EXTI -> PR & EXTI_PR_PR3) != 0){
@@ -161,6 +161,10 @@ void EXTI3_IRQHandler(void){
 			break;
 
 		case W5500_SR_IR_CON:
+
+			break;
+
+		case W5500_SR_IR_RECV:
 			if((GPIOD -> ODR & GPIO_ODR_ODR_13) != 0){
 
 				GPIOD -> ODR	&= ~(GPIO_ODR_ODR_13); 	//LED3 off

@@ -488,6 +488,7 @@ uint8_t W5500OpenTCPServer(uint8_t socket_no){
 	while(!(SPI1SendNByteReceive1Byte(temp_array,3) == W5500_SR_SR_SOCK_INIT));
 
 
+
 	//listen Socket n
 	temp_array[0] 	= MSB(W5500_SR_CR);
 	temp_array[1] 	= LSB(W5500_SR_CR);

@@ -27,10 +27,16 @@ void SPI1Init(){
 	//SPI 8-bit data frame format
 	SPI1 -> CR1 	&= ~(SPI_CR1_DFF);
 
+
+
+	//SPI baud rate for debug purpose
+	//SPI1 -> CR1 	|= (SPI_CR1_BR_1 |  SPI_CR1_BR_0); 	// 84 MHz / 16 = 5.25 MHz good for saleale debuging !!
+	SPI1 -> CR1 	|= ( SPI_CR1_BR_0); 				// 84 MHz / 4 = 21 MHz
+	//SPI1 -> CR1 	|= SPI_CR1_BR; 		// 84 MHz / 256 = 328 kHz (only in test version)
+
 	//SPI baud rate without prescaler the sclk clock would be 42 MHz
 	//SPI1 -> CR1 	|= ~(SPI_CR1_BR); 	// 84 MHz / 2 = 42 MHz
-	SPI1 -> CR1 	|= (SPI_CR1_BR_1 |  SPI_CR1_BR_0); 	// 84 MHz / 16 = 5.25 MHz
-	//SPI1 -> CR1 	|= SPI_CR1_BR; 		// 84 MHz / 256 = 328 kHz (only in test version)
+
 
 	//SPI in master mode configuration
 	SPI1 -> CR1 	|= SPI_CR1_MSTR;
