@@ -17,10 +17,14 @@ void InitGPIO(void){
 	RCC -> AHB1ENR |= RCC_AHB1ENR_GPIODEN;
 	//Enable SPI3 APB1 clock source 42 MHz max clock
 	RCC -> APB1ENR |= RCC_APB1ENR_SPI3EN;
+	//Enable USART3 CLK enable clk source 42 Mhz
+	RCC -> APB1ENR |= RCC_APB1ENR_USART3EN;
 	//Enable SPI1 APB2 clock source 84 MHz max clock
 	RCC -> APB2ENR |= RCC_APB2ENR_SPI1EN;
 	//Enable SYSCONFIG for interrupt purpose
 	RCC -> APB2ENR |= RCC_APB2ENR_SYSCFGEN;
+
+
 
 	/**********************************************************************************
 	//////////////////////////PIN CONFIGURATION////////////////////////////////////////
@@ -96,6 +100,29 @@ void InitGPIO(void){
 	GPIOA -> PUPDR 		&= ~(GPIO_PUPDR_PUPDR2); 		//PA2 pull-up
 	GPIOA -> ODR 		|= GPIO_ODR_ODR_2; 				//Enable W5500 module
 
+
+	/**********************************************************************************
+	//////////////////////////USART3 CONFIGURATION/////////////////////////////////////
+	***********************************************************************************/
+
+	//////////
+	//USART3 RX
+	//////////
+	GPIOB -> MODER  	|= GPIO_MODER_MODER11_1; 	//PB11 pin as alternate function
+	GPIOB -> OTYPER     &= ~(GPIO_OTYPER_OT_11); 	//PB11 output type push-pull
+	GPIOB -> OSPEEDR 	|= GPIO_OSPEEDER_OSPEEDR11; //PB11 output speed register (very high speed)
+	GPIOB -> PUPDR		|= GPIO_PUPDR_PUPDR11_0; 	//PB11 pull-up
+	GPIOB -> AFR[1] 	|= (0x07 << 12); 			//PB11 alternate function USART3 RX
+
+
+	//////////
+	//USART3 TX
+	//////////
+	GPIOB -> MODER  	|= GPIO_MODER_MODER10_1; 	//PB10 pin as alternate function
+	GPIOB -> OTYPER     &= ~(GPIO_OTYPER_OT_10); 	//PB10 output type push-pull
+	GPIOB -> OSPEEDR 	|= GPIO_OSPEEDER_OSPEEDR10; //PB10 output speed register (very high speed)
+	GPIOB -> PUPDR		|= GPIO_PUPDR_PUPDR10_0; 	//PB10 pull-up
+	GPIOB -> AFR[1] 	|= (0x07 << 8); 			//PB10 alternate function USART3 TX
 
 
 	/**********************************************************************************

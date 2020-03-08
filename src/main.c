@@ -35,6 +35,7 @@ SOFTWARE.
 #include "W5500.h"
 #include "ADC.h"
 #include "DMA.h"
+#include "USART.h"
 
 void EXTI0_IRQHandler(void); 		//Initialization of handler for external interrupt on line 0
 void EXTI3_IRQHandler(void); 		//Initialization of handler for external interrupt on line 3
@@ -54,7 +55,7 @@ uint8_t TCP_sorket_num 			= 0;								//TCP socket number form 0 to 7
 int main(void){
 
   uint32_t ret_code_from_sysTick; 	//return code from SysTick_Config function 1 for error see core_cm4.h
-  uint8_t error_hand;
+//  uint8_t error_hand;
 
 //  volatile uint16_t adc_data[256];
 //
@@ -65,10 +66,10 @@ int main(void){
 
   //Init GPIOA
   InitGPIO();
-  //Init SPI3
-  SPI3Init();
   //Init SPI1
   SPI1Init();
+  //USART3 init
+  USART3Init(115200);
   //Init ADC1 for temp sensor
   //ADC1TempInit();
   //Initialize DAM for ADC1 temperature sensor
@@ -77,23 +78,22 @@ int main(void){
   //DMA2Stream0InterruptEnable();
 
   //W5500 initialize
-  //W5500Init();
-  if(W5500SpiConnCheck() == 0){
-
-	  W5500InitV2(ip, gateway, submask, mac);
-	  //Initialize socket n for TCP protocol
-	  error_hand = W5500InitTCP(TCP_sorket_num,1024,1,1);
-	  //error was occurred
-	  if(error_hand !=0)return 0;
-	  //Open TCP server socket
-	  error_hand = W5500OpenTCPServer(TCP_sorket_num);
-	  //error was occurred
-	  if(error_hand !=0)return 0;
-
-  }else{
-
-	  return 0;
-  }
+//  if(W5500SpiConnCheck() == 0){
+//
+//	  W5500InitV2(ip, gateway, submask, mac);
+//	  //Initialize socket n for TCP protocol
+//	  error_hand = W5500InitTCP(TCP_sorket_num,1024,1,1);
+//	  //error was occurred
+//	  if(error_hand !=0)return 0;
+//	  //Open TCP server socket
+//	  error_hand = W5500OpenTCPServer(TCP_sorket_num);
+//	  //error was occurred
+//	  if(error_hand !=0)return 0;
+//
+//  }else{
+//
+//	  return 0;
+//  }
 
   //Configure system ticks to us range
   ret_code_from_sysTick = SysTick_Config(SystemCoreClock / 1000000);
@@ -104,10 +104,16 @@ int main(void){
 
 
   //DMA2ADC1CollectNewData();
+  uint8_t data[6] = {'T','e','s','t','\r','\n'};
+  uint8_t data2[6] = {'K','o','s','t','\r','\n'};
 
   /* Infinite loop */
   while (1){
 
+	  DelayMs(100);
+	  USART3SendText((uint8_t *)&data,5);
+	  DelayMs(100);
+	  USART3SendText((uint8_t *)&data2,5);
 // 		ADC1 temperature read
 //	  if(!(ADC1->CR2&ADC_CR2_ADON)){
 //
@@ -228,4 +234,21 @@ void DMA2_Stream0_IRQHandler(void){
 
 	DMA2 -> LIFCR	|= DMA_LIFCR_CTCIF0; 				//Clear interrupt flag for transfer complete
 	DMA2 -> LIFCR	|= DMA_LIFCR_CHTIF0; 				//Clear interrupt flag for transfer half transfer
+}
+
+//USART3 interrupt handler
+void USART3_IRQHandler(void){
+	if(USART3 -> SR & USART_SR_RXNE){
+
+		if((GPIOD -> ODR & GPIO_ODR_ODR_13) != 0){
+
+			GPIOD -> ODR	&= ~(GPIO_ODR_ODR_13); 	//LED3 off
+		}else{
+
+			GPIOD -> ODR	|= GPIO_ODR_ODR_13; 	//LED3 on
+		}
+		//Clear interrupt
+		USART3 -> SR		&= ~(USART_SR_RXNE);
+	}
+
 }
