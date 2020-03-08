@@ -69,7 +69,7 @@ int main(void){
   //Init SPI1
   SPI1Init();
   //USART3 init
-  USART3Init(115200);
+  USART3Init(1500000);
   //Init ADC1 for temp sensor
   //ADC1TempInit();
   //Initialize DAM for ADC1 temperature sensor
@@ -239,16 +239,18 @@ void DMA2_Stream0_IRQHandler(void){
 //USART3 interrupt handler
 void USART3_IRQHandler(void){
 	if(USART3 -> SR & USART_SR_RXNE){
+		uint8_t temp = USART3 -> DR;
+		if(temp == 0x30){
+			if((GPIOD -> ODR & GPIO_ODR_ODR_13) != 0){
 
-		if((GPIOD -> ODR & GPIO_ODR_ODR_13) != 0){
+				GPIOD -> ODR	&= ~(GPIO_ODR_ODR_13); 	//LED3 off
+			}else{
 
-			GPIOD -> ODR	&= ~(GPIO_ODR_ODR_13); 	//LED3 off
-		}else{
-
-			GPIOD -> ODR	|= GPIO_ODR_ODR_13; 	//LED3 on
+				GPIOD -> ODR	|= GPIO_ODR_ODR_13; 	//LED3 on
+			}
 		}
-		//Clear interrupt
-		USART3 -> SR		&= ~(USART_SR_RXNE);
+		//Clear interrupt if you are not reading form USART3 DR
+		//USART3 -> SR		&= ~(USART_SR_RXNE);
 	}
 
 }
