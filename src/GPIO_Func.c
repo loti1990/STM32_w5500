@@ -70,6 +70,15 @@ void InitGPIO(void){
 	//0- masked (disabled), 1- not masked (enabled)
 	EXTI -> IMR			|= EXTI_IMR_MR0; 				//Enable external interrupt at pin 0
 
+
+	//////////////////////////////////////////////////////////
+	//GPIOB PB0 configure for ADC1 IN8////////////////////////
+	//////////////////////////////////////////////////////////
+	GPIOB -> MODER 		|= GPIO_MODER_MODER0; 			//PB0 analog mode
+	GPIOB -> PUPDR 		&= ~(GPIO_PUPDR_PUPDR0);	 	//PB0 no pull-up or pull-down
+
+
+
 					/*************************************************
 					////////////////////OUTPUTS///////////////////////
 					*************************************************/

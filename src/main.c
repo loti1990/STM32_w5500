@@ -69,7 +69,9 @@ int main(void){
   //Init SPI1
   SPI1Init();
   //USART3 init
-  USART3Init(1500000);
+  USART3Init(115200);
+  //ADC1 enable at channel 8
+  ADC1In8Init();
   //Init ADC1 for temp sensor
   //ADC1TempInit();
   //Initialize DAM for ADC1 temperature sensor
@@ -104,16 +106,22 @@ int main(void){
 
 
   //DMA2ADC1CollectNewData();
-  uint8_t data[6] = {'T','e','s','t','\r','\n'};
-  uint8_t data2[6] = {'K','o','s','t','\r','\n'};
-
+  //uint8_t data[6] = {'T','e','s','t','\r','\n'};
+  //uint8_t data2[6] = {'K','o','s','t','\r','\n'};
+  uint16_t ADC_value = 0;
   /* Infinite loop */
   while (1){
 
-	  DelayMs(100);
-	  USART3SendText((uint8_t *)&data,5);
-	  DelayMs(100);
-	  USART3SendText((uint8_t *)&data2,5);
+
+	  ADC_value = ADC1In8Read();
+	  ADC_value = ADC_value >> 4;
+	  //DelayMs(100);
+	  USART3SendText((uint8_t *)&ADC_value,1);
+	  //DelayMs(100);
+	  //USART3SendText((uint8_t *)&data2,5);
+
+
+
 // 		ADC1 temperature read
 //	  if(!(ADC1->CR2&ADC_CR2_ADON)){
 //

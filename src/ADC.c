@@ -29,6 +29,7 @@ void ADC1TempInit(){
 
 }
 
+//Read temperature value from internal temperature sensor
 uint16_t TempSensRead(){
 
 	ADC1 	-> CR2 		|= ADC_CR2_SWSTART;		//Start conversion
@@ -38,5 +39,41 @@ uint16_t TempSensRead(){
 
 	return (uint16_t) ADC1 -> DR;
 }
+
+
+//ADC1 IN8 on PB0 initialization
+void ADC1In8Init(){
+
+	RCC		-> APB2ENR 	|= RCC_APB2ENR_ADC1EN;	//ADC1 clock enable default APB2 clock was 84 MHz
+
+	ADC1 	-> CR2 		&= ~(ADC_CR2_ADON);		//Turn off ADC1
+
+	ADC 	-> CCR 		|= ADC_CCR_ADCPRE_0; 	//For all ADC clock was set to APB2/4(prescaler) = 84 MHz /4 = 21 MHz (1 cycle was 48 ns)
+
+	ADC1 	-> CR1 		&= ~(ADC_CR1_RES_0 | ADC_CR1_RES_1);	//Setup 12 bit resolution (take 15 ADC clock cycle)
+
+	ADC1	-> SQR3 	|= ADC_SQR3_SQ1_3; 		//Select Channel 8 (at GPIOB PB0) to be converted in first and only sequance
+
+	ADC1 	-> SMPR2 	|= ADC_SMPR2_SMP8_2; 	//Setup sampling time to 480 cycle * 48 ns = 23 us
+
+	ADC1 	-> SQR1		&= ~(ADC_SQR1_L_0 | ADC_SQR1_L_1 | ADC_SQR1_L_2 | ADC_SQR1_L_3); 	// One conversion
+
+	ADC1 	-> CR2 		|= ADC_CR2_ADON;		//Turn on ADC1
+
+	//ADC1 	-> CR2 		|=(ADC_CR2_CONT); 		//Continious convertion mode
+}
+
+//Read ADC value form channel 8 at PB0
+uint16_t ADC1In8Read(){
+
+	ADC1 	-> CR2 		|= ADC_CR2_SWSTART;		//Start conversion
+
+
+	while(!(ADC1 -> SR & ADC_SR_EOC)); 			//Wait on EOC status flag
+
+	return (uint16_t) ADC1 -> DR;
+}
+
+
 
 
