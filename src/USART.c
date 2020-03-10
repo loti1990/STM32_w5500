@@ -36,7 +36,7 @@ void USART3Init(uint32_t baud_rate){
 
 	//Enable interrupt
 	//NVIC_EnableIRQ(USART3_IRQ);
-	NVIC -> ISER[1] 				|= (1 << (USART3_IRQn-32)); 	//Enable external interrupt
+	NVIC -> ISER[1] 				|= (1 << (USART3_IRQn-32)); 	//Enable USART3 interrupt
 
 	//Set priority
 	NVIC -> IP[USART3_IRQn] 		= (uint8_t) 0x02;		//set priority of USART3_IRQ to 2 (lower are the number the higher are priority)

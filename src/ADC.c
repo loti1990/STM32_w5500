@@ -58,6 +58,26 @@ void ADC1In8Init(){
 
 	ADC1 	-> SQR1		&= ~(ADC_SQR1_L_0 | ADC_SQR1_L_1 | ADC_SQR1_L_2 | ADC_SQR1_L_3); 	// One conversion
 
+	//Analog watchdog settings
+
+	ADC1 	-> CR1 		|= ADC_CR1_AWDSGL; 		//Enable watchdog on a single chanel defined below
+
+	ADC1 	-> CR1 		|= ADC_CR1_AWDCH_3; 	//Select analog watchdog channel 8
+
+	ADC1 	-> CR1 		|= ADC_CR1_AWDIE; 		//Interrupt enable for watchdog
+
+	ADC1 	-> CR1 		|= ADC_CR1_AWDEN; 		//Enable analog watchdog on regular chanel
+
+	ADC1   	-> LTR 		= 2000;			//ADC1 watchdog lower treshold register
+
+	ADC1  	-> HTR 		= 2500; 		//ADC1 watchdog higher treshold register
+
+	NVIC -> ISER[0] 	|= (1 << ADC_IRQn); 	//Enable ADC interrupt
+
+	NVIC -> IP[ADC_IRQn] 		= (uint8_t) 0x03;		//set priority of ADC_IRQ to 3 (lower are the number the higher are priority)
+
+	//Analog watchdog settings
+
 	ADC1 	-> CR2 		|= ADC_CR2_ADON;		//Turn on ADC1
 
 	//ADC1 	-> CR2 		|=(ADC_CR2_CONT); 		//Continious convertion mode

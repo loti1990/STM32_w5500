@@ -262,3 +262,21 @@ void USART3_IRQHandler(void){
 	}
 
 }
+
+//ADC interrupt handler
+void ADC_IRQHandler(void){
+
+	//Check for analog watchdog interrupt occured
+	if(ADC1 -> SR & ADC_SR_AWD){
+
+		if((GPIOD -> ODR & GPIO_ODR_ODR_13) != 0){
+
+			GPIOD -> ODR	&= ~(GPIO_ODR_ODR_13); 	//LED3 off
+		}else{
+
+			GPIOD -> ODR	|= GPIO_ODR_ODR_13; 	//LED3 on
+		}
+	ADC1 -> SR 	&= ~(ADC_SR_AWD); 	//Clear watchdog interrupt flag
+	}
+
+}
