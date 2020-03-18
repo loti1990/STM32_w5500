@@ -112,11 +112,12 @@ int main(void){
   /* Infinite loop */
   while (1){
 
-
 	  ADC_value = ADC1In8Read();
-	  ADC_value = ADC_value >> 4;
+
+	  //ADC_value = ADC1In8Read();
+	  //ADC_value = ADC_value >> 4;
 	  //DelayMs(100);
-	  USART3SendText((uint8_t *)&ADC_value,1);
+	  //USART3SendText((uint8_t *)&ADC_value,1);
 	  //DelayMs(100);
 	  //USART3SendText((uint8_t *)&data2,5);
 
@@ -249,13 +250,9 @@ void USART3_IRQHandler(void){
 	if(USART3 -> SR & USART_SR_RXNE){
 		uint8_t temp = USART3 -> DR;
 		if(temp == 0x30){
-			if((GPIOD -> ODR & GPIO_ODR_ODR_13) != 0){
-
-				GPIOD -> ODR	&= ~(GPIO_ODR_ODR_13); 	//LED3 off
-			}else{
-
-				GPIOD -> ODR	|= GPIO_ODR_ODR_13; 	//LED3 on
-			}
+			uint16_t ADC_value = ADC1In8Read();
+			//ADC_value = ADC_value >> 4;
+			USART3SendText((uint8_t *)&ADC_value,2);
 		}
 		//Clear interrupt if you are not reading form USART3 DR
 		//USART3 -> SR		&= ~(USART_SR_RXNE);

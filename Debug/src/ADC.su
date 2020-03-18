@@ -1,4 +1,4 @@
 ADC.c:8:6:ADC1TempInit	0	static
 ADC.c:33:10:TempSensRead	0	static
 ADC.c:45:6:ADC1In8Init	4	static
-ADC.c:89:10:ADC1In8Read	0	static
+ADC.c:87:10:ADC1In8Read	0	static

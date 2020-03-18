@@ -68,13 +68,13 @@ void ADC1In8Init(){
 
 	ADC1 	-> CR1 		|= ADC_CR1_AWDEN; 		//Enable analog watchdog on regular chanel
 
-	ADC1   	-> LTR 		= 2000;			//ADC1 watchdog lower treshold register
+	ADC1   	-> LTR 		= 3900;			//ADC1 watchdog lower treshold register
 
-	ADC1  	-> HTR 		= 2500; 		//ADC1 watchdog higher treshold register
+	ADC1  	-> HTR 		= 4095; 		//ADC1 watchdog higher treshold register
 
 	NVIC -> ISER[0] 	|= (1 << ADC_IRQn); 	//Enable ADC interrupt
 
-	NVIC -> IP[ADC_IRQn] 		= (uint8_t) 0x03;		//set priority of ADC_IRQ to 3 (lower are the number the higher are priority)
+	NVIC -> IP[ADC_IRQn] 		= (uint8_t) 0x02;		//set priority of ADC_IRQ to 2 (lower are the number the higher are priority)
 
 	//Analog watchdog settings
 
