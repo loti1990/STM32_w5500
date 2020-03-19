@@ -41,6 +41,17 @@ void EXTI0_IRQHandler(void); 		//Initialization of handler for external interrup
 void EXTI3_IRQHandler(void); 		//Initialization of handler for external interrupt on line 3
 void DMA2_Stream0_IRQHandler(void); //Initialization of handler for DMA2 interrupt on stream 0
 
+//DEFINITIONS
+#define TH1 	3800
+#define TH2 	3600
+
+//State machine defintions
+#define ST_IDLE 	0x00
+#define ST_TH1 		0x01
+#define ST_INTEG	0x02
+#define ST_PRINT 	0x03
+
+
 //GLOBAL VARIABLES
 
 uint8_t ip[4] 					= {192,168,1,100}; 					//dedicated ip address for external W5500 device
@@ -109,10 +120,52 @@ int main(void){
   //uint8_t data[6] = {'T','e','s','t','\r','\n'};
   //uint8_t data2[6] = {'K','o','s','t','\r','\n'};
   uint16_t ADC_value = 0;
+  uint8_t currentState = 0x00;
+  uint64_t integral = 0;
+
   /* Infinite loop */
   while (1){
 
 	  ADC_value = ADC1In8Read();
+
+	  switch(currentState){
+
+	  case ST_IDLE:
+
+		  if(ADC_value < TH1 && ADC_value > TH2){
+			  currentState = ST_TH1;
+		  }
+
+		  break;
+
+	  case ST_TH1:
+
+		  if(ADC_value < TH2){
+			  currentState = ST_INTEG;
+		  }
+
+		  break;
+
+	  case ST_INTEG:
+
+		  if(ADC_value > TH1){
+			  currentState = ST_PRINT;
+		  }
+
+		  integral += ADC_value;
+
+		  break;
+
+	  case ST_PRINT:
+
+		  USART3SendText((uint8_t *)&integral,8);
+		  integral = 0;
+		  currentState = ST_IDLE;
+
+		  break;
+
+	  }
+
 
 	  //ADC_value = ADC1In8Read();
 	  //ADC_value = ADC_value >> 4;
