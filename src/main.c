@@ -42,7 +42,7 @@ void EXTI3_IRQHandler(void); 		//Initialization of handler for external interrup
 void DMA2_Stream0_IRQHandler(void); //Initialization of handler for DMA2 interrupt on stream 0
 
 //DEFINITIONS
-#define TH1 	3800
+#define TH1 	3900
 #define TH2 	3600
 
 //State machine defintions
