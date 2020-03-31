@@ -42,14 +42,14 @@ void EXTI3_IRQHandler(void); 		//Initialization of handler for external interrup
 void DMA2_Stream0_IRQHandler(void); //Initialization of handler for DMA2 interrupt on stream 0
 
 //DEFINITIONS
-#define TH1 	3900
-#define TH2 	3600
+//#define TH1 	3900
+//#define TH2 	3600
 
 //State machine defintions
-#define ST_IDLE 	0x00
-#define ST_TH1 		0x01
-#define ST_INTEG	0x02
-#define ST_PRINT 	0x03
+//#define ST_IDLE 	0x00
+//#define ST_TH1 		0x01
+//#define ST_INTEG	0x02
+//#define ST_PRINT 	0x03
 
 
 //GLOBAL VARIABLES
@@ -59,14 +59,14 @@ uint8_t gateway[4]				= {192,168,1,1}; 					//gateway
 uint8_t submask[4]				= {255,255,255,0}; 					//subnet mask
 uint8_t mac[6]					= {0x00,0x08,0xdc,0x01,0x02,0x03}; 	//dedicated mac address
 uint8_t TCP_sorket_num 			= 0;								//TCP socket number form 0 to 7
-
+uint16_t port 					= 1024; 							//TCP socket port
 //
 //MAIN
 //
 int main(void){
 
   uint32_t ret_code_from_sysTick; 	//return code from SysTick_Config function 1 for error see core_cm4.h
-//  uint8_t error_hand;
+  uint8_t error_hand;
 
 //  volatile uint16_t adc_data[256];
 //
@@ -80,9 +80,9 @@ int main(void){
   //Init SPI1
   SPI1Init();
   //USART3 init
-  USART3Init(115200);
+  //USART3Init(115200);
   //ADC1 enable at channel 8
-  ADC1In8Init();
+  //ADC1In8Init();
   //Init ADC1 for temp sensor
   //ADC1TempInit();
   //Initialize DAM for ADC1 temperature sensor
@@ -91,22 +91,22 @@ int main(void){
   //DMA2Stream0InterruptEnable();
 
   //W5500 initialize
-//  if(W5500SpiConnCheck() == 0){
-//
-//	  W5500InitV2(ip, gateway, submask, mac);
-//	  //Initialize socket n for TCP protocol
-//	  error_hand = W5500InitTCP(TCP_sorket_num,1024,1,1);
-//	  //error was occurred
-//	  if(error_hand !=0)return 0;
-//	  //Open TCP server socket
-//	  error_hand = W5500OpenTCPServer(TCP_sorket_num);
-//	  //error was occurred
-//	  if(error_hand !=0)return 0;
-//
-//  }else{
-//
-//	  return 0;
-//  }
+  if(W5500SpiConnCheck() == 0){
+
+	  W5500InitV2(ip, gateway, submask, mac);
+	  //Initialize socket n for TCP protocol
+	  error_hand = W5500InitTCP(TCP_sorket_num,port,1,1);
+	  //error was occurred
+	  if(error_hand !=0)return 0;
+	  //Open TCP server socket
+	  error_hand = W5500OpenTCPServer(TCP_sorket_num);
+	  //error was occurred
+	  if(error_hand !=0)return 0;
+
+  }else{
+
+	  return 0;
+  }
 
   //Configure system ticks to us range
   ret_code_from_sysTick = SysTick_Config(SystemCoreClock / 1000000);
@@ -119,52 +119,52 @@ int main(void){
   //DMA2ADC1CollectNewData();
   //uint8_t data[6] = {'T','e','s','t','\r','\n'};
   //uint8_t data2[6] = {'K','o','s','t','\r','\n'};
-  uint16_t ADC_value = 0;
-  uint8_t currentState = 0x00;
-  uint64_t integral = 0;
+//  uint16_t ADC_value = 0;
+//  uint8_t currentState = 0x00;
+//  uint64_t integral = 0;
 
   /* Infinite loop */
   while (1){
 
-	  ADC_value = ADC1In8Read();
-
-	  switch(currentState){
-
-	  case ST_IDLE:
-
-		  if(ADC_value < TH1 && ADC_value > TH2){
-			  currentState = ST_TH1;
-		  }
-
-		  break;
-
-	  case ST_TH1:
-
-		  if(ADC_value < TH2){
-			  currentState = ST_INTEG;
-		  }
-
-		  break;
-
-	  case ST_INTEG:
-
-		  if(ADC_value > TH1){
-			  currentState = ST_PRINT;
-		  }
-
-		  integral += ADC_value;
-
-		  break;
-
-	  case ST_PRINT:
-
-		  USART3SendText((uint8_t *)&integral,8);
-		  integral = 0;
-		  currentState = ST_IDLE;
-
-		  break;
-
-	  }
+//	  ADC_value = ADC1In8Read();
+//
+//	  switch(currentState){
+//
+//	  case ST_IDLE:
+//
+//		  if(ADC_value < TH1 && ADC_value > TH2){
+//			  currentState = ST_TH1;
+//		  }
+//
+//		  break;
+//
+//	  case ST_TH1:
+//
+//		  if(ADC_value < TH2){
+//			  currentState = ST_INTEG;
+//		  }
+//
+//		  break;
+//
+//	  case ST_INTEG:
+//
+//		  if(ADC_value > TH1){
+//			  currentState = ST_PRINT;
+//		  }
+//
+//		  integral += ADC_value;
+//
+//		  break;
+//
+//	  case ST_PRINT:
+//
+//		  USART3SendText((uint8_t *)&integral,8);
+//		  integral = 0;
+//		  currentState = ST_IDLE;
+//
+//		  break;
+//
+//	  }
 
 
 	  //ADC_value = ADC1In8Read();
@@ -226,13 +226,6 @@ void EXTI3_IRQHandler(void){
 
 		case W5500_SR_IR_DISCON:
 			W5500OpenTCPServer(((w5500_socket_interrupt_status & 0xE0) >> 5));
-			break;
-
-		case W5500_SR_IR_CON:
-
-			break;
-
-		case W5500_SR_IR_RECV:
 			if((GPIOD -> ODR & GPIO_ODR_ODR_13) != 0){
 
 				GPIOD -> ODR	&= ~(GPIO_ODR_ODR_13); 	//LED3 off
@@ -240,6 +233,14 @@ void EXTI3_IRQHandler(void){
 
 				GPIOD -> ODR	|= GPIO_ODR_ODR_13; 	//LED3 on
 			}
+			break;
+
+		case W5500_SR_IR_CON:
+
+			break;
+
+		case W5500_SR_IR_RECV:
+
 			break;
 
 		default:
