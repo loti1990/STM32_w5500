@@ -683,6 +683,24 @@ uint8_t CheckInterruptStatus(){
 	return socket_num_and_status;
 }
 
+uint16_t ReadRecvSize(){
+
+	//temporary register, necessary to initialize to initial state
+	uint8_t temp_array[5] = {0x00,0x00,0x00,0x00,0x00};
+	uint8_t read_data[2]  = {0x00,0x00};
+
+	//Read received data len from socket 0 received size register
+	temp_array[0]	= MSB(W5500_SR_RX_RSR_0);
+	temp_array[1]	= LSB(W5500_SR_RX_RSR_0);
+	temp_array[2] 	= (W5500_CP_BSB_S0_R
+					| W5500_CP_READ
+					| W5500_CP_OM_VDLM); 				//set byte for reading from common register
+
+	SPI1SendNByteReceiveNByte(temp_array, 3, read_data, 2);
+
+	return (read_data[1]<<8 | read_data[0]);
+
+}
 /*
  * Plan strezenja prekinitvi:
  * -preveri na katerem socketu se je zgodila prekinitev,

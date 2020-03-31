@@ -4,3 +4,4 @@ W5500.c:211:6:W5500InitV2	48	static
 W5500.c:331:9:W5500InitTCP	48	static
 W5500.c:432:9:W5500OpenTCPServer	32	static
 W5500.c:518:9:CheckInterruptStatus	32	static
+W5500.c:686:10:ReadRecvSize	32	static

@@ -80,7 +80,7 @@ int main(void){
   //Init SPI1
   SPI1Init();
   //USART3 init
-  //USART3Init(115200);
+  USART3Init(115200);
   //ADC1 enable at channel 8
   //ADC1In8Init();
   //Init ADC1 for temp sensor
@@ -215,24 +215,19 @@ void EXTI3_IRQHandler(void){
 
 	//w5500 socket number and status
 	volatile uint8_t w5500_socket_interrupt_status;
-
+	uint16_t recv_len = 0;
 	//Check if interrupt occurred in W5500 side
 	if((EXTI -> PR & EXTI_PR_PR3) != 0){
 		//check interrupt status
 		w5500_socket_interrupt_status = CheckInterruptStatus();
 
+		USART3SendText((uint8_t *)&w5500_socket_interrupt_status,1);
 
 		switch(w5500_socket_interrupt_status & 0x1F){
 
 		case W5500_SR_IR_DISCON:
 			W5500OpenTCPServer(((w5500_socket_interrupt_status & 0xE0) >> 5));
-			if((GPIOD -> ODR & GPIO_ODR_ODR_13) != 0){
 
-				GPIOD -> ODR	&= ~(GPIO_ODR_ODR_13); 	//LED3 off
-			}else{
-
-				GPIOD -> ODR	|= GPIO_ODR_ODR_13; 	//LED3 on
-			}
 			break;
 
 		case W5500_SR_IR_CON:
@@ -240,10 +235,18 @@ void EXTI3_IRQHandler(void){
 			break;
 
 		case W5500_SR_IR_RECV:
-
+			recv_len = ReadRecvSize();
+			USART3SendText((uint8_t *)&recv_len,2);
 			break;
 
 		default:
+			if((GPIOD -> ODR & GPIO_ODR_ODR_13) != 0){
+
+				GPIOD -> ODR	&= ~(GPIO_ODR_ODR_13); 	//LED3 off
+			}else{
+
+				GPIOD -> ODR	|= GPIO_ODR_ODR_13; 	//LED3 on
+			}
 			break;
 
 		}

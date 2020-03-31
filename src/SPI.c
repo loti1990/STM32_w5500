@@ -108,6 +108,30 @@ uint8_t SPI1SendNByteReceive1Byte(uint8_t *data_to_send, uint32_t send_data_len)
 	 return received_data;
 }
 
+//SPI1 send n bytes receive n bytes
+void SPI1SendNByteReceiveNByte(uint8_t *data_to_send, uint32_t send_data_len, uint8_t *data_to_read, uint32_t receive_data_len){
+
+	//variable for count
+	 uint32_t i = 0;
+
+	 //SPI1 CS enable (output low logical level)
+	 GPIOA -> ODR 		&= ~(GPIO_ODR_ODR_4);
+
+	 for(i = 0;i < send_data_len;i++){
+		 //Send data
+		 SPI1Send1ByteReceive1Byte(&data_to_send[i]);
+	 }
+	 for(i = 0;i < receive_data_len;i++){
+		 //Receive data
+		 data_to_read[i] = SPI1Send1ByteReceive1Byte(&data_to_send[0]);
+	 }
+
+	 //SPI1 CS disable (output high logical level)
+	 GPIOA -> ODR 		|= GPIO_ODR_ODR_4;
+
+}
+
+
 //SPI3 initialization
 void SPI3Init(){
 

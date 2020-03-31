@@ -21,6 +21,8 @@ uint8_t W5500OpenTCPServer(uint8_t socket_no);			//Open TCP protocol
 
 uint8_t CheckInterruptStatus(void); 					//Check on which socket was occurred interrupt
 
+uint16_t ReadRecvSize(void); 							//Read received data size register
+
 /*Function initialization end*/
 
 /*Bit manipulation def. function start*/
