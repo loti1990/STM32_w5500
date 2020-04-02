@@ -1,6 +1,6 @@
-main.c:66:5:main	16	static
-main.c:214:6:EXTI3_IRQHandler	16	static
-main.c:269:6:EXTI0_IRQHandler	0	static
-main.c:283:6:DMA2_Stream0_IRQHandler	0	static
-main.c:306:6:USART3_IRQHandler	16	static
-main.c:321:6:ADC_IRQHandler	0	static
+main.c:67:5:main	16	static
+main.c:215:6:EXTI3_IRQHandler	16	static
+main.c:270:6:EXTI0_IRQHandler	0	static
+main.c:284:6:DMA2_Stream0_IRQHandler	0	static
+main.c:307:6:USART3_IRQHandler	16	static
+main.c:322:6:ADC_IRQHandler	0	static

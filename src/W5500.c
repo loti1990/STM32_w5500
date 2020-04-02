@@ -698,6 +698,41 @@ uint16_t ReadRecvSize(){
 
 	SPI1SendNByteReceiveNByte(temp_array, 3, read_data, 2);
 
+//	//Write in to register which contain received data length (reset register to 0x0000)
+//	temp_array[0]	= MSB(W5500_SR_RX_RSR_0);
+//	temp_array[1]	= LSB(W5500_SR_RX_RSR_0);
+//	temp_array[2] 	= (W5500_CP_BSB_S0_R
+//					| W5500_CP_WRITE
+//					| W5500_CP_OM_VDLM); 				//set byte for reading from common register
+//	temp_array[3] 	= 0x00; 							//reset register on address 0x0026
+//	temp_array[4] 	= 0x00; 							//reset register on address 0x0027
+//
+//	//write thru spi communication
+//	SPI1SendNByte(temp_array,5);
+
+//	//Write in to register which contain start of the data pointer (reset register to 0x0000)
+//	temp_array[0]	= MSB(W5500_SR_RX_RD_0);
+//	temp_array[1]	= LSB(W5500_SR_RX_RD_0);
+//	temp_array[2] 	= (W5500_CP_BSB_S0_R
+//					| W5500_CP_WRITE
+//					| W5500_CP_OM_VDLM); 				//set byte for reading from common register
+//	temp_array[3] 	= 0x00; 							//reset register on address 0x0028
+//	temp_array[4] 	= 0x00; 							//reset register on address 0x0029
+//
+//	//write thru spi communication
+//	SPI1SendNByte(temp_array,5);
+
+	//Send RECV ACK
+	temp_array[0] 	= MSB(W5500_SR_CR);
+	temp_array[1] 	= LSB(W5500_SR_CR);
+	temp_array[2] 	= (W5500_CP_BSB_S0_R
+					| W5500_CP_WRITE
+					| W5500_CP_OM_VDLM); 				//write in to socket n configuration register
+	temp_array[3] 	= W5500_SR_CR_RECV; 				//RECV command
+
+	//write thru spi communication
+	SPI1SendNByte(temp_array,4);
+
 	return (read_data[1]<<8 | read_data[0]);
 
 }

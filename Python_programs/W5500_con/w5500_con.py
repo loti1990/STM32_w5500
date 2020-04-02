@@ -34,8 +34,8 @@ class W5500Conn():
 
 		try:
 
-			self.s.send(data)
-
+			#self.s.send(data)
+			self.s.sendall(data)
 		except socket.error as e:
 
 			print("[-] Fail to send data to:\nIP: %s\nPORT: %s\nERROR: %s"%(self.ip,self.port,e))
@@ -45,11 +45,13 @@ def main():
 	a = W5500Conn(ip = IP, port = PORT)
 	a.OpenTCP()
 	data = ""
-	for i in range(999):
+	for i in range(1024):
 		data = data + "1"
 	print(len(data))
 	a.SendData(data.encode())
-	time.sleep(5)
+	time.sleep(1)
+	a.SendData(data.encode())
+	time.sleep(2)
 	a.CloseTCP()
 
 #Run main proram

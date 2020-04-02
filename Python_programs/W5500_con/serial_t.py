@@ -9,7 +9,7 @@ while(1):
 		data = ser.read(1)
 		#print("Data: %b"%(data.decode()))
 		if(data != b''):
-			print(bin(ord(data.decode())))
+			print(data)
 
 	except serial.SerialTimeoutException as e:
 		print("Timeout %s"%e)

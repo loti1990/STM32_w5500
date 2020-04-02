@@ -60,6 +60,7 @@ uint8_t submask[4]				= {255,255,255,0}; 					//subnet mask
 uint8_t mac[6]					= {0x00,0x08,0xdc,0x01,0x02,0x03}; 	//dedicated mac address
 uint8_t TCP_sorket_num 			= 0;								//TCP socket number form 0 to 7
 uint16_t port 					= 1024; 							//TCP socket port
+
 //
 //MAIN
 //
@@ -77,7 +78,7 @@ int main(void){
 
   //Init GPIOA
   InitGPIO();
-  //Init SPI1
+  //Init SPI1ls
   SPI1Init();
   //USART3 init
   USART3Init(115200);
@@ -95,7 +96,7 @@ int main(void){
 
 	  W5500InitV2(ip, gateway, submask, mac);
 	  //Initialize socket n for TCP protocol
-	  error_hand = W5500InitTCP(TCP_sorket_num,port,1,1);
+	  error_hand = W5500InitTCP(TCP_sorket_num,port,2,2);
 	  //error was occurred
 	  if(error_hand !=0)return 0;
 	  //Open TCP server socket
