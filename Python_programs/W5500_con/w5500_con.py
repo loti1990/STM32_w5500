@@ -15,6 +15,7 @@ class W5500Conn():
 		try:
 			self.s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 			self.s.settimeout(5) 	#timeout 5s
+		#	self.s.setsockopt(socket.SOL_SOCKET,socket.SO_RCVBUF, 100000)
 			self.s.connect((self.ip,self.port))
 			self.s.settimeout(None) #reset timeout to default
 			print("[+] Susesfully connect to:\nIP: %s\nPORT: %s"%(self.ip,self.port))
@@ -34,8 +35,10 @@ class W5500Conn():
 
 		try:
 
-			#self.s.send(data)
-			self.s.sendall(data)
+			flag = self.s.send(data)
+			if(flag == 0):
+				print("Error sending data")
+			#self.s.sendall(data)
 		except socket.error as e:
 
 			print("[-] Fail to send data to:\nIP: %s\nPORT: %s\nERROR: %s"%(self.ip,self.port,e))
@@ -45,12 +48,14 @@ def main():
 	a = W5500Conn(ip = IP, port = PORT)
 	a.OpenTCP()
 	data = ""
-	for i in range(1024):
+	for i in range(1023):
 		data = data + "1"
+
 	print(len(data))
-	a.SendData(data.encode())
-	time.sleep(1)
-	a.SendData(data.encode())
+	for i in range(14):
+		a.SendData(data.encode())
+		#time.sleep(1)
+
 	time.sleep(2)
 	a.CloseTCP()
 

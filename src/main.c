@@ -96,7 +96,7 @@ int main(void){
 
 	  W5500InitV2(ip, gateway, submask, mac);
 	  //Initialize socket n for TCP protocol
-	  error_hand = W5500InitTCP(TCP_sorket_num,port,2,2);
+	  error_hand = W5500InitTCP(TCP_sorket_num,port,16,16);
 	  //error was occurred
 	  if(error_hand !=0)return 0;
 	  //Open TCP server socket
@@ -222,12 +222,12 @@ void EXTI3_IRQHandler(void){
 		//check interrupt status
 		w5500_socket_interrupt_status = CheckInterruptStatus();
 
-		USART3SendText((uint8_t *)&w5500_socket_interrupt_status,1);
+		//USART3SendText((uint8_t *)&w5500_socket_interrupt_status,1);
 
 		switch(w5500_socket_interrupt_status & 0x1F){
 
 		case W5500_SR_IR_DISCON:
-			W5500OpenTCPServer(((w5500_socket_interrupt_status & 0xE0) >> 5));
+			//W5500OpenTCPServer(((w5500_socket_interrupt_status & 0xE0) >> 5));
 
 			break;
 
@@ -236,11 +236,12 @@ void EXTI3_IRQHandler(void){
 			break;
 
 		case W5500_SR_IR_RECV:
-			recv_len = ReadRecvSize();
-			USART3SendText((uint8_t *)&recv_len,2);
+			//recv_len = ReadRecvSize();
+			//USART3SendText((uint8_t *)&recv_len,2);
 			break;
 
 		default:
+			//USART3SendText((uint8_t *)&w5500_socket_interrupt_status,1);
 			if((GPIOD -> ODR & GPIO_ODR_ODR_13) != 0){
 
 				GPIOD -> ODR	&= ~(GPIO_ODR_ODR_13); 	//LED3 off
