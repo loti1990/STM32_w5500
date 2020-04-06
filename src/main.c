@@ -60,7 +60,7 @@ uint8_t ip[4] 					= {192,168,1,100}; 					//dedicated ip address for external W
 uint8_t gateway[4]				= {192,168,1,1}; 					//gateway
 uint8_t submask[4]				= {255,255,255,0}; 					//subnet mask
 uint8_t mac[6]					= {0x00,0x08,0xdc,0x01,0x02,0x03}; 	//dedicated mac address
-uint8_t TCP_sorket_num 			= 1;								//TCP socket number form 0 to 7
+uint8_t TCP_sorket_num 			= 0;								//TCP socket number form 0 to 7
 uint16_t port 					= 1024; 							//TCP socket port
 uint8_t rx_buff_size 			= 2; 								//Rx buff size in KB
 uint8_t tx_buff_size 			= 2;							//Tx buff size in KB
@@ -244,9 +244,9 @@ void EXTI3_IRQHandler(void){
 			break;
 
 		case W5500_SR_IR_RECV:
-			recv_len = ReadRecvSize(((w5500_socket_interrupt_status & 0xE0) >> 5), rx_buffer);
+			recv_len = ReadRecvSizeAndData(((w5500_socket_interrupt_status & 0xE0) >> 5), rx_buffer);
 			USART3SendText((uint8_t *)&recv_len,2);
-			USART3SendText((uint8_t *)&rx_buffer,1024);
+			//USART3SendText((uint8_t *)&rx_buffer,1024);
 			break;
 
 		default:

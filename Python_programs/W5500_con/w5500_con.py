@@ -52,11 +52,12 @@ def main():
 		data = data + "1"
 
 	print(len(data))
-	for i in range(2):
+	start_time = time.time()
+	for i in range(1000):
 		a.SendData(data.encode())
-		time.sleep(0.5)
-
-	time.sleep(2)
+		time.sleep(0.001)
+	print((1000*1024)/(time.time()-start_time)/1e6)
+	time.sleep(0.5)
 	a.CloseTCP()
 
 #Run main proram

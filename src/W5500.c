@@ -654,8 +654,13 @@ uint8_t CheckInterruptStatus(){
 
 	return socket_num_and_status;
 }
-
-uint16_t ReadRecvSize(uint8_t socket_no, uint8_t *data_buffer){//, uint8_t *){
+//read data from socket n RX buffer
+//Returned value was equal to received byte number or
+//1 error was occured (invalid socket number)
+//function takes 2 arguments:
+//socket number (active socket on wich was occured interrupt)
+//rx data pointer to store received data
+uint16_t ReadRecvSizeAndData(uint8_t socket_no, uint8_t *data_buffer){
 
 	//temporary register, necessary to initialize to initial state
 	uint8_t temp_array[5] = {0x00,0x00,0x00,0x00,0x00};

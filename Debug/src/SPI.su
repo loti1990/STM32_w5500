@@ -1,6 +1,6 @@
 SPI.c:8:6:SPI1Init	0	static
-SPI.c:49:9:SPI1Send1ByteReceive1Byte	0	static
-SPI.c:68:6:SPI1SendNByte	0	static
-SPI.c:88:9:SPI1SendNByteReceive1Byte	8	static
-SPI.c:112:6:SPI1SendNByteReceiveNByte	12	static
-SPI.c:136:6:SPI3Init	0	static
+SPI.c:50:9:SPI1Send1ByteReceive1Byte	0	static
+SPI.c:69:6:SPI1SendNByte	0	static
+SPI.c:89:9:SPI1SendNByteReceive1Byte	8	static
+SPI.c:113:6:SPI1SendNByteReceiveNByte	12	static
+SPI.c:137:6:SPI3Init	0	static
