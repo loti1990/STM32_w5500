@@ -83,99 +83,99 @@ uint8_t S0_TX_RD_LSB[3] = {0x00,0x23,0x08};
 uint8_t S0_TX_WR[5] = {0x00,0x24,0x0C};
 
 //Initialize W5500 ethernet module
-void W5500Init(void){
-
-	//enable ping
-	SPI1SendNByte(CR_MR_W5500,4);
-
-	//setup gateway IP address
-	SPI1SendNByte(CR_GAR_W5500,7);
-
-	//setup subnet mask register
-	SPI1SendNByte(CR_SUBR_W5500,7);
-
-	//setup hardware address register
-	SPI1SendNByte(CR_SHAR_W5500,9);
-
-	CR_SIPR_W5500[0]=MSB(W5500_CRB_SIPR_0);
-	CR_SIPR_W5500[1]=LSB(W5500_CRB_SIPR_0);
-	//setup source IP address register
-	SPI1SendNByte(CR_SIPR_W5500,7);
-
-	//setup PHY configuration register
-	SPI1SendNByte(CR_PHYCFGR_W5500,4);
-
-	//enable interrupt for socket 0
-	SPI1SendNByte(CR_SIMR_W5500,4);
-
-	//setup Socket 0 RX and TX memory allocation
-	SPI1SendNByte(S0_RX_TX_BUF_SIZE_W5500,5);
-
-	//setup Socket 0 Protocol
-	SPI1SendNByte(S0_MR_W5500,4);
-
-	//setup Socket 0 port number
-	SPI1SendNByte(S0_PORT_W5500,5);
-
-	//open Socket 0
-	SPI1SendNByte(S0_CR_OPEN_W5500,4);
-
-	//wait on Socket 0 SOCK_INIT flag
-	while(!(SPI1SendNByteReceive1Byte(S0_SR_W5500,3) == 0x13));
-
-	//listen Socket 0
-	SPI1SendNByte(S0_CR_LISTEN_W5500,4);
-
-	//wait on Socket 0 SOCK_LISTEN flag
-	while(!(SPI1SendNByteReceive1Byte(S0_SR_W5500,3) == 0x14));
-
-	//wait on socket establishe flag
-	while(!(SPI1SendNByteReceive1Byte(S0_SR_W5500,3)==0x17));
-
-	//create variables for Socket0 TX buffer start and end pointer which define data length
-	uint16_t start_pointer = 0;
-	uint16_t end_pointer = 0;
-
-	//read Socket 0 TX read pointer register
-	start_pointer = SPI1SendNByteReceive1Byte(S0_TX_RD_MSB,3);
-	start_pointer = start_pointer << 8;
-	start_pointer = start_pointer | SPI1SendNByteReceive1Byte(S0_TX_RD_LSB,3);
-
-	//calculate value of Socket0 write pointer register for length of data available for send
-	end_pointer = start_pointer + 256;
-
-	//manage LSB and MSB bits
-	S0_TX_WR[3] =(uint8_t)(end_pointer>>8);
-	S0_TX_WR[4] =(uint8_t)end_pointer;
-
-	//write value in to Socket0 TX write pointer register
-	SPI1SendNByte(S0_TX_WR,5);
-
-
-	//generate data for sending
-	int i=0;
-	for(i=3;i<259;i++){
-
-		S0_TX_BUFFER[i]=i;
-	}
-
-	//configure Socket0 TX buffer start address
-	S0_TX_BUFFER[0] = SPI1SendNByteReceive1Byte(S0_TX_RD_MSB,3);
-	S0_TX_BUFFER[1] = SPI1SendNByteReceive1Byte(S0_TX_RD_LSB,3);
-
-	//write data in to TX buffer
-	SPI1SendNByte(S0_TX_BUFFER,259);
-
-	//send TX data to the client
-	SPI1SendNByte(S0_SEND_TX_BUFFER,4);
-
-	//wait on last ACK flag from client
-	//while(!(SPI1SendNByteReceive1Byte(S0_SR_W5500,3)==0x1d));
-
-	//close the connection
-	SPI1SendNByteReceive1Byte(S0_CLOSE,3);
-
-}
+//void W5500Init(void){
+//
+//	//enable ping
+//	SPI1SendNByte(CR_MR_W5500,4);
+//
+//	//setup gateway IP address
+//	SPI1SendNByte(CR_GAR_W5500,7);
+//
+//	//setup subnet mask register
+//	SPI1SendNByte(CR_SUBR_W5500,7);
+//
+//	//setup hardware address register
+//	SPI1SendNByte(CR_SHAR_W5500,9);
+//
+//	CR_SIPR_W5500[0]=MSB(W5500_CRB_SIPR_0);
+//	CR_SIPR_W5500[1]=LSB(W5500_CRB_SIPR_0);
+//	//setup source IP address register
+//	SPI1SendNByte(CR_SIPR_W5500,7);
+//
+//	//setup PHY configuration register
+//	SPI1SendNByte(CR_PHYCFGR_W5500,4);
+//
+//	//enable interrupt for socket 0
+//	SPI1SendNByte(CR_SIMR_W5500,4);
+//
+//	//setup Socket 0 RX and TX memory allocation
+//	SPI1SendNByte(S0_RX_TX_BUF_SIZE_W5500,5);
+//
+//	//setup Socket 0 Protocol
+//	SPI1SendNByte(S0_MR_W5500,4);
+//
+//	//setup Socket 0 port number
+//	SPI1SendNByte(S0_PORT_W5500,5);
+//
+//	//open Socket 0
+//	SPI1SendNByte(S0_CR_OPEN_W5500,4);
+//
+//	//wait on Socket 0 SOCK_INIT flag
+//	while(!(SPI1SendNByteReceive1Byte(S0_SR_W5500,3) == 0x13));
+//
+//	//listen Socket 0
+//	SPI1SendNByte(S0_CR_LISTEN_W5500,4);
+//
+//	//wait on Socket 0 SOCK_LISTEN flag
+//	while(!(SPI1SendNByteReceive1Byte(S0_SR_W5500,3) == 0x14));
+//
+//	//wait on socket establishe flag
+//	while(!(SPI1SendNByteReceive1Byte(S0_SR_W5500,3)==0x17));
+//
+//	//create variables for Socket0 TX buffer start and end pointer which define data length
+//	uint16_t start_pointer = 0;
+//	uint16_t end_pointer = 0;
+//
+//	//read Socket 0 TX read pointer register
+//	start_pointer = SPI1SendNByteReceive1Byte(S0_TX_RD_MSB,3);
+//	start_pointer = start_pointer << 8;
+//	start_pointer = start_pointer | SPI1SendNByteReceive1Byte(S0_TX_RD_LSB,3);
+//
+//	//calculate value of Socket0 write pointer register for length of data available for send
+//	end_pointer = start_pointer + 256;
+//
+//	//manage LSB and MSB bits
+//	S0_TX_WR[3] =(uint8_t)(end_pointer>>8);
+//	S0_TX_WR[4] =(uint8_t)end_pointer;
+//
+//	//write value in to Socket0 TX write pointer register
+//	SPI1SendNByte(S0_TX_WR,5);
+//
+//
+//	//generate data for sending
+//	int i=0;
+//	for(i=3;i<259;i++){
+//
+//		S0_TX_BUFFER[i]=i;
+//	}
+//
+//	//configure Socket0 TX buffer start address
+//	S0_TX_BUFFER[0] = SPI1SendNByteReceive1Byte(S0_TX_RD_MSB,3);
+//	S0_TX_BUFFER[1] = SPI1SendNByteReceive1Byte(S0_TX_RD_LSB,3);
+//
+//	//write data in to TX buffer
+//	SPI1SendNByte(S0_TX_BUFFER,259);
+//
+//	//send TX data to the client
+//	SPI1SendNByte(S0_SEND_TX_BUFFER,4);
+//
+//	//wait on last ACK flag from client
+//	//while(!(SPI1SendNByteReceive1Byte(S0_SR_W5500,3)==0x1d));
+//
+//	//close the connection
+//	SPI1SendNByteReceive1Byte(S0_CLOSE,3);
+//
+//}
 //Check SPI connection with external W5500 ethernet module
 //0 - connection established thru SPI communication
 //1 - connection error
@@ -347,37 +347,18 @@ uint8_t W5500InitTCP(uint8_t socket_no, uint16_t port, uint8_t TX_buff_size, uin
 	//temporary register, necessary to initialize to initial state
 	uint8_t temp_array[10] = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 	//socket select register which select proper offset address allocation
-	uint8_t socket_sel_register;
+	uint8_t socket_sel_register = 	(socket_no == 0x00) ? W5500_CP_BSB_S0_R://socket 0 address
+									(socket_no == 0x01) ? W5500_CP_BSB_S1_R://socket 1 address
+									(socket_no == 0x02) ? W5500_CP_BSB_S2_R://socket 2 address
+									(socket_no == 0x03) ? W5500_CP_BSB_S3_R://socket 3 address
+									(socket_no == 0x04) ? W5500_CP_BSB_S4_R://socket 4 address
+									(socket_no == 0x05) ? W5500_CP_BSB_S5_R://socket 5 address
+									(socket_no == 0x06) ? W5500_CP_BSB_S6_R://socket 6 address
+									(socket_no == 0x07) ? W5500_CP_BSB_S7_R://socket 7 address
+									0; 										//default error
 
-	switch(socket_no){
-
-	case 0x00:
-		socket_sel_register = W5500_CP_BSB_S0_R; 		//socket 0 address
-		break;
-	case 0x01:
-		socket_sel_register = W5500_CP_BSB_S1_R; 		//socket 1 address
-		break;
-	case 0x02:
-		socket_sel_register = W5500_CP_BSB_S2_R;		//socket 2 address
-		break;
-	case 0x03:
-		socket_sel_register = W5500_CP_BSB_S3_R; 		//socket 3 address
-		break;
-	case 0x04:
-		socket_sel_register = W5500_CP_BSB_S4_R; 		//socket 4 address
-		break;
-	case 0x05:
-		socket_sel_register = W5500_CP_BSB_S5_R; 		//socket 5 address
-		break;
-	case 0x06:
-		socket_sel_register = W5500_CP_BSB_S6_R; 		//socket 6 address
-		break;
-	case 0x07:
-		socket_sel_register = W5500_CP_BSB_S7_R; 		//socket 7 address
-		break;
-	default:
-		return 1; 										//error
-	}
+	//error not a valid socket number
+	if(socket_sel_register == 0) return 1;
 
 
 
@@ -448,38 +429,15 @@ uint8_t W5500OpenTCPServer(uint8_t socket_no){
 	//temporary register, necessary to initialize to initial state
 	uint8_t temp_array[10] = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 	//socket select register which select proper offset address allocation
-	uint8_t socket_sel_register;
-
-	switch(socket_no){
-
-		case 0x00:
-			socket_sel_register = W5500_CP_BSB_S0_R; 		//socket 0 address
-			break;
-		case 0x01:
-			socket_sel_register = W5500_CP_BSB_S1_R; 		//socket 1 address
-			break;
-		case 0x02:
-			socket_sel_register = W5500_CP_BSB_S2_R;		//socket 2 address
-			break;
-		case 0x03:
-			socket_sel_register = W5500_CP_BSB_S3_R; 		//socket 3 address
-			break;
-		case 0x04:
-			socket_sel_register = W5500_CP_BSB_S4_R; 		//socket 4 address
-			break;
-		case 0x05:
-			socket_sel_register = W5500_CP_BSB_S5_R; 		//socket 5 address
-			break;
-		case 0x06:
-			socket_sel_register = W5500_CP_BSB_S6_R; 		//socket 6 address
-			break;
-		case 0x07:
-			socket_sel_register = W5500_CP_BSB_S7_R; 		//socket 7 address
-			break;
-		default:
-			return 1; 										//error
-		}
-
+	uint8_t socket_sel_register = 	(socket_no == 0x00) ? W5500_CP_BSB_S0_R://socket 0 address
+									(socket_no == 0x01) ? W5500_CP_BSB_S1_R://socket 1 address
+									(socket_no == 0x02) ? W5500_CP_BSB_S2_R://socket 2 address
+									(socket_no == 0x03) ? W5500_CP_BSB_S3_R://socket 3 address
+									(socket_no == 0x04) ? W5500_CP_BSB_S4_R://socket 4 address
+									(socket_no == 0x05) ? W5500_CP_BSB_S5_R://socket 5 address
+									(socket_no == 0x06) ? W5500_CP_BSB_S6_R://socket 6 address
+									(socket_no == 0x07) ? W5500_CP_BSB_S7_R://socket 7 address
+									0; 										//default error
 
 	//open Socket n
 	temp_array[0] 	= MSB(W5500_SR_CR);
@@ -697,27 +655,41 @@ uint8_t CheckInterruptStatus(){
 	return socket_num_and_status;
 }
 
-uint16_t ReadRecvSize(){
+uint16_t ReadRecvSize(uint8_t socket_no, uint8_t *data_buffer){//, uint8_t *){
 
 	//temporary register, necessary to initialize to initial state
 	uint8_t temp_array[5] = {0x00,0x00,0x00,0x00,0x00};
 	uint8_t read_data[2]  = {0x00,0x00};
 	uint16_t new_RX_RD 	= 0;
+	//socket address selected register
+	uint8_t socket_sel_register = 	(socket_no == 0x00) ? W5500_CP_BSB_S0_R://socket 0 address
+									(socket_no == 0x01) ? W5500_CP_BSB_S1_R://socket 1 address
+									(socket_no == 0x02) ? W5500_CP_BSB_S2_R://socket 2 address
+									(socket_no == 0x03) ? W5500_CP_BSB_S3_R://socket 3 address
+									(socket_no == 0x04) ? W5500_CP_BSB_S4_R://socket 4 address
+									(socket_no == 0x05) ? W5500_CP_BSB_S5_R://socket 5 address
+									(socket_no == 0x06) ? W5500_CP_BSB_S6_R://socket 6 address
+									(socket_no == 0x07) ? W5500_CP_BSB_S7_R://socket 7 address
+									0; 										//default error
 
-//	//Read starting point of pointer register
+	//error not a valid socket number
+	if(socket_sel_register == 0) return 1;
+
+
+	//Read starting point of pointer register
 	temp_array[0]	= MSB(W5500_SR_RX_RD_0);
 	temp_array[1]	= LSB(W5500_SR_RX_RD_0);
-	temp_array[2] 	= (W5500_CP_BSB_S0_R
+	temp_array[2] 	= (socket_sel_register
 					| W5500_CP_READ
 					| W5500_CP_OM_VDLM);
-	SPI1SendNByteReceiveNByte(temp_array, 3, read_data, 2);
+	SPI1SendNByteReceiveNByte(temp_array, 3,  read_data, 2);
 
 	new_RX_RD = (read_data[0]<<8 | read_data[1]);
 
 	//Read received data len from socket 0 received size register
 	temp_array[0]	= MSB(W5500_SR_RX_RSR_0);
 	temp_array[1]	= LSB(W5500_SR_RX_RSR_0);
-	temp_array[2] 	= (W5500_CP_BSB_S0_R
+	temp_array[2] 	= (socket_sel_register
 					| W5500_CP_READ
 					| W5500_CP_OM_VDLM); 				//set byte for reading from common register
 	SPI1SendNByteReceiveNByte(temp_array, 3, read_data, 2);
@@ -725,6 +697,13 @@ uint16_t ReadRecvSize(){
 	//read received data here
 
 	//start
+	//Read received data
+	temp_array[0]	= MSB(new_RX_RD);
+	temp_array[1]	= LSB(new_RX_RD);
+	temp_array[2] 	= ((socket_sel_register+0x10)
+					| W5500_CP_READ
+					| W5500_CP_OM_VDLM); 				//set byte for reading from common register
+	SPI1SendNByteReceiveNByte(temp_array, 3, data_buffer, (uint32_t)(read_data[0]<<8 | read_data[1]));
 
 	//end
 
@@ -746,7 +725,7 @@ uint16_t ReadRecvSize(){
 //	//Write in to register which contain start of the data pointer (reset register to 0x0000)
 	temp_array[0]	= MSB(W5500_SR_RX_RD_0);
 	temp_array[1]	= LSB(W5500_SR_RX_RD_0);
-	temp_array[2] 	= (W5500_CP_BSB_S0_R
+	temp_array[2] 	= (socket_sel_register
 					| W5500_CP_WRITE
 					| W5500_CP_OM_VDLM); 				//set byte for reading from common register
 	temp_array[3] 	= MSB(new_RX_RD); 							//reset register on address 0x0028
@@ -768,7 +747,7 @@ uint16_t ReadRecvSize(){
 	//Send RECV ACK
 	temp_array[0] 	= MSB(W5500_SR_CR);
 	temp_array[1] 	= LSB(W5500_SR_CR);
-	temp_array[2] 	= (W5500_CP_BSB_S0_R
+	temp_array[2] 	= (socket_sel_register
 					| W5500_CP_WRITE
 					| W5500_CP_OM_VDLM); 				//write in to socket n configuration register
 	temp_array[3] 	= W5500_SR_CR_RECV; 				//RECV command

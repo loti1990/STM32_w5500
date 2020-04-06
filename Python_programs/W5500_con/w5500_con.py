@@ -48,13 +48,13 @@ def main():
 	a = W5500Conn(ip = IP, port = PORT)
 	a.OpenTCP()
 	data = ""
-	for i in range(1023):
+	for i in range(1024):
 		data = data + "1"
 
 	print(len(data))
-	for i in range(14):
+	for i in range(2):
 		a.SendData(data.encode())
-		#time.sleep(1)
+		time.sleep(0.5)
 
 	time.sleep(2)
 	a.CloseTCP()

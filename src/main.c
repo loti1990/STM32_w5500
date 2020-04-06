@@ -44,6 +44,8 @@ void DMA2_Stream0_IRQHandler(void); //Initialization of handler for DMA2 interru
 //DEFINITIONS
 //#define TH1 	3900
 //#define TH2 	3600
+#define RX_BUFF_SIZE 	2
+#define TX_BUFF_SIZE	2
 
 //State machine defintions
 //#define ST_IDLE 	0x00
@@ -58,8 +60,14 @@ uint8_t ip[4] 					= {192,168,1,100}; 					//dedicated ip address for external W
 uint8_t gateway[4]				= {192,168,1,1}; 					//gateway
 uint8_t submask[4]				= {255,255,255,0}; 					//subnet mask
 uint8_t mac[6]					= {0x00,0x08,0xdc,0x01,0x02,0x03}; 	//dedicated mac address
-uint8_t TCP_sorket_num 			= 0;								//TCP socket number form 0 to 7
+uint8_t TCP_sorket_num 			= 1;								//TCP socket number form 0 to 7
 uint16_t port 					= 1024; 							//TCP socket port
+uint8_t rx_buff_size 			= 2; 								//Rx buff size in KB
+uint8_t tx_buff_size 			= 2;							//Tx buff size in KB
+
+//Buffers
+uint8_t rx_buffer[RX_BUFF_SIZE*1024] = {0,}; 						//Rx buffer
+uint8_t tx_buffer[TX_BUFF_SIZE*1024] = {0,}; 						//Tx buffer
 
 //
 //MAIN
@@ -96,7 +104,7 @@ int main(void){
 
 	  W5500InitV2(ip, gateway, submask, mac);
 	  //Initialize socket n for TCP protocol
-	  error_hand = W5500InitTCP(TCP_sorket_num,port,16,16);
+	  error_hand = W5500InitTCP(TCP_sorket_num,port,TX_BUFF_SIZE,RX_BUFF_SIZE);
 	  //error was occurred
 	  if(error_hand !=0)return 0;
 	  //Open TCP server socket
@@ -222,12 +230,12 @@ void EXTI3_IRQHandler(void){
 		//check interrupt status
 		w5500_socket_interrupt_status = CheckInterruptStatus();
 
-		//USART3SendText((uint8_t *)&w5500_socket_interrupt_status,1);
+		USART3SendText((uint8_t *)&w5500_socket_interrupt_status,1);
 
 		switch(w5500_socket_interrupt_status & 0x1F){
 
 		case W5500_SR_IR_DISCON:
-			//W5500OpenTCPServer(((w5500_socket_interrupt_status & 0xE0) >> 5));
+			W5500OpenTCPServer(((w5500_socket_interrupt_status & 0xE0) >> 5));
 
 			break;
 
@@ -236,12 +244,13 @@ void EXTI3_IRQHandler(void){
 			break;
 
 		case W5500_SR_IR_RECV:
-			//recv_len = ReadRecvSize();
-			//USART3SendText((uint8_t *)&recv_len,2);
+			recv_len = ReadRecvSize(((w5500_socket_interrupt_status & 0xE0) >> 5), rx_buffer);
+			USART3SendText((uint8_t *)&recv_len,2);
+			USART3SendText((uint8_t *)&rx_buffer,1024);
 			break;
 
 		default:
-			//USART3SendText((uint8_t *)&w5500_socket_interrupt_status,1);
+			USART3SendText((uint8_t *)&w5500_socket_interrupt_status,1);
 			if((GPIOD -> ODR & GPIO_ODR_ODR_13) != 0){
 
 				GPIOD -> ODR	&= ~(GPIO_ODR_ODR_13); 	//LED3 off
