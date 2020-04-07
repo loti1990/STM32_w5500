@@ -69,7 +69,7 @@ def main():
 		data = data + "0"
 	data = data.encode()
 
-	for i in range(1000000):
+	for i in range(10):
 		start_time = time.time()
 		a.SendData(data)
 		speed_samples_up.append((1)/(time.time()-start_time)/1e6)
@@ -82,7 +82,7 @@ def main():
 	print("Down: %.2f Mbit/s"%np.average(speed_samples_down))
 	time.sleep(0.5)
 
-	a.CloseTCP()
+#	a.CloseTCP()
 
 #Run main proram
 if(__name__ == "__main__"):

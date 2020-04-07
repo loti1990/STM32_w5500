@@ -261,9 +261,8 @@ void EXTI3_IRQHandler(void){
 
 			break;
 
+		case W5500_SR_IR_TIMEOUT:
 
-		default:
-			USART3SendText((uint8_t *)&w5500_socket_interrupt_status,1);
 			if((GPIOD -> ODR & GPIO_ODR_ODR_13) != 0){
 
 				GPIOD -> ODR	&= ~(GPIO_ODR_ODR_13); 	//LED3 off
@@ -271,6 +270,12 @@ void EXTI3_IRQHandler(void){
 
 				GPIOD -> ODR	|= GPIO_ODR_ODR_13; 	//LED3 on
 			}
+
+			break;
+
+		default:
+			USART3SendText((uint8_t *)&w5500_socket_interrupt_status,1);
+
 			break;
 
 		}
