@@ -65,21 +65,21 @@ def main():
 	a = W5500Conn(ip = IP, port = PORT)
 	a.OpenTCP()
 	data = ""
-	for i in range(1024):
+	for i in range(1):
 		data = data + "0"
 	data = data.encode()
 
-	for i in range(100000):
+	for i in range(1000000):
 		start_time = time.time()
 		a.SendData(data)
-		speed_samples_up.append((1024)/(time.time()-start_time)/1e6)
+		speed_samples_up.append((1)/(time.time()-start_time)/1e6)
 		#time.sleep(0.001)
-		start_time = time.time()
-		a.ReceiveData(1024)
-		speed_samples_down.append((2047)/(time.time()-start_time)/1e6)
+		start_time2 = time.time()
+		print(a.ReceiveData(2048))
+		speed_samples_down.append((2048)/(time.time()-start_time2)/1e6)
 
-	print("Upload: %d Mbit/s"%np.average(speed_samples_up))
-	print("Down: %d Mbit/s"%np.average(speed_samples_down))
+	print("Upload: %.2f Mbit/s"%np.average(speed_samples_up))
+	print("Down: %.2f Mbit/s"%np.average(speed_samples_down))
 	time.sleep(0.5)
 
 	a.CloseTCP()
