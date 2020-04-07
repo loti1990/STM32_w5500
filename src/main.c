@@ -56,10 +56,10 @@ void DMA2_Stream0_IRQHandler(void); //Initialization of handler for DMA2 interru
 
 //GLOBAL VARIABLES
 
-uint8_t ip[4] 					= {192,168,1,100}; 					//dedicated ip address for external W5500 device
-uint8_t gateway[4]				= {192,168,1,1}; 					//gateway
+uint8_t ip[4] 					= {192,168,1,100};//{172,17,10,96}; 					//dedicated ip address for external W5500 device
+uint8_t gateway[4]				= {192,168,1,1};//{172,17,10,1}; 					//gateway
 uint8_t submask[4]				= {255,255,255,0}; 					//subnet mask
-uint8_t mac[6]					= {0x00,0x08,0xdc,0x01,0x02,0x03}; 	//dedicated mac address
+uint8_t mac[6]					= {0x00,0x01,0x02,0x03,0x04,0x05}; 	//dedicated mac address
 uint8_t TCP_sorket_num 			= 0;								//TCP socket number form 0 to 7
 uint16_t port 					= 1024; 							//TCP socket port
 uint8_t rx_buff_size 			= 2; 								//Rx buff size in KB
@@ -224,7 +224,7 @@ void EXTI3_IRQHandler(void){
 
 	//w5500 socket number and status
 	volatile uint8_t w5500_socket_interrupt_status;
-	uint16_t recv_len = 0;
+	//uint16_t recv_len = 0;
 	//Check if interrupt occurred in W5500 side
 	if((EXTI -> PR & EXTI_PR_PR3) != 0){
 		//check interrupt status
@@ -234,23 +234,30 @@ void EXTI3_IRQHandler(void){
 
 		switch(w5500_socket_interrupt_status & 0x1F){
 
+		//Disconnect interrupt
 		case W5500_SR_IR_DISCON:
 			W5500OpenTCPServer(((w5500_socket_interrupt_status & 0xE0) >> 5));
 
 			break;
 
+		//Connect interrupt
 		case W5500_SR_IR_CON:
 
 			break;
 
+		//Receive interrupt
 		case W5500_SR_IR_RECV:
-			recv_len = ReadRecvSizeAndData(((w5500_socket_interrupt_status & 0xE0) >> 5), rx_buffer);
-			USART3SendText((uint8_t *)&recv_len,2);
+			ReadRecvSizeAndData(((w5500_socket_interrupt_status & 0xE0) >> 5), rx_buffer);
+			if(rx_buffer[0] == 0x30){
+				SendData(((w5500_socket_interrupt_status & 0xE0) >> 5),tx_buffer,1024);
+
+			}
+			//USART3SendText((uint8_t *)&recv_len,2);
 			//USART3SendText((uint8_t *)&rx_buffer,1024);
 			break;
 
-		default:
-			USART3SendText((uint8_t *)&w5500_socket_interrupt_status,1);
+		//Send OK
+		case W5500_SR_IR_SEND_OK:
 			if((GPIOD -> ODR & GPIO_ODR_ODR_13) != 0){
 
 				GPIOD -> ODR	&= ~(GPIO_ODR_ODR_13); 	//LED3 off
@@ -258,6 +265,11 @@ void EXTI3_IRQHandler(void){
 
 				GPIOD -> ODR	|= GPIO_ODR_ODR_13; 	//LED3 on
 			}
+			break;
+
+
+		default:
+			USART3SendText((uint8_t *)&w5500_socket_interrupt_status,1);
 			break;
 
 		}

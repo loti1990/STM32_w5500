@@ -1,6 +1,8 @@
 import socket
 import time
+import numpy as np
 IP 	= '192.168.1.100'
+#IP 	= '172.17.10.96'
 PORT 	= 1024
 
 
@@ -31,6 +33,18 @@ class W5500Conn():
 		except socket.error as e:
 			print("[-] Fail to close connection on:\nIP: %s\nPORT: %s\nERROR: %s"%(self.ip,self.port,e))
 
+	def ReceiveData(self,data_len):
+		try:
+
+			#self.s.settimeout(5) 	#timeout 5s
+			#recv_data = self.s.recv(data_len)
+			#self.s.settimeout(None) #reset timeout to default
+			return(self.s.recv(data_len))
+
+		except socket.error as e:
+
+			print("[-] Fail to receive data from:\nIP: %s\nPORT: %s\nERROR: %s"%(self.ip,self.port,e))
+
 	def SendData(self,data):
 
 		try:
@@ -45,19 +59,29 @@ class W5500Conn():
 
 def main():
 
+
+	speed_samples_down = []
+	speed_samples_up = []
 	a = W5500Conn(ip = IP, port = PORT)
 	a.OpenTCP()
 	data = ""
 	for i in range(1024):
-		data = data + "1"
+		data = data + "0"
+	data = data.encode()
 
-	print(len(data))
-	start_time = time.time()
-	for i in range(1000):
-		a.SendData(data.encode())
-		time.sleep(0.001)
-	print((1000*1024)/(time.time()-start_time)/1e6)
+	for i in range(100000):
+		start_time = time.time()
+		a.SendData(data)
+		speed_samples_up.append((1024)/(time.time()-start_time)/1e6)
+		#time.sleep(0.001)
+		start_time = time.time()
+		a.ReceiveData(1024)
+		speed_samples_down.append((2047)/(time.time()-start_time)/1e6)
+
+	print("Upload: %d Mbit/s"%np.average(speed_samples_up))
+	print("Down: %d Mbit/s"%np.average(speed_samples_down))
 	time.sleep(0.5)
+
 	a.CloseTCP()
 
 #Run main proram

@@ -660,7 +660,7 @@ uint8_t CheckInterruptStatus(){
 //function takes 2 arguments:
 //socket number (active socket on wich was occured interrupt)
 //rx data pointer to store received data
-uint16_t ReadRecvSizeAndData(uint8_t socket_no, uint8_t *data_buffer){
+uint16_t ReadRecvSizeAndData(uint8_t socket_no, uint8_t *rx_data_buffer){
 
 	//temporary register, necessary to initialize to initial state
 	uint8_t temp_array[5] = {0x00,0x00,0x00,0x00,0x00};
@@ -700,15 +700,14 @@ uint16_t ReadRecvSizeAndData(uint8_t socket_no, uint8_t *data_buffer){
 	SPI1SendNByteReceiveNByte(temp_array, 3, read_data, 2);
 
 	//read received data here
-
 	//start
 	//Read received data
 	temp_array[0]	= MSB(new_RX_RD);
 	temp_array[1]	= LSB(new_RX_RD);
-	temp_array[2] 	= ((socket_sel_register+0x10)
+	temp_array[2] 	= ((socket_sel_register + 0x10)		//0x10 is the offset to reach socket n Rx buffer
 					| W5500_CP_READ
 					| W5500_CP_OM_VDLM); 				//set byte for reading from common register
-	SPI1SendNByteReceiveNByte(temp_array, 3, data_buffer, (uint32_t)(read_data[0]<<8 | read_data[1]));
+	SPI1SendNByteReceiveNByte(temp_array, 3, rx_data_buffer, (uint32_t)(read_data[0]<<8 | read_data[1]));
 
 	//end
 
@@ -727,18 +726,18 @@ uint16_t ReadRecvSizeAndData(uint8_t socket_no, uint8_t *data_buffer){
 //	//write thru spi communication
 //	SPI1SendNByte(temp_array,5);
 
-//	//Write in to register which contain start of the data pointer (reset register to 0x0000)
+//	//Write in to register which contain start of the data pointer
 	temp_array[0]	= MSB(W5500_SR_RX_RD_0);
 	temp_array[1]	= LSB(W5500_SR_RX_RD_0);
 	temp_array[2] 	= (socket_sel_register
 					| W5500_CP_WRITE
 					| W5500_CP_OM_VDLM); 				//set byte for reading from common register
-	temp_array[3] 	= MSB(new_RX_RD); 							//reset register on address 0x0028
-	temp_array[4] 	= LSB(new_RX_RD); 							//reset register on address 0x0029
+	temp_array[3] 	= MSB(new_RX_RD); 							//update register on address 0x0028
+	temp_array[4] 	= LSB(new_RX_RD); 							//update register on address 0x0029
 	//write thru spi communication
 	SPI1SendNByte(temp_array,5);
 
-////	//Write RX pointer register
+//	//Write RX pointer register
 //	temp_array[0] 	= MSB(W5500_SR_RX_WR_0);
 //	temp_array[1] 	= LSB(W5500_SR_RX_WR_0);
 //	temp_array[2] 	= (W5500_CP_BSB_S0_R
@@ -754,7 +753,7 @@ uint16_t ReadRecvSizeAndData(uint8_t socket_no, uint8_t *data_buffer){
 	temp_array[1] 	= LSB(W5500_SR_CR);
 	temp_array[2] 	= (socket_sel_register
 					| W5500_CP_WRITE
-					| W5500_CP_OM_VDLM); 				//write in to socket n configuration register
+					| W5500_CP_OM_VDLM); 				//write in to socket n command register
 	temp_array[3] 	= W5500_SR_CR_RECV; 				//RECV command
 	//write thru spi communication
 	SPI1SendNByte(temp_array,4);
@@ -763,6 +762,90 @@ uint16_t ReadRecvSizeAndData(uint8_t socket_no, uint8_t *data_buffer){
 	return (read_data[0]<<8 | read_data[1]);
 
 }
+//Socket n send data, the function require:
+//returned value was:
+//1 error was occured (invalid socket number, free size of Tx data buffer in W5500 is to small dependet of the data_len)
+//0 sucsesfuly send data in to peer computer
+//function takes 3 arguments:
+//socket number (active socket on wich was occured interrupt)
+//tx data pointer to store transmited data
+//size of data to be send
+uint8_t SendData(uint8_t socket_no,uint8_t *tx_data_buffer,uint16_t data_len){
+
+	//temporary register, necessary to initialize to initial state
+	uint8_t temp_array[5] = {0x00,0x00,0x00,0x00,0x00};
+	uint8_t read_data[2]  = {0x00,0x00};
+	uint16_t new_TX_WR = 0;
+	//socket address selected register
+	uint8_t socket_sel_register = 	(socket_no == 0x00) ? W5500_CP_BSB_S0_R://socket 0 address
+									(socket_no == 0x01) ? W5500_CP_BSB_S1_R://socket 1 address
+									(socket_no == 0x02) ? W5500_CP_BSB_S2_R://socket 2 address
+									(socket_no == 0x03) ? W5500_CP_BSB_S3_R://socket 3 address
+									(socket_no == 0x04) ? W5500_CP_BSB_S4_R://socket 4 address
+									(socket_no == 0x05) ? W5500_CP_BSB_S5_R://socket 5 address
+									(socket_no == 0x06) ? W5500_CP_BSB_S6_R://socket 6 address
+									(socket_no == 0x07) ? W5500_CP_BSB_S7_R://socket 7 address
+									0; 										//default error
+
+	//error not a valid socket number
+	if(socket_sel_register == 0) return 1;
+
+	//Read free size in TX buffer
+	temp_array[0] 	= MSB(W5500_SR_TX_FSR_0);
+	temp_array[1] 	= LSB(W5500_SR_TX_FSR_0);
+	temp_array[2] 	= (socket_sel_register
+					| W5500_CP_READ
+					| W5500_CP_OM_VDLM); 				//read from socket n free size register
+	//read thru spi communication
+	SPI1SendNByteReceiveNByte(temp_array, 3, read_data, 2);
+
+	//check if free size in to TX buffer is less than data length to send, rise error
+	if((read_data[0]<<8 | read_data[1]) < data_len) return 1;
+
+	//Read TX pointer register
+	temp_array[0] 	= MSB(W5500_SR_TX_RD_0);
+	temp_array[1] 	= LSB(W5500_SR_TX_RD_0);
+	temp_array[2] 	= (socket_sel_register
+					| W5500_CP_READ
+					| W5500_CP_OM_VDLM); 				//read from socket n free size register
+	//read thru spi communication
+	SPI1SendNByteReceiveNByte(temp_array, 3, read_data, 2);
+
+	new_TX_WR = (read_data[0]<<8 | read_data[1]) + ((uint16_t) data_len);
+
+	//Write in to TX data buffer
+	temp_array[0] 	= read_data[0];
+	temp_array[1] 	= read_data[1];
+	temp_array[2] 	= ((socket_sel_register + 0x08) 	//0x08 is the offset to reach socket n TX buffer
+					| W5500_CP_WRITE
+					| W5500_CP_OM_VDLM); 				//write in to TX buffer
+	//send data in to TX data buffer
+	SPI1SendNByteControlAndOther(temp_array,3,tx_data_buffer,data_len);
+
+	//Update transmit write pointer register
+	temp_array[0]	= MSB(W5500_SR_TX_WR_0);
+	temp_array[1]	= LSB(W5500_SR_TX_WR_0);
+	temp_array[2] 	= (socket_sel_register
+					| W5500_CP_WRITE
+					| W5500_CP_OM_VDLM); 				//set byte for reading from common register
+	temp_array[3] 	= MSB(new_TX_WR); 							//update transmit write register 0x0024
+	temp_array[4] 	= LSB(new_TX_WR); 							//update transmit write register 0x0025
+	//write thru spi communication
+	SPI1SendNByte(temp_array,5);
+
+	//Set send command
+	temp_array[0] 	= MSB(W5500_SR_CR);
+	temp_array[1] 	= LSB(W5500_SR_CR);
+	temp_array[2] 	= (socket_sel_register
+					| W5500_CP_WRITE
+					| W5500_CP_OM_VDLM); 				//write in to socket n command register
+	temp_array[3] 	= W5500_SR_CR_SEND; 				//SEND command
+	//write thru spi communication
+	SPI1SendNByte(temp_array,4);
+
+	return 0;
+}
+
 /*
  * Plan strezenja prekinitvi:
  * -preveri na katerem socketu se je zgodila prekinitev,

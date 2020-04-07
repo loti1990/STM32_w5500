@@ -23,6 +23,8 @@ uint8_t CheckInterruptStatus(void); 					//Check on which socket was occurred in
 
 uint16_t ReadRecvSizeAndData(uint8_t socket_no, uint8_t *data_buffer);		//Read received data and received data size register
 
+uint8_t SendData(uint8_t socket_no,uint8_t *tx_data_buffer,uint16_t data_len); //Socket n send data
+
 /*Function initialization end*/
 
 /*Bit manipulation def. function start*/

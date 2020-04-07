@@ -85,6 +85,34 @@ void SPI1SendNByte(uint8_t *data,uint32_t data_len){
 
 }
 
+//SPI1 send n-byte with control data first and other data second
+void SPI1SendNByteControlAndOther(uint8_t *control_data,uint32_t c_data_len,uint8_t *data,uint32_t data_len){
+
+	 //variable for count
+	 uint32_t i = 0;
+
+	 //SPI1 CS enable (output low logical level)
+	 GPIOA -> ODR 		&= ~(GPIO_ODR_ODR_4);
+
+	 //Send control data first
+	 for(i = 0;i < c_data_len;i++){
+
+		 //Write 8 bit data
+		 SPI1Send1ByteReceive1Byte(&(control_data[i]));
+	 }
+	 //Send other data second
+	 for(i = 0;i < data_len;i++){
+
+		 //Write 8 bit data
+		 SPI1Send1ByteReceive1Byte(&(data[i]));
+	 }
+
+	 //SPI1 CS disable (output high logical level)
+	 GPIOA -> ODR 		|= GPIO_ODR_ODR_4;
+
+}
+
+
 //SPI1 send n bytes and receive 1-Byte
 uint8_t SPI1SendNByteReceive1Byte(uint8_t *data_to_send, uint32_t send_data_len){
 
