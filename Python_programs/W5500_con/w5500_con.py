@@ -82,7 +82,7 @@ def main():
 	print("Down: %.2f Mbit/s"%np.average(speed_samples_down))
 	time.sleep(0.5)
 
-#	a.CloseTCP()
+	a.CloseTCP()
 
 #Run main proram
 if(__name__ == "__main__"):

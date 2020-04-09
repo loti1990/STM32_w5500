@@ -484,6 +484,28 @@ uint8_t W5500OpenTCPServer(uint8_t socket_no){
 
 	return 0;
 }
+
+//Close TCP protocol
+//Socket number 	<socket_no> 	(0,1,2,3,4,5,6,7)
+//Returned value 0-OK status 1- error
+uint8_t W5500CloseTCPServer(uint8_t socket_no){
+
+	//temporary register, necessary to initialize to initial state
+	uint8_t temp_array[5] = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+	//socket select register which select proper offset address allocation
+	uint8_t socket_sel_register = 	(socket_no == 0x00) ? W5500_CP_BSB_S0_R://socket 0 address
+									(socket_no == 0x01) ? W5500_CP_BSB_S1_R://socket 1 address
+									(socket_no == 0x02) ? W5500_CP_BSB_S2_R://socket 2 address
+									(socket_no == 0x03) ? W5500_CP_BSB_S3_R://socket 3 address
+									(socket_no == 0x04) ? W5500_CP_BSB_S4_R://socket 4 address
+									(socket_no == 0x05) ? W5500_CP_BSB_S5_R://socket 5 address
+									(socket_no == 0x06) ? W5500_CP_BSB_S6_R://socket 6 address
+									(socket_no == 0x07) ? W5500_CP_BSB_S7_R://socket 7 address
+									0; 										//default error
+
+
+}
+
 //Check on which socket was occurred interrupt
 //Returned value was equal to number on which socket occurred interrupt (0,1,2,3,4,5,6,7) or
 //8 if multiple interrupt occurred at the same time
@@ -762,6 +784,7 @@ uint16_t ReadRecvSizeAndData(uint8_t socket_no, uint8_t *rx_data_buffer){
 	return (read_data[0]<<8 | read_data[1]);
 
 }
+
 //Socket n send data, the function require:
 //returned value was:
 //1 error was occured (invalid socket number, free size of Tx data buffer in W5500 is to small dependet of the data_len)
