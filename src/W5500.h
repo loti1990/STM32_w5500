@@ -19,6 +19,8 @@ uint8_t W5500InitTCP(uint8_t socket_no, uint16_t port, uint8_t TX_buff_size, uin
 
 uint8_t W5500OpenTCPServer(uint8_t socket_no);			//Open TCP protocol
 
+uint8_t W5500CloseAndOpenTCPServer(uint8_t socket_no); 		//Close TCP protocol and open back
+
 uint8_t CheckInterruptStatus(void); 					//Check on which socket was occurred interrupt
 
 uint16_t ReadRecvSizeAndData(uint8_t socket_no, uint8_t *data_buffer);		//Read received data and received data size register

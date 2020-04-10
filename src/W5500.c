@@ -485,13 +485,13 @@ uint8_t W5500OpenTCPServer(uint8_t socket_no){
 	return 0;
 }
 
-//Close TCP protocol
+//Close TCP protocol and then open back
 //Socket number 	<socket_no> 	(0,1,2,3,4,5,6,7)
 //Returned value 0-OK status 1- error
-uint8_t W5500CloseTCPServer(uint8_t socket_no){
+uint8_t W5500CloseAndOpenTCPServer(uint8_t socket_no){
 
 	//temporary register, necessary to initialize to initial state
-	uint8_t temp_array[5] = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+	uint8_t temp_array[5] = {0x00,0x00,0x00,0x00,0x00};
 	//socket select register which select proper offset address allocation
 	uint8_t socket_sel_register = 	(socket_no == 0x00) ? W5500_CP_BSB_S0_R://socket 0 address
 									(socket_no == 0x01) ? W5500_CP_BSB_S1_R://socket 1 address
@@ -504,6 +504,29 @@ uint8_t W5500CloseTCPServer(uint8_t socket_no){
 									0; 										//default error
 
 
+	//Disconect from client
+	temp_array[0] 	= MSB(W5500_SR_CR);
+	temp_array[1] 	= LSB(W5500_SR_CR);
+	temp_array[2] 	= (socket_sel_register
+					| W5500_CP_WRITE
+					| W5500_CP_OM_VDLM); 				//write in to socket n configuration register
+	temp_array[3] 	= W5500_SR_CR_CLOSE; 				//close command command
+	//write thru spi communication
+	SPI1SendNByte(temp_array,4);
+
+	//Read status register for closing
+	temp_array[0]	= MSB(W5500_SR_SR);
+	temp_array[1]	= LSB(W5500_SR_SR);
+	temp_array[2] 	= (socket_sel_register
+					| W5500_CP_READ
+					| W5500_CP_OM_VDLM); 				//set byte for reading from common register
+	//wait on Socket n SOCK_LISTEN flag
+	while(!(SPI1SendNByteReceive1Byte(temp_array,3) == W5500_SR_SR_SOCK_CLOSED));
+
+	//Open TCP server
+	W5500OpenTCPServer(socket_no);
+
+	return 0;
 }
 
 //Check on which socket was occurred interrupt

@@ -93,11 +93,11 @@ int main(void){
   //ADC1 enable at channel 8
   //ADC1In8Init();
   //Init ADC1 for temp sensor
-  //ADC1TempInit();
+  ADC1TempInit();
   //Initialize DAM for ADC1 temperature sensor
-  //DMA2ADC1Init((uint16_t)256, (uint32_t *) &ADC1 -> DR, (uint32_t *) &adc_data);
+  DMA2ADC1Init((uint16_t)(1024*TX_BUFF_SIZE), (uint32_t *) &ADC1 -> DR, (uint32_t *) &tx_buffer);
   //Enable interrupt for DMA2 stream 0
-  //DMA2Stream0InterruptEnable();
+  DMA2Stream0InterruptEnable();
 
   //W5500 initialize
   if(W5500SpiConnCheck() == 0){
@@ -186,7 +186,7 @@ int main(void){
 
 
 // 		ADC1 temperature read
-//	  if(!(ADC1->CR2&ADC_CR2_ADON)){
+	  if(!(ADC1->CR2&ADC_CR2_ADON)){
 //
 //		  for(i = 0; i < 256; i++){
 //			  if(i == 1){
@@ -197,8 +197,8 @@ int main(void){
 //			  }
 //		  }
 //		  temperature = (((3.0*(float)temp/4095.0)-0.76)/0.0025)+25.0;
-//		  DMA2ADC1CollectNewData();
-//	  }
+		  DMA2ADC1CollectNewData();
+	  }
 
 	  //temp = TempSensRead();
 	  //temperature = (((3.0*(float)temp/4095.0)-0.76)/0.0025)+25.0;
@@ -251,6 +251,7 @@ void EXTI3_IRQHandler(void){
 			if(rx_buffer[0] == 0x30){
 				SendData(((w5500_socket_interrupt_status & 0xE0) >> 5),tx_buffer,2048);
 
+
 			}
 			//USART3SendText((uint8_t *)&recv_len,2);
 			//USART3SendText((uint8_t *)&rx_buffer,1024);
@@ -262,6 +263,8 @@ void EXTI3_IRQHandler(void){
 			break;
 
 		case W5500_SR_IR_TIMEOUT:
+			//if timeout occured first close the active connection and then reopen it
+			W5500CloseAndOpenTCPServer(((w5500_socket_interrupt_status & 0xE0) >> 5));
 
 			if((GPIOD -> ODR & GPIO_ODR_ODR_13) != 0){
 
