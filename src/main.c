@@ -69,6 +69,8 @@ uint8_t tx_buff_size 			= 2;							//Tx buff size in KB
 uint8_t rx_buffer[RX_BUFF_SIZE*1024] = {0,}; 						//Rx buffer
 uint8_t tx_buffer[TX_BUFF_SIZE*1024] = {0,}; 						//Tx buffer
 
+uint8_t active_conn = 0;
+
 //
 //MAIN
 //
@@ -76,8 +78,9 @@ int main(void){
 
   uint32_t ret_code_from_sysTick; 	//return code from SysTick_Config function 1 for error see core_cm4.h
   uint8_t error_hand;
+  uint32_t i = 0;
 
-//  volatile uint16_t adc_data[256];
+  volatile uint16_t adc_data[256];
 //
 //  volatile uint16_t i = 0;
 //
@@ -95,7 +98,7 @@ int main(void){
   //Init ADC1 for temp sensor
   ADC1TempInit();
   //Initialize DAM for ADC1 temperature sensor
-  DMA2ADC1Init((uint16_t)(1024*TX_BUFF_SIZE), (uint32_t *) &ADC1 -> DR, (uint32_t *) &tx_buffer);
+  DMA2ADC1Init((uint16_t)2048, (uint32_t *) &ADC1 -> DR, (uint32_t *) &tx_buffer);
   //Enable interrupt for DMA2 stream 0
   DMA2Stream0InterruptEnable();
 
@@ -133,6 +136,7 @@ int main(void){
 //  uint64_t integral = 0;
 
   /* Infinite loop */
+  //for(i = 0; i<128; i++) tx_buffer[i] = (uint8_t) i;
   while (1){
 
 //	  ADC_value = ADC1In8Read();
@@ -237,6 +241,7 @@ void EXTI3_IRQHandler(void){
 		//Disconnect interrupt
 		case W5500_SR_IR_DISCON:
 			W5500OpenTCPServer(((w5500_socket_interrupt_status & 0xE0) >> 5));
+			active_conn = 0;
 
 			break;
 
@@ -249,9 +254,11 @@ void EXTI3_IRQHandler(void){
 		case W5500_SR_IR_RECV:
 			ReadRecvSizeAndData(((w5500_socket_interrupt_status & 0xE0) >> 5), rx_buffer);
 			if(rx_buffer[0] == 0x30){
-				SendData(((w5500_socket_interrupt_status & 0xE0) >> 5),tx_buffer,2048);
+				//SendData(((w5500_socket_interrupt_status & 0xE0) >> 5),tx_buffer,2048);
+				active_conn = 1;
 
-
+			}else if(rx_buffer[0] == 0x31){
+				active_conn = 0;
 			}
 			//USART3SendText((uint8_t *)&recv_len,2);
 			//USART3SendText((uint8_t *)&rx_buffer,1024);
@@ -259,7 +266,7 @@ void EXTI3_IRQHandler(void){
 
 		//Send OK
 		case W5500_SR_IR_SEND_OK:
-
+			active_conn = 1;
 			break;
 
 		case W5500_SR_IR_TIMEOUT:
@@ -323,6 +330,13 @@ void DMA2_Stream0_IRQHandler(void){
 		}else{
 
 			GPIOD -> ODR	|= GPIO_ODR_ODR_13; 	//LED3 on
+		}
+
+		//
+		//Sending data buffer here
+		if(active_conn == 1){
+			SendData(TCP_sorket_num,tx_buffer,2048);
+			active_conn = 0;
 		}
 	}
 

@@ -30,9 +30,12 @@ void DMA2ADC1Init(uint16_t data_num, uint32_t *peripheral_address, uint32_t *mem
 
 	DMA2_Stream0 -> CR		&= ~(DMA_SxCR_PINCOS);											//Peripheral increment offset size -> the offset size for the peripheral address calculation is linked to the PSIZE
 
-	DMA2_Stream0 -> CR		|= (DMA_SxCR_MSIZE_0); 											//Memory data size -> half-word (16 - bit)
+	//DMA2_Stream0 -> CR		|= (DMA_SxCR_MSIZE_0); 											//Memory data size -> half-word (16 - bit)
+	DMA2_Stream0 -> CR		&= ~(DMA_SxCR_MSIZE_0 | DMA_SxCR_MSIZE_1); 						//Memory data size -> half-word (8 - bit)
 
-	DMA2_Stream0 -> CR		|= (DMA_SxCR_PSIZE_0);											//Peripheral data size -> half-word (16 - bit)
+	//DMA2_Stream0 -> CR		|= (DMA_SxCR_PSIZE_0);											//Peripheral data size -> half-word (16 - bit)
+
+	DMA2_Stream0 -> CR		&= ~(DMA_SxCR_PSIZE_0 | DMA_SxCR_PSIZE_1);						//Peripheral data size -> half-word (8 - bit)
 
 	DMA2_Stream0 -> CR		|= (DMA_SxCR_MINC);												//Memory increment mode -> memory address pointer is incremented after each data transfer (increment is done according to MSIZE)
 

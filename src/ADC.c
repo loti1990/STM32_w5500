@@ -21,7 +21,9 @@ void ADC1TempInit(){
 
 	ADC1 	-> SMPR1 	|= (ADC_SMPR1_SMP16_0 | ADC_SMPR1_SMP16_1 | ADC_SMPR1_SMP16_2); 	//For temperature measurement the sampling time must be > 10 us so 480 cycle * 48 ns = 23 us
 
-	ADC1 	-> CR1 		&= ~(ADC_CR1_RES_0 | ADC_CR1_RES_1);	//Setup 12 bit resolution (take 15 ADC clock cycle)
+	//ADC1 	-> CR1 		&= ~(ADC_CR1_RES_0 | ADC_CR1_RES_1);	//Setup 12 bit resolution (take 15 ADC clock cycle)
+
+	ADC1 	-> CR1 		|= (ADC_CR1_RES_1);		//Setup 8 bit resolution (take 11 ADC clock cycle)
 
 	ADC1 	-> CR2 		|=(ADC_CR2_CONT); 		//Continious convertion mode
 

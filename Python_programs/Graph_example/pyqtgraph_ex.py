@@ -15,6 +15,7 @@ import socket_setup as sc
 #enable disable DEBUG
 DEBUG = 0
 
+GRAPH_LEN = 2048*5
 
 #serial1 = ss.SerialSetup(baudrate = 115200, com_port = "/dev/ttyUSB0", timeout = 0.5)
 TCP_conn = sc.W5500Conn("192.168.1.100",1024)
@@ -122,8 +123,14 @@ class Gui(QtGui.QMainWindow):
 		self.workerContinuouse.dataContin.connect(self.dataContinuouse)
 
 	def dataContinuouse(self,adc_data):
-		self.adcData.append(adc_data)
-
+		#temperature = (((3.0*(float)temp/4095.0)-0.76)/0.0025)+25.0;
+		temperature = ((((3.0*adc_data)/256.0)-0.76)/0.0025)+25.0
+		#print(temperature)
+		if(len(self.adcData) > GRAPH_LEN):
+			self.adcData.pop(0)
+			self.adcData.append(temperature)
+		else:
+			self.adcData.append(temperature)
 
 	#Excecute if start PB was clicked
 	def startContinuouseDownload(self):
@@ -209,6 +216,10 @@ class WorkThreadContinuouse(QtCore.QThread):
 		self.wait()
 
 	def setRun(self,runFlag):
+		if(runFlag):
+			TCP_conn.SendData(b'0')
+		else:
+			TCP_conn.SendData(b'1')
 		self.runFlag = runFlag
 
 
@@ -216,9 +227,12 @@ class WorkThreadContinuouse(QtCore.QThread):
 		while self.runFlag:
 			#try:
 			#serial1.flushInputData()
-			TCP_conn.SendData(b'0')
+			#time.sleep(0.5)
+			#TCP_conn.SendData(b'0')
 			self.rawADC = TCP_conn.ReceiveData(2048).decode()
+
 			data = []
+			#print(self.rawADC)
 			for i in self.rawADC:
 				data.append(int(ord(i)))
 
