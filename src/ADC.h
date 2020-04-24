@@ -15,6 +15,8 @@ uint16_t TempSensRead(void); //Read data data register from integrated temperatu
 
 void ADC1In8Init(void); 		//Initialization ADC1 on input channel 8 at PB0
 
+void ADC1In8DMAInit(void); 		//Initialization ADC1 on input channel 8 at PB0 with DMA controll pull
+
 uint16_t ADC1In8Read(); 	//Read converted ADC value from ADC1 on input channel 8 PB0
 
 

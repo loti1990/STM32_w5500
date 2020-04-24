@@ -116,7 +116,7 @@ class Gui(QtGui.QMainWindow):
 
 
 		#Connections between threads
-		#Good example on treading signals 
+		#Good example on treading signals
 		#https://gitlab.com/aleksandaratanasov/pyqt_threaded_ui/blob/master/threaded_ui.py
 		self.workerContinuouse.finished.connect(self.terminateWorkerContin)
 		self.workerContinuouse.updating.connect(self.updateGraph)
@@ -124,14 +124,14 @@ class Gui(QtGui.QMainWindow):
 
 	def dataContinuouse(self,adc_data):
 		#temperature = (((3.0*(float)temp/4095.0)-0.76)/0.0025)+25.0;
-		temperature = ((((3.0*adc_data)/4096.0)-0.76)/0.0025)+25.0
+		#temperature = ((((3.0*adc_data)/4096.0)-0.76)/0.0025)+25.0
 		#print(temperature)
-		#temperature = adc_data
+		voltage = (3./4096)*adc_data
 		if(len(self.adcData) > GRAPH_LEN):
 			self.adcData.pop(0)
-			self.adcData.append(temperature)
+			self.adcData.append(voltage)
 		else:
-			self.adcData.append(temperature)
+			self.adcData.append(voltage)
 
 	#Excecute if start PB was clicked
 	def startContinuouseDownload(self):
@@ -231,15 +231,15 @@ class WorkThreadContinuouse(QtCore.QThread):
 			#time.sleep(0.5)
 			#TCP_conn.SendData(b'0')
 			#time1 = time.time()
-			self.rawADC = TCP_conn.ReceiveData(2048).decode()
 
+			self.rawADC = TCP_conn.ReceiveData(2048)
 			data = []
 			#print(self.rawADC)
 			#for i in self.rawADC:
 			#	data.append(int(ord(i)))
 
 			for i in range(0,len(self.rawADC),2):
-				data.append(int(ord(self.rawADC[i]) | ord(self.rawADC[i+1])<<8))
+				data.append(int(self.rawADC[i] | self.rawADC[i+1]<<8))
 
 			for i in data:
 				#print(i)

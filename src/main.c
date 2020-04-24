@@ -78,9 +78,9 @@ int main(void){
 
   uint32_t ret_code_from_sysTick; 	//return code from SysTick_Config function 1 for error see core_cm4.h
   uint8_t error_hand;
-  uint32_t i = 0;
+  //uint32_t i = 0;
 
-  volatile uint16_t adc_data[256];
+  //volatile uint16_t adc_data[256];
 //
 //  volatile uint16_t i = 0;
 //
@@ -95,9 +95,13 @@ int main(void){
   USART3Init(115200);
   //ADC1 enable at channel 8
   //ADC1In8Init();
+  //ADC1 enable at channel 8 for DMA data pulling
+  ADC1In8DMAInit();
   //Init ADC1 for temp sensor
-  ADC1TempInit();
+  //ADC1TempInit();
   //Initialize DAM for ADC1 temperature sensor
+  //DMA2ADC1Init((uint16_t)2048, (uint32_t *) &ADC1 -> DR, (uint32_t *) &tx_buffer);
+  //Initialize DAM for ADC1 chanel 8
   DMA2ADC1Init((uint16_t)2048, (uint32_t *) &ADC1 -> DR, (uint32_t *) &tx_buffer);
   //Enable interrupt for DMA2 stream 0
   DMA2Stream0InterruptEnable();
@@ -336,7 +340,7 @@ void DMA2_Stream0_IRQHandler(void){
 		//Sending data buffer here
 		if(active_conn == 1){
 			SendData(TCP_sorket_num,tx_buffer,2048);
-			active_conn = 0;
+			//active_conn = 0;
 		}
 	}
 
