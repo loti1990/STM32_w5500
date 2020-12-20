@@ -202,7 +202,7 @@ int main(void){
 
 
 // 		ADC1 temperature read
-	  if(!(ADC1->CR2&ADC_CR2_ADON)){
+	  //if(!(ADC1->CR2&ADC_CR2_ADON)){
 //
 //		  for(i = 0; i < 256; i++){
 //			  if(i == 1){
@@ -213,8 +213,8 @@ int main(void){
 //			  }
 //		  }
 //		  temperature = (((3.0*(float)temp/4095.0)-0.76)/0.0025)+25.0;
-		  DMA2ADC1CollectNewData();
-	  }
+		  //DMA2ADC1CollectNewData();
+	  //}
 
 	  //temp = TempSensRead();
 	  //temperature = (((3.0*(float)temp/4095.0)-0.76)/0.0025)+25.0;

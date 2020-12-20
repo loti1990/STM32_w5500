@@ -297,7 +297,8 @@ void InitGPIO(void){
 	GPIOB -> MODER  	|= GPIO_MODER_MODER6_1; 		//PB6 pin as alternate function
 	GPIOB -> OTYPER 	|= GPIO_OTYPER_OT_6; 			//PB6 output type open-drain
 	GPIOB -> OSPEEDR 	|= GPIO_OSPEEDER_OSPEEDR6_0;  	//PB6 output speed register (medium speed)
-	GPIOB -> PUPDR		&= ~(GPIO_PUPDR_PUPDR6); 		//PB6 no pull-up, pull-down
+	//GPIOB -> PUPDR		&= ~(GPIO_PUPDR_PUPDR6); 		//PB6 no pull-up, pull-down
+	GPIOB -> PUPDR 		|= GPIO_PUPDR_PUPDR6_0;			//Pull up for test
 	GPIOB -> AFR[0] 	|= (0x04 << 24);				//PB6 alternate function I2C1_SCL
 
 

@@ -18,8 +18,13 @@ void I2C1Init(void){
 	//Our target frequency was 400 kHz
 	//APB1 clk = 42MHz
 	//I2C1 clk = 400kHz
-	//CCR = 42MHz/400kHz/2 = 53 = 0x35
-	I2C1 -> CCR 	|= 0x35;
+	//Tpclk1 = 1/APB1 clk
+	//Ton = CCR * Tpclk1
+	//Toff = 2*CCR*Tpclk1
+	//For our data 1/I2C1 clk = Ton+Toff (period tau)
+	//CCR = 1/(I2C clk * (Tpclk1 + 2*Tpclk1))
+	//CCR for our data is 35 or 0x23
+	I2C1 -> CCR 	|= 0x23;
 
 	//Set up maximum rise time in Fm/Sm mode
 	//For Sm mode the max rise time was 1000 ns (max freq. 100kHz) so for Fm mode with 400kHz these was 4x lower
@@ -44,10 +49,14 @@ void I2C1TestSend(void){
 	while(!(I2C1 -> SR1 & I2C_SR1_SB));
 
 	//Send data
-	I2C1 -> DR 		= 0xAA;
+	I2C1 -> DR 		= 0xFA;
 
 	//Wait to on data to be send
 	while(!(I2C1 -> SR1 & I2C_SR1_TXE));
+
+	//Send stop bit
+	I2C1 -> CR1 	|= I2C_CR1_STOP;
+
 
 }
 
