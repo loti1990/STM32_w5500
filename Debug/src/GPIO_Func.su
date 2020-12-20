@@ -1,1 +1,2 @@
-GPIO_Func.c:6:6:InitGPIO	16	static
+GPIO_Func.c:5:6:TestInitGpioAsm	0	static
+GPIO_Func.c:59:6:InitGPIO	16	static

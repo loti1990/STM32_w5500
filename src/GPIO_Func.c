@@ -2,6 +2,59 @@
 
 #include "GPIO.h"
 
+void TestInitGpioAsm(void){
+
+	//Enable GPIOD AHB1 clock source
+	//RCC -> AHB1ENR |= RCC_AHB1ENR_GPIODEN;
+
+	asm volatile(
+			"//Enable GPIOD AHB1 clock source\n\t"
+			"LDR 	r0,=0x40023800 		//RCC base address\n\t"
+			"LDR 	r1,[r0,#48]			//Read RCC AHB1 peripheral set register\n\t"
+			"ORR 	r1,r1,#0x08 		//Logical or with readable RCC AHB1 register\n\t"
+			"STR 	r1,[r0,#48] 		//Enable clock to GPIOD peripheral in RCC AHB1 peripheral clock enable register\n\t"
+	);
+
+	//0x4002 0C00 //GPIOD mode register
+	asm volatile(
+			"LDR	r0, =0x40020C00 	//base address of GPIOD\n\t"
+
+			"//PD13 pin as output\n\t"
+			"LDR 	r1,[r0] 			//load GPIOD MODER register\n\t"
+			"ORR 	r1,r1,#0x4000000 	//Logical OR\n\t"
+			"STR 	r1,[r0] 			//store r1 in to address specified in r0\n\t"
+
+			"//PD13 output type push-pull\n\t"
+			"LDR	r1,[r0,#4]			//store value of GPIOD port output type register\n\t"
+			"BIC 	r1,r1,0xFFFFDFFF	//clear bit 13 in GPIO OTYPE register\n\r"
+			"STR 	r1,[r0,#4] 			//store r1 in to address specified in r0 with offset 4 byte\n\t"
+
+			"//PD13 output speed register (medium speed)\n\t"
+			"LDR	r1,[r0,#8]			//store value of the GPIOD OSPEEDER in to r1\n\t"
+			"ORR 	r1,r1,#0x4000000 	//set bit 26 for GPIOD pin 13 medium speed\n\t"
+			"STR 	r1,[r0,#8] 			//store r1 in to address specified in r0 with offset 8 byte\n\t"
+
+			"//PD13 pull-up\n\t"
+			"LDR	r1,[r0,#12]			//store value of the GPIOD PUPDR in to r1\n\t"
+			"ORR	r1,r1,#0x4000000	//Logical OR\n\t"
+			"STR 	r1,[r0,#12] 		//store r1 in to address specified in r0 with offset 12 byte\n\t"
+
+			"//TURN ON LED ON PD13\n\t"
+			"LDR	r1,=0x2000			//store value in to r1 for turning on PD3\n\t"
+			"STR 	r1,[r0,#24] 		//store r1 in to address specified in r0 with offset 24 byte\n\t"
+	);
+
+	/*
+	//////////////////////////////////////
+	//GPIOD PD13/LED3 on discovery board//
+	//////////////////////////////////////
+	GPIOD -> MODER 		|= GPIO_MODER_MODER13_0;		//PD13 pin as output
+	GPIOD -> OTYPER 	&= ~(GPIO_OTYPER_OT_13);		//PD13 output type push-pull
+	GPIOD -> OSPEEDR 	|= GPIO_OSPEEDER_OSPEEDR13_0; 	//PD13 output speed register (medium speed)
+	GPIOD -> PUPDR 		&= ~(GPIO_PUPDR_PUPDR13); 		//PD13 pull-up
+	*/
+
+}
 
 void InitGPIO(void){
 
@@ -19,6 +72,8 @@ void InitGPIO(void){
 	RCC -> APB1ENR |= RCC_APB1ENR_SPI3EN;
 	//Enable USART3 CLK enable clk source 42 Mhz
 	RCC -> APB1ENR |= RCC_APB1ENR_USART3EN;
+	//Enable I2C1 clock enable clk source 42 MHz
+	RCC -> APB1ENR |= RCC_APB1ENR_I2C1EN;
 	//Enable SPI1 APB2 clock source 84 MHz max clock
 	RCC -> APB2ENR |= RCC_APB2ENR_SPI1EN;
 	//Enable SYSCONFIG for interrupt purpose
@@ -230,6 +285,31 @@ void InitGPIO(void){
 	GPIOB -> OSPEEDR 	|= GPIO_OSPEEDER_OSPEEDR5;  //PB5 output speed register (very high speed)
 	GPIOB -> PUPDR		|= GPIO_PUPDR_PUPDR5_0; 	//PB5 pull-up
 	GPIOB -> AFR[0] 	|= (0x06 << 20); 			//PB5 alternate function SPI3_MOSI
+
+	/**********************************************************************************
+	//////////////////////////I2C1 CONFIGURATION///////////////////////////////////////
+	***********************************************************************************/
+
+	///////////
+	//I2C1_SCL
+	///////////
+	//pin PB6 SCL configuration
+	GPIOB -> MODER  	|= GPIO_MODER_MODER6_1; 		//PB6 pin as alternate function
+	GPIOB -> OTYPER 	|= GPIO_OTYPER_OT_6; 			//PB6 output type open-drain
+	GPIOB -> OSPEEDR 	|= GPIO_OSPEEDER_OSPEEDR6_0;  	//PB6 output speed register (medium speed)
+	GPIOB -> PUPDR		&= ~(GPIO_PUPDR_PUPDR6); 		//PB6 no pull-up, pull-down
+	GPIOB -> AFR[0] 	|= (0x04 << 24);				//PB6 alternate function I2C1_SCL
+
+
+	///////////
+	//I2C1_SDA
+	///////////
+	//pin PB7 SDA configuration
+	GPIOB -> MODER  	|= GPIO_MODER_MODER7_1; 		//PB7 pin as alternate function
+	GPIOB -> OTYPER 	|= GPIO_OTYPER_OT_7; 			//PB7 output type open-drain
+	GPIOB -> OSPEEDR 	|= GPIO_OSPEEDER_OSPEEDR7_0;  	//PB7 output speed register (medium speed)
+	GPIOB -> PUPDR		&= ~(GPIO_PUPDR_PUPDR7); 		//PB7 no pull-up, pull-down
+	GPIOB -> AFR[0] 	|= (0x04 << 28);				//PB7 alternate function I2C1_SDA
 
 }
 

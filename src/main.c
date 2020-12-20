@@ -36,6 +36,7 @@ SOFTWARE.
 #include "ADC.h"
 #include "DMA.h"
 #include "USART.h"
+#include "I2C.h"
 
 void EXTI0_IRQHandler(void); 		//Initialization of handler for external interrupt on line 0
 void EXTI3_IRQHandler(void); 		//Initialization of handler for external interrupt on line 3
@@ -87,8 +88,10 @@ int main(void){
 //  volatile float temperature = 0.0;
 //  volatile uint16_t temp = 0;
 
-  //Init GPIOA
+  //Init GPIO
   InitGPIO();
+  //Test GPIO asm init
+  //TestInitGpioAsm();
   //Init SPI1ls
   SPI1Init();
   //USART3 init
@@ -105,6 +108,8 @@ int main(void){
   DMA2ADC1Init((uint16_t)2048, (uint32_t *) &ADC1 -> DR, (uint32_t *) &tx_buffer);
   //Enable interrupt for DMA2 stream 0
   DMA2Stream0InterruptEnable();
+  //Enable I2C1
+  I2C1Init();
 
   //W5500 initialize
   if(W5500SpiConnCheck() == 0){
@@ -142,6 +147,9 @@ int main(void){
   /* Infinite loop */
   //for(i = 0; i<128; i++) tx_buffer[i] = (uint8_t) i;
   while (1){
+
+	  //I2C1 test send
+	  I2C1TestSend();
 
 //	  ADC_value = ADC1In8Read();
 //

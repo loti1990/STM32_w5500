@@ -6,6 +6,9 @@
 #ifndef GPIO_H_
 #define GPIO_H_
 
+//Test code for asm function
+void TestInitGpioAsm(void);
+
 //GPIOA initialization function
 void InitGPIO(void);
 

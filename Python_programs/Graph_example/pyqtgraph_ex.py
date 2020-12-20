@@ -15,7 +15,7 @@ import socket_setup as sc
 #enable disable DEBUG
 DEBUG = 0
 
-GRAPH_LEN = 2048*10
+GRAPH_LEN = 2048*5
 
 #serial1 = ss.SerialSetup(baudrate = 115200, com_port = "/dev/ttyUSB0", timeout = 0.5)
 TCP_conn = sc.W5500Conn("192.168.1.100",1024)
