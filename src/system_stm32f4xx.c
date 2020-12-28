@@ -58,19 +58,21 @@
   *-----------------------------------------------------------------------------
   *        HSE Frequency(Hz)                      | 80000000
   *-----------------------------------------------------------------------------
-  *        PLL_M                                  | 8
+  *        PLL_M                                  | 4
   *-----------------------------------------------------------------------------
-  *        PLL_N                                  | 336
+  *        PLL_N                                  | 168
   *-----------------------------------------------------------------------------
   *        PLL_P                                  | 2
   *-----------------------------------------------------------------------------
   *        PLL_Q                                  | 7
   *-----------------------------------------------------------------------------
-  *        PLLI2S_N                               | NA
+  *        I2S VCO input clock                    | HSE/PLL_M = 2 MHz
   *-----------------------------------------------------------------------------
-  *        PLLI2S_R                               | NA
+  *        PLLI2S_N                               | 129
   *-----------------------------------------------------------------------------
-  *        I2S input clock                        | NA
+  *        PLLI2S_R                               | 3
+  *-----------------------------------------------------------------------------
+  *        I2S input clock                        | 86 MHz
   *-----------------------------------------------------------------------------
   *        VDD(V)                                 | 3.3
   *-----------------------------------------------------------------------------
@@ -152,14 +154,18 @@
 
 /************************* PLL Parameters *************************************/
 /* PLL_VCO = (HSE_VALUE or HSI_VALUE / PLL_M) * PLL_N */
-#define PLL_M      8
-#define PLL_N      336
+#define PLL_M      4
+#define PLL_N      168
 
 /* SYSCLK = PLL_VCO / PLL_P */
 #define PLL_P      2
 
 /* USB OTG FS, SDIO and RNG Clock =  PLL_VCO / PLLQ */
 #define PLL_Q      7
+
+/* PLL_I2S parameters */
+#define PLLI2S_N	129 	//valid value is from 50 to 432
+#define PLLI2S_R 	3 		//valid value is from 2  to 7
 
 /******************************************************************************/
 
@@ -393,9 +399,24 @@ static void SetSysClock(void)
     RCC->CR |= RCC_CR_PLLON;
 
     /* Wait till the main PLL is ready */
-    while((RCC->CR & RCC_CR_PLLRDY) == 0)
-    {
-    }
+    while((RCC->CR & RCC_CR_PLLRDY) == 0);
+
+    ///////////////////////
+	//PLL_I2S_CONFIGURATION
+	///////////////////////
+
+	//PLLI2SCFGR configure multiplication and divide PLL parameters
+	RCC -> PLLI2SCFGR 	= (PLLI2S_N << 6) | (PLLI2S_R << 28);
+
+	//PLLI2S clock source used by I2S peripheral
+	RCC -> CFGR 	&= ~(RCC_CFGR_I2SSRC);
+
+	//Enable I2S pll clock
+	RCC -> CR 		|= RCC_CR_PLLI2SON;
+
+	//Wait until I2S OLL clock ware become locked PLLI2SRDY (0-unlock 1-locked)
+	while((RCC -> CR & RCC_CR_PLLI2SRDY) == 0);
+
    
     /* Configure Flash prefetch, Instruction cache, Data cache and wait state */
     FLASH->ACR = FLASH_ACR_PRFTEN |FLASH_ACR_ICEN |FLASH_ACR_DCEN |FLASH_ACR_LATENCY_5WS;
@@ -406,6 +427,7 @@ static void SetSysClock(void)
 
     /* Wait till the main PLL is used as system clock source */
     while ((RCC->CFGR & (uint32_t)RCC_CFGR_SWS ) != RCC_CFGR_SWS_PLL);
+
   }
   else
   { /* If HSE fails to start-up, the application will have wrong clock

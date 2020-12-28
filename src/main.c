@@ -36,7 +36,9 @@ SOFTWARE.
 #include "ADC.h"
 #include "DMA.h"
 #include "USART.h"
+#include "I2S.h"
 #include "I2C.h"
+#include "PWM.h"
 
 void EXTI0_IRQHandler(void); 		//Initialization of handler for external interrupt on line 0
 void EXTI3_IRQHandler(void); 		//Initialization of handler for external interrupt on line 3
@@ -95,6 +97,8 @@ int main(void){
   //Init SPI1ls
   SPI1Init();
   //USART3 init
+  //I2S2 initialization
+  //I2S2Init();
   USART3Init(115200);
   //ADC1 enable at channel 8
   //ADC1In8Init();
@@ -108,6 +112,8 @@ int main(void){
   DMA2ADC1Init((uint16_t)2048, (uint32_t *) &ADC1 -> DR, (uint32_t *) &tx_buffer);
   //Enable interrupt for DMA2 stream 0
   DMA2Stream0InterruptEnable();
+  //Enable PWM on timer3 ch4 pin PB1
+  InitPWMPB1();
   //Enable I2C1
   I2C1Init();
 
@@ -149,7 +155,7 @@ int main(void){
   while (1){
 
 	  //I2C1 test send
-	  I2C1TestSend();
+	  //I2C1TestSend();
 
 //	  ADC_value = ADC1In8Read();
 //

@@ -66,6 +66,8 @@ void InitGPIO(void){
 	RCC -> AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
 	//Enable GPIOB AHB1 clock source
 	RCC -> AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
+	//Enable GPIOC APB1 clock source
+	RCC -> AHB1ENR |= RCC_AHB1ENR_GPIOCEN;
 	//Enable GPIOD AHB1 clock source
 	RCC -> AHB1ENR |= RCC_AHB1ENR_GPIODEN;
 	//Enable SPI3 APB1 clock source 42 MHz max clock
@@ -78,6 +80,8 @@ void InitGPIO(void){
 	RCC -> APB2ENR |= RCC_APB2ENR_SPI1EN;
 	//Enable SYSCONFIG for interrupt purpose
 	RCC -> APB2ENR |= RCC_APB2ENR_SYSCFGEN;
+	//Enable SPI2(I2S2) clock source
+	RCC -> APB1ENR |= RCC_APB1ENR_SPI2EN;
 
 
 
@@ -287,6 +291,31 @@ void InitGPIO(void){
 	GPIOB -> AFR[0] 	|= (0x06 << 20); 			//PB5 alternate function SPI3_MOSI
 
 	/**********************************************************************************
+	//////////////////////////SPI2 as I2S2 CONFIGURATION///////////////////////////////
+	***********************************************************************************/
+
+	///////////
+	//I2S2 CLK
+	///////////
+	//Pin PB10 I2S CLK configuration
+	GPIOB -> MODER 		|= GPIO_MODER_MODER10_1; 	//PB10 pin as alternate function
+	GPIOB -> OTYPER 	&= ~(GPIO_OTYPER_OT_10); 	//PB10 output type push-pull
+	GPIOB -> OSPEEDR 	|= GPIO_OSPEEDER_OSPEEDR10; //PB10 output speed register (very high speed)
+	GPIOB -> PUPDR		|= GPIO_PUPDR_PUPDR10_0; 	//PB10 pull-up
+	GPIOB -> AFR[1] 	|= (0x05 << 8); 			//PB10 alternate function SPI2_SCK/I2S2_CK
+
+	///////////
+	//I2S2 SD
+	///////////
+	//Pin PC3 I2S SD configuration
+	GPIOC -> MODER 		|= GPIO_MODER_MODER3_1; 	//PC3 pin as alternate function
+	GPIOC -> OTYPER 	&= ~(GPIO_OTYPER_OT_3); 	//PC3 output type push-pull
+	GPIOC -> OSPEEDR 	|= GPIO_OSPEEDER_OSPEEDR3; 	//PC3 output speed register (very high speed)
+	GPIOC -> PUPDR		|= GPIO_PUPDR_PUPDR3_0; 	//PC3 pull-up
+	GPIOC -> AFR[0] 	|= (0x05 << 12); 			//PC3 alternate function SPI2_MOSI/I2S2_SD
+
+
+	/**********************************************************************************
 	//////////////////////////I2C1 CONFIGURATION///////////////////////////////////////
 	***********************************************************************************/
 
@@ -311,6 +340,22 @@ void InitGPIO(void){
 	GPIOB -> OSPEEDR 	|= GPIO_OSPEEDER_OSPEEDR7_0;  	//PB7 output speed register (medium speed)
 	GPIOB -> PUPDR		&= ~(GPIO_PUPDR_PUPDR7); 		//PB7 no pull-up, pull-down
 	GPIOB -> AFR[0] 	|= (0x04 << 28);				//PB7 alternate function I2C1_SDA
+
+	/**********************************************************************************
+	//////////////////////////PWM CONFIGURATION////////////////////////////////////////
+	***********************************************************************************/
+
+	///////////////
+	//PWM TIM3_CH4
+	///////////////
+	//pin PB1 as PWM output
+	GPIOB -> MODER  	|= GPIO_MODER_MODER1_1; 		//PB1 pin as alternate function
+	GPIOB -> OTYPER     &= ~(GPIO_OTYPER_OT_1); 		//PB1 output type push-pull
+	GPIOB -> OSPEEDR 	|= GPIO_OSPEEDER_OSPEEDR1;  	//PB1 output speed register (very high speed)
+	GPIOB -> PUPDR 		&= ~(GPIO_PUPDR_PUPDR1); 		//PB1 no pull-up or pull-down
+	GPIOB -> AFR[0] 	|= (0x02 << 4); 				//PB1 AF2 alternating functin
+
+
 
 }
 
